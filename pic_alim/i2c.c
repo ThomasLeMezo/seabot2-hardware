@@ -12,8 +12,36 @@ void i2c_read_data_from_buffer(){
 
   for(i=0; i<(nb_rx_octet-1); i++){
     switch(rxbuffer_tab[0]+i){
-    case 0x01:  // led power
-      LED = (rxbuffer_tab[i+1]);
+      case 0x00:  // alimentation
+        switch(rxbuffer_tab[i+1]){
+          case 0x01:
+            state = POWER_ON;
+            break;
+          case 0x02:
+            time_to_stop = default_time_to_stop;  // Go to Sleep mode
+            start_time_to_stop = 1;
+            state = WAIT_TO_SLEEP;
+            break;
+          default:
+            break;
+        }
+        i++;
+        break;
+      case 0x03:
+        default_time_to_start[0] = rxbuffer_tab[i+1]; // hours
+        break;
+      case 0x04:
+        default_time_to_start[1] = rxbuffer_tab[i+1]; // min
+        break;
+      case 0x05:
+        default_time_to_start[2] = rxbuffer_tab[i+1]; // sec
+        break;
+      case 0x06:
+        default_time_to_stop = rxbuffer_tab[i+1]; // sec
+        break;
+      case 0x07:
+        watchdog_restart_default = rxbuffer_tab[i+1];
+        watchdog_restart = watchdog_restart_default;
       break;
     default:
       break;
@@ -23,19 +51,70 @@ void i2c_read_data_from_buffer(){
 
 void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
   switch(rxbuffer_tab[0]+nb_tx_octet){
-  case 0xC0:
-   SSPBUF = CODE_VERSION;
-    break;
-  case 0xC1:
-   SSPBUF = is_init;
-    break;
-  case 0xC2:
-    SSPBUF = 0xAA;
-    break;
-  default:
-   SSPBUF = 0x00;
-   break;
+    case 0x00:
+      SSPBUF = battery_voltage[0];
+      break;
+    case 0x01:
+      SSPBUF = battery_voltage[0] >> 8;
+      break;
+    case 0x02:
+      SSPBUF = battery_voltage[1];
+      break;
+    case 0x03:
+      SSPBUF = battery_voltage[1] >> 8;
+      break;
+    case 0x04:
+      SSPBUF = battery_voltage[2];
+      break;
+    case 0x05:
+      SSPBUF = battery_voltage[2] >> 8;
+      break;
+    case 0x06:
+      SSPBUF = battery_voltage[3];
+      break;
+    case 0x07:
+      SSPBUF = battery_voltage[3] >> 8;
+      break;
+    case 0x08:
+      SSPBUF = power_current[0];
+      break;
+    case 0x09:
+      SSPBUF = power_current[0] >> 8;
+      break;
+    case 0x0A:
+      SSPBUF = power_current[1];
+      break;
+    case 0x0B:
+      SSPBUF = power_current[1] >> 8;
+      break;
+    case 0x0C:
+      SSPBUF = power_current[2];
+      break;
+    case 0x0D:
+      SSPBUF = power_current[2] >> 8;
+      break;
+
+    case 0xB0:
+      SSPBUF = state;
+      break;
+    case 0xB1:
+      SSPBUF = watchdog_restart_default;
+      break;
+    case 0xB2:
+      SSPBUF = ILS;
+      break;
+
+    case 0xC0:
+      SSPBUF = CODE_VERSION;
+      break;
+    case 0xC1:
+      SSPBUF = is_init;
+      break;
+    default:
+      SSPBUF = 0x00;
+      break;
   }
+  watchdog_restart = watchdog_restart_default;
 }
 
 void i2c_write_buffer(unsigned short val){

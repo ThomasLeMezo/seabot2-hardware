@@ -2,6 +2,41 @@
 
 volatile unsigned short is_init = 0;
 
+// Led
+unsigned short led_delay = 100;
+unsigned short cpt_led = 100;
+unsigned short set_led_on = 0;
+
+// ILS
+unsigned short ils_cpt = 4;
+unsigned short ils_removed = 1;
+
+// Batteries
+volatile unsigned int battery_voltage[4] = {0, 0, 0, 0};
+volatile unsigned int power_current[3] = {0, 0, 0};
+
+// State Machine
+volatile unsigned short state = POWER_ON;
+unsigned short cpt_state_machine = CPT_STATE_MACHINE_DEFAULT;
+unsigned short step_state_machine = 0;
+
+// Sleep mode
+unsigned char time_to_start[3] = {0, 0, 5}; // hour, min, sec
+unsigned char time_to_stop = 60; // in sec (max 255 sec)
+
+unsigned char default_time_to_start[3] = {0, 0, 5};
+unsigned char default_time_to_stop = 60;
+
+unsigned short start_time_to_stop = 0;
+unsigned short start_time_to_power_on = 0;
+unsigned short start_time_to_start = 0;
+
+// Watchdog
+unsigned short watchdog_restart = 60; // in min
+volatile unsigned short watchdog_restart_default = 60;
+unsigned short watchdog_cpt_sec = 59;
+unsigned short watchdog_cpt_default = 59;
+
 
 /** RA3 - ILS
 * RA5 - Relais de puissance
@@ -48,4 +83,50 @@ void init_io(){
 
   TRISC6_bit = 1; // RC6 input for AN8
   TRISC7_bit = 1; // RC7 input for AN9
+}
+
+void measure_power(){
+  battery_voltage[0] = ADC_Get_Sample(4);   // Get 10-bit results of AD conversion AN4 batterie 1
+  battery_voltage[1] = ADC_Get_Sample(5);   // Get 10-bit results of AD conversion AN5 batterie 2
+  battery_voltage[2] = ADC_Get_Sample(6);   // Get 10-bit results of AD conversion AN6 batterie 3
+  battery_voltage[3] = ADC_Get_Sample(7);   // Get 10-bit results of AD conversion AN7 batterie 4
+
+
+  power_current[0] = ADC_Get_Sample(11);
+  power_current[1] = ADC_Get_Sample(8);
+  power_current[2] = ADC_Get_Sample(9);
+}
+
+void init_timer0(){
+  T0CON = 0x85; // TIMER0 ON (1 s)
+  TMR0H = TIMER0_CPT_H;
+  TMR0L = TIMER0_CPT_L;
+  TMR0IE_bit = 0;
+}
+
+void init_timer3(){
+  T3CON = 0x30;
+  TMR3IF_bit = 0;
+  TMR3H = TIMER3_CPT_H;
+  TMR3L = TIMER3_CPT_L;
+  TMR3IE_bit = 0;
+}
+
+void ils_analysis(unsigned short new_state){
+  if(ILS==0){ // Magnet detected
+    ils_cpt--;
+    set_led_on = 1;
+  }
+  else{
+    ils_cpt = ILS_CPT_TIME;
+    set_led_on = 0;
+    ils_removed = 1;
+  }
+
+  if(ils_removed == 1 && ils_cpt == 0){
+    ils_cpt = ILS_CPT_TIME;
+    state = new_state;
+    ils_removed = 0;
+    set_led_on = 0;
+  }
 }
