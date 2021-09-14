@@ -98,7 +98,7 @@ void measure_power(){
 }
 
 void init_timer0(){
-  T0CON = 0x85; // TIMER0 ON (1 s)
+  T0CON = 0x05; // TIMER0 ON (1 s)
   TMR0H = TIMER0_CPT_H;
   TMR0L = TIMER0_CPT_L;
   TMR0IE_bit = 0;

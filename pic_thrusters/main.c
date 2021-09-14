@@ -1,9 +1,18 @@
 /*  PIC18F14K22  mikroC PRO for PIC
-External oscillator 16MHZ
+External oscillator 16MHZ (HS)
 
 * RC0 - ESC1
 * RC1 - ESC2
 * RB7 - LED
+
+  Pulse Width Signal
+  Signal Voltage  3.3-5 volts
+  Update at 50 Hz
+  Stopped         1500 microseconds
+  Max forward     1900 microseconds
+  Max reverse     1100 microseconds
+  Signal Deadband    +/- 25 microseconds (centered around 1500 microseconds)
+
 */
 
 #include "i2c.h"
@@ -14,6 +23,8 @@ External oscillator 16MHZ
  */
 void main(){
   unsigned short k = 0;
+
+  OSCCON = 0b11110000; // 0=4xPLL OFF, 111=IRCF<2:0>=16Mhz  OSTS=0  SCS<1:0>10 1x = Internal oscillator block
  
   asm CLRWDT;// Watchdog
   SWDTEN_bit = 1; //armement du watchdog
@@ -21,9 +32,7 @@ void main(){
   init_io(); // Initialize I/O
   init_i2c(0x20); // Initialize I2C
   init_timer0(); // Initialize TIMER0 every 1 seconds
-  init_timer1(); // Initialize TIMER3 every 100ms
-
-  LED = 0;
+  init_timer1(); // Initialize TIMER3 every 
 
   INTCON3.INT1IP = 0; //INT1 External Interrupt Priority bit, INT0 always a high
   //priority interrupt source
@@ -68,6 +77,9 @@ void interrupt(){
 
   // Interruption TIMER1 toutes les 10us
   if (TMR1IF_bit){
+    TMR1H = TIMER1_CPT_H;
+    TMR1L = TIMER1_CPT_L;
+    TMR1IF_bit = 0;
 
     if(cpt_global==0){
       MOT1 = 1;
@@ -92,13 +104,9 @@ void interrupt(){
       else
         cpt_motor_2--;
     }
-
-    TMR1H = TIMER1_CPT_H;
-    TMR1L = TIMER1_CPT_L;
-    TMR1IF_bit = 0;
   }
 
-  else if (TMR0IF_bit){
+  if (TMR0IF_bit){
     // Watchdog
     if(watchdog_restart>0)
       watchdog_restart--;  

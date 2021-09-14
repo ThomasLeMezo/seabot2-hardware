@@ -36,7 +36,7 @@ void main(){
   SWDTEN_bit = 1; //armement du watchdog
 
   init_io(); // Initialize I/O
-  init_i2c(0x42); // Initialize I2C
+  init_i2c(0x39); // Initialize I2C
   init_timer0(); // Initialize TIMER0 every 1 seconds
   init_timer3(); // Initialize TIMER3 every 100ms
 
@@ -134,6 +134,9 @@ void interrupt(){
 
   // Interruption du TIMER0 (1 s) (cpt to start/stop + Watchdog)
   if (TMR0IF_bit){
+    TMR0H = TIMER0_CPT_H;
+    TMR0L = TIMER0_CPT_L;
+    TMR0IF_bit = 0;
 
     // To Do
     if(state == SLEEP){
@@ -179,15 +182,15 @@ void interrupt(){
           watchdog_restart = watchdog_restart_default;
         }
       }
-    }
-    
-    TMR0H = TIMER0_CPT_H;
-    TMR0L = TIMER0_CPT_L;
-    TMR0IF_bit = 0;
+    }    
   }
 
   // Interruption du TIMER3 (State Machine, 100ms)
-  else if (TMR3IF_bit){
+  if (TMR3IF_bit){
+    TMR3H = TIMER3_CPT_H;
+    TMR3L = TIMER3_CPT_L;
+    TMR3IF_bit = 0;
+
     // LED (ILS)
     if(set_led_on == 1) // For ILS
       LED = 1;
@@ -201,7 +204,7 @@ void interrupt(){
         cpt_led=led_delay;
       }
     }
-
+    
     // State Machine (500 ms)
     if(cpt_state_machine==0){
       cpt_state_machine = CPT_STATE_MACHINE_DEFAULT;
@@ -210,8 +213,6 @@ void interrupt(){
     else
       cpt_state_machine--;
 
-    TMR3H = TIMER3_CPT_H;
-    TMR3L = TIMER3_CPT_L;
-    TMR3IF_bit = 0;
+    
   }
 }

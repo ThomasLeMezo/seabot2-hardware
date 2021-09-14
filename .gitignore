@@ -61,4 +61,8 @@ dkms.conf
 *.dbg
 *.log
 *.lst
-*.mcppi
+*.dic
+*.dlt
+*.brk
+*.bmk
+*.asm

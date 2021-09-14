@@ -13,8 +13,6 @@ sbit LED at LATB.B7; // LED
 #define MOTOR_CMD_STOP 150
 #define PWM_PERIOD 2000
 extern unsigned short cmd_motor[2];
-#define TMR1_CPT 136 // 16MHz/4 and 10us delay, cpt incrementing from TMR1_CPT to 0xFFFF
-// 136, 215, 246
 
 extern unsigned char cpt_motor_1;
 extern unsigned char cpt_motor_2;
@@ -30,7 +28,7 @@ extern volatile unsigned short watchdog_restart;
 
 // Timer1
 #define TIMER1_CPT_H 0xFF
-#define TIMER1_CPT_L 136
+#define TIMER1_CPT_L 110
 
 
 /**

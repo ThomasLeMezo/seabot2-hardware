@@ -51,12 +51,11 @@ extern unsigned short watchdog_cpt_default;
 
 // Timer0
 #define TIMER0_CPT_H 0x0B
-#define TIMER0_CPT_L 0xDC
+#define TIMER0_CPT_L 0xDB
 
 // Timer3
 #define TIMER3_CPT_H 0x3C
-#define TIMER3_CPT_L 0xB0
-
+#define TIMER3_CPT_L 0xAF
 
 /**
  * @brief initialization of input/ouput

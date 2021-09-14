@@ -17,29 +17,23 @@ volatile unsigned short watchdog_restart = WATCHDOG_RESTART_DEFAULT;
  * Initialisation des entrées sorties du PIC
  */
 void init_io(){
-  CM1CON0 = 0x00; // Not using the comparators
-  CM2CON0 = 0x00;
-
   TRISB7_bit = 0; // OUTPUT (LED)
 
+  TRISC = 0x00;
   TRISC0_bit = 0; // RC0 output for ESC0
   TRISC1_bit = 0; // RC1 output for ESC1
 }
 
 void init_timer0(){
-  TMR0ON = 1;
-  T0PS = 0b101; // prescale (1:64)
+  T0CON = 0x87; // TIMER0 ON (1 s)
   TMR0H = TIMER0_CPT_H;
   TMR0L = TIMER0_CPT_L;
   TMR0IE_bit = 0;
 }
 
 void init_timer1(){
-  TMR1ON = 1;
-  T1CKPS = 0; // prescale (1:1) 
-
-  TMR1IF_bit = 0;
-  TMR1IE_bit = 0; // overflow interrupt reset
+  T1CON = 0x01; // 10 us
   TMR1H = TIMER1_CPT_H;
   TMR1L = TIMER1_CPT_L;
+  TMR1IE_bit = 0; // overflow interrupt reset
 }

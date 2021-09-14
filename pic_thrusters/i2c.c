@@ -26,11 +26,20 @@ void i2c_read_data_from_buffer(){
 
 void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
   switch(rxbuffer_tab[0]+nb_tx_octet){
+    case 0x00:
+      SSPBUF = cmd_motor[0];
+      break;
+    case 0x01:
+      SSPBUF = cmd_motor[1];
+      break;
     case 0xC0:
       SSPBUF = CODE_VERSION;
       break;
     case 0xC1:
       SSPBUF = is_init;
+      break;
+    case 0xC2:
+      SSPBUF = watchdog_restart;
       break;
     default:
       SSPBUF = 0x00;
