@@ -68,7 +68,6 @@ void init_io(){
   TRISA2_bit = 1; // INPUT (ILS)
   TRISA5_bit = 0; // OUTPUT (POWER)
 
-
   INTCON2.RABPU = 0; // PORTA and PORTB Pull-up Enable bit
   WPUA.WPUA2 = 1; // Pull-up enabled sur RA2
 

@@ -1,6 +1,5 @@
-/*  PIC18F14K22  mikroC PRO for PIC v6.4
-Oscillateur interne 16MHZ (attention l'edit project ne marche pas, paramétrer 
-l'oscillateur en dur)
+/*  PIC18F14K22  mikroC PRO for PIC
+Internal oscillator 16MHz
 
 * RA3 - ILS
 * RA5 - Relais de puissance
@@ -58,7 +57,7 @@ void main(){
   INTCON.PEIE = 1; // Peripheral Interrupt Enable bit
 
   TMR0IE_bit = 1;  //Enable TIMER0
-  TMR0ON_bit = 1; // Start TIMER1
+  TMR0ON_bit = 1; // Start TIMER0
   
   TMR3IE_bit = 1;  //Enable TIMER3
   TMR3ON_bit = 1; // Start TIMER3
