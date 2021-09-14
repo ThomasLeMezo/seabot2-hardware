@@ -9,8 +9,8 @@ extern volatile unsigned short is_init;
 
 sbit ILS at PORTA.B2;
 
-sbit LED at PORTB.B7;
-sbit ALIM at PORTA.B5;
+sbit LED at LATB.B7;
+sbit ALIM at LATB.B5;
 
 
 
@@ -101,7 +101,7 @@ unsigned short watchdog_cpt_default = 59;
 void init_io(){
 
 
- ANSEL = 0b00001111;
+ ANSEL = 0b11110000;
  ANSELH = 0b11110100;
 
  CM1CON0 = 0x00;
@@ -112,6 +112,7 @@ void init_io(){
  TRISA = 0xFF;
  TRISA2_bit = 1;
  TRISA5_bit = 0;
+
 
  INTCON2.RABPU = 0;
  WPUA.WPUA2 = 1;

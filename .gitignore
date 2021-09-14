@@ -54,3 +54,11 @@ dkms.conf
 *.c.ini
 *.h.ini
 *.dct
+*.cp
+*.mcl
+*.asm
+*.cfg
+*.dbg
+*.log
+*.lst
+*.mcppi

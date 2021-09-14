@@ -7,8 +7,8 @@ extern volatile unsigned short is_init;
 
 sbit ILS at PORTA.B2; //  entrée de l'ILS
 
-sbit LED at PORTB.B7; // sortie LED
-sbit ALIM at PORTA.B5; // sortie MOSFET de puissance, commande de l'alimentation
+sbit LED at LATB.B7; // sortie LED
+sbit ALIM at LATB.B5; // sortie MOSFET de puissance, commande de l'alimentation
 
 
 // ILS

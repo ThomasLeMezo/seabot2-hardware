@@ -103,7 +103,7 @@ void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
     case 0xB2:
       SSPBUF = ILS;
       break;
-
+      
     case 0xC0:
       SSPBUF = CODE_VERSION;
       break;

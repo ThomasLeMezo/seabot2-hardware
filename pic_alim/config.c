@@ -56,7 +56,7 @@ unsigned short watchdog_cpt_default = 59;
 void init_io(){
   // ANSEL : enable if 0
   // ANS0-7
-  ANSEL = 0b00001111;  // Set RC0,RC1,RC2,RC3 to analog (AN4,AN5,AN6,AN7)
+  ANSEL = 0b11110000;  // Set RC0,RC1,RC2,RC3 to analog (AN4,AN5,AN6,AN7)
   ANSELH = 0b11110100; // Set RC6, RC7, RC5 to analog (AN8, AN9, AN11)
 
   CM1CON0 = 0x00; // Not using the comparators
@@ -67,6 +67,7 @@ void init_io(){
   TRISA = 0xFF;
   TRISA2_bit = 1; // INPUT (ILS)
   TRISA5_bit = 0; // OUTPUT (POWER)
+
 
   INTCON2.RABPU = 0; // PORTA and PORTB Pull-up Enable bit
   WPUA.WPUA2 = 1; // Pull-up enabled sur RA2

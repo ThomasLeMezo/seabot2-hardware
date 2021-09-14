@@ -68,7 +68,7 @@ void main(){
   while(1){
     asm CLRWDT;
 
-    if(step_state_machine==1){
+    if(step_state_machine==1){ // Every 500ms
       step_state_machine=0;
       measure_power();
       
@@ -203,7 +203,7 @@ void interrupt(){
       }
     }
 
-    // State Machine
+    // State Machine (500 ms)
     if(cpt_state_machine==0){
       cpt_state_machine = CPT_STATE_MACHINE_DEFAULT;
       step_state_machine = 1;
