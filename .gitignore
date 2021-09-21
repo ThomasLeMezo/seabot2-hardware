@@ -66,3 +66,4 @@ dkms.conf
 *.brk
 *.bmk
 *.asm
+pic_piston/mikroC_project/pic_piston.mcpds_callertable.txt
