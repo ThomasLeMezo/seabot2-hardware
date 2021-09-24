@@ -28,34 +28,43 @@ void init_io(){
   // ANSEL : enable if 0
   // ANS0-7
   /*ANSEL = 0b11110000;  // Set RC0,RC1,RC2,RC3 to analog (AN4,AN5,AN6,AN7)
-  ANSELH = 0b11110100; // Set RC6, RC7, RC5 to analog (AN8, AN9, AN11)
+  ANSELH = 0b11110100; // Set RC6, RC7, RC5 to analog (AN8, AN9, AN11) */
 
-  CM1CON0 = 0x00; // Not using the comparators
-  CM2CON0 = 0x00;
+  // INPUT-OUTPUT
+  TRISA1_bit = 0; // ENABLE output
+  TRISA0_bit = 1; // current measure input
 
-  // NVCFG = 00; PVCFG = 00;
+  TRISB10_bit = 1; // Codeur A
+  TRISB11_bit = 1; // Codeur B
+  TRISB12_bit = 1; // Codeur Idx
 
-  TRISA = 0xFF;
-  TRISA2_bit = 1; // INPUT (ILS)
-  TRISA5_bit = 0; // OUTPUT (POWER)
-
-  INTCON2.RABPU = 0; // PORTA and PORTB Pull-up Enable bit
-  WPUA.WPUA2 = 1; // Pull-up enabled sur RA2
-
-  TRISB = 0xFF;
-  TRISB5_bit = 1; // RC5 input for AN11
-  TRISB7_bit = 0; // OUTPUT (LED)
-
-  TRISC = 0xFF;
-  TRISC0_bit = 1; // RC0 input for AN4
-  TRISC1_bit = 1; // RC1 input for AN5
-  TRISC2_bit = 1; // RC2 input for AN6
-  TRISC3_bit = 1; // RC3 input for AN7
-
-  TRISC6_bit = 1; // RC6 input for AN8
-  TRISC7_bit = 1; // RC7 input for AN9*/
+  TRISB5_bit = 1; // Top switch
+  TRISB6_bit = 1; // Bottom switch
+  TRISB7_bit = 1; // Interrupt for switch
 
   TRISB13_bit = 0;
+
+  // Interrupt for switch
+  INTCON2bits.INT0EP = 0; // interrupt on positive edge
+  IEC0bits.INT0IE = 1; // enable interrupt
+  IFS0bits.INT0IF = 0; // set flag to 0
+  
+  // QEI (Quadrature Encoder Interface)
+  // Quadrature Encoder Interface enabled (x4 mode) with position counter reset by match (MAXxCNT)
+  QEI1CONbits.QEIM0 = 1;
+  QEI1CONbits.QEIM1 = 1;
+  QEI1CONbits.QEIM2 = 1;
+  QEI1CONbits.POSRES = 0; // do not resset position with index
+
+  // PWM
+  P1TCONbits.PTEN = 1; // PWM Time Base Timer Enable bit
+  PWM1CON1 = 0x0000; // Disable all pwm except PEN1H
+  PWM1CON1bits.PEN1H = 1;
+
+  // http://ww1.microchip.com/downloads/en/devicedoc/70187e.pdf (p.24)
+  P1TPER = 99; // 16MHz => 20kHz
+  P1DC1 = 100; 
+
 }
 
 void measure_power(){

@@ -8,6 +8,9 @@ extern volatile unsigned short is_init;
 sbit ENABLE at PORTA.B1; // output ENABLE
 sbit LED at PORTB.B13; // output ENABLE
 
+sbit SWITCH_TOP at PORTB.B5; // top switch
+sbit SWITCH_BOTTOM at PORTB.B6; // bottom switch
+
 // Watchdog
 extern unsigned short watchdog_restart; // in min
 extern volatile unsigned short watchdog_restart_default;

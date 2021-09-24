@@ -26,8 +26,8 @@ RA0 : Motor Current Sensor
 void main(){
   unsigned short k = 0;
   // External oscillator HS
-  COSC_0_bit = 0;
-  COSC_1_bit = 0;
+  COSC_0_bit = 1;
+  COSC_1_bit = 1;
   COSC_2_bit = 0;
 
   //asm CLRWDT;// Watchdog
@@ -44,6 +44,9 @@ void main(){
   LED = 0;
 
   is_init = 1;
+
+  // Resset the  POS1CNT = 0x00;
+  POS1CNT = 0x0000;
 
   while(1){
     //asm CLRWDT;
@@ -63,4 +66,14 @@ void interrupt(){
   /// ************************************************** //
   /// ********************** TIMERS  ******************* //
 
+}
+
+
+void interrupt_switch() org 0x000014{
+  if (IFS0bits.INT0IF){
+    if(SWITCH_TOP || SWITCH_BOTTOM)
+      LED = 1;
+    
+    IFS0bits.INT0IF = 0;
+  }
 }

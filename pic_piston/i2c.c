@@ -14,6 +14,12 @@ void i2c_read_data_from_buffer(){
       case 0x00:
         LED = rxbuffer_tab[i+1];
         break;
+      case 0x01:
+        ENABLE = rxbuffer_tab[i+1];
+        break;
+      case 0x02:
+        P1DC1 = rxbuffer_tab[i+1];
+        break;
       default:
         break;
     }
@@ -23,8 +29,11 @@ void i2c_read_data_from_buffer(){
 void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
   switch(rxbuffer_tab[0]+nb_tx_octet){
     case 0x00:
-      I2C1TRN = 0x00;
+      I2C1TRN = POS1CNT;
       break;
+    case 0x01:
+      I2C1TRN = (POS1CNT >> 8); // Pas idéal car deux lectures
+      break;  
       
     case 0xC0:
       I2C1TRN = CODE_VERSION;
