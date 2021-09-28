@@ -17,6 +17,11 @@ extern volatile unsigned short watchdog_restart_default;
 extern unsigned short watchdog_cpt_sec;
 extern unsigned short watchdog_cpt_default;
 
+// Count
+extern short qei_overflow; // number of overflow for the encoder
+
+#define MOTOR_STOP 80
+
 /**
  * @brief initialization of input/ouput
  */

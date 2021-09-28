@@ -51,7 +51,7 @@ void main(){
   while(1){
     //asm CLRWDT;
 
-
+    //ENABLE = 1;
     if(nb_rx_octet>1 && I2C1STATbits.P == 1){
         i2c_read_data_from_buffer();
         nb_rx_octet = 0;

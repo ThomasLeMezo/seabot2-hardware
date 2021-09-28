@@ -8,7 +8,7 @@ volatile unsigned short watchdog_restart_default = 60;
 unsigned short watchdog_cpt_sec = 59;
 unsigned short watchdog_cpt_default = 59;
 
-
+short qei_overflow = 0;
 /** RA3 - ILS
 * RA5 - Relais de puissance
 * RB4 - SDA
@@ -25,11 +25,6 @@ unsigned short watchdog_cpt_default = 59;
  * Initialisation des entrées sorties du PIC
  */
 void init_io(){
-  // ANSEL : enable if 0
-  // ANS0-7
-  /*ANSEL = 0b11110000;  // Set RC0,RC1,RC2,RC3 to analog (AN4,AN5,AN6,AN7)
-  ANSELH = 0b11110100; // Set RC6, RC7, RC5 to analog (AN8, AN9, AN11) */
-
   // INPUT-OUTPUT
   TRISA1_bit = 0; // ENABLE output
   TRISA0_bit = 1; // current measure input
@@ -54,7 +49,13 @@ void init_io(){
   QEI1CONbits.QEIM0 = 1;
   QEI1CONbits.QEIM1 = 1;
   QEI1CONbits.QEIM2 = 1;
-  QEI1CONbits.POSRES = 0; // do not resset position with index
+  QEI1CONbits.POSRES = 0; // do not reset position with index
+
+  DFLT1CONbits.CEID = 1 ; // count error disable bit (0=enable)
+  DFLT1CONbits.QEOUT = 1 ; // Digital filter outputs are enabled
+
+  MAXCNT = 0xFFFF; // max value (interrupt if overflow)
+  POS1CNT = 0xFF;
 
   // PWM
   P1TCONbits.PTEN = 1; // PWM Time Base Timer Enable bit
@@ -62,8 +63,8 @@ void init_io(){
   PWM1CON1bits.PEN1H = 1;
 
   // http://ww1.microchip.com/downloads/en/devicedoc/70187e.pdf (p.24)
-  P1TPER = 99; // 16MHz => 20kHz
-  P1DC1 = 100; 
+  P1TPER = MOTOR_STOP - 1; // 16MHz => 20kHz
+  P1DC1 = MOTOR_STOP;
 
 }
 

@@ -32,8 +32,14 @@ void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
       I2C1TRN = POS1CNT;
       break;
     case 0x01:
-      I2C1TRN = (POS1CNT >> 8); // Pas idéal car deux lectures
+      I2C1TRN = (POS1CNT >> 8); // not recommended (two reads)
       break;  
+    case 0x02:
+      I2C1TRN = MAXCNT;
+      break;
+    case 0x03:
+      I2C1TRN = (MAXCNT >> 8); // not recommended (two reads)
+      break; 
       
     case 0xC0:
       I2C1TRN = CODE_VERSION;
