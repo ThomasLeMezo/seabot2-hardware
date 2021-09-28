@@ -18,7 +18,7 @@ extern unsigned short watchdog_cpt_sec;
 extern unsigned short watchdog_cpt_default;
 
 // Count
-extern short qei_overflow; // number of overflow for the encoder
+extern signed short qei_overflow; // number of overflow for the encoder
 
 #define MOTOR_STOP 80
 

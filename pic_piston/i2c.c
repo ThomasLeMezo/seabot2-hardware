@@ -33,11 +33,17 @@ void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
       break;
     case 0x01:
       I2C1TRN = (POS1CNT >> 8); // not recommended (two reads)
-      break;  
+      break;
     case 0x02:
-      I2C1TRN = MAXCNT;
+      I2C1TRN = qei_overflow;
       break;
     case 0x03:
+      I2C1TRN = QEI1CONbits.UPDN;
+      break;
+    case 0x10:
+      I2C1TRN = MAXCNT;
+      break;
+    case 0x11:
       I2C1TRN = (MAXCNT >> 8); // not recommended (two reads)
       break; 
       

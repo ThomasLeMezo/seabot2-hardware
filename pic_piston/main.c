@@ -77,3 +77,12 @@ void interrupt_switch() org 0x000014{
     IFS0bits.INT0IF = 0;
   }
 }
+
+void interrupt_qei() org 0x000088{
+  LED = ~LED;
+  if(QEI1CONbits.UPDN)
+    qei_overflow += 1;
+  else
+    qei_overflow -= 1;
+  QEIIF_bit = 0;
+}

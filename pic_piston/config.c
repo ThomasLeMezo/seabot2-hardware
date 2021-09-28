@@ -8,7 +8,7 @@ volatile unsigned short watchdog_restart_default = 60;
 unsigned short watchdog_cpt_sec = 59;
 unsigned short watchdog_cpt_default = 59;
 
-short qei_overflow = 0;
+signed  short qei_overflow = 0;
 /** RA3 - ILS
 * RA5 - Relais de puissance
 * RB4 - SDA
@@ -56,6 +56,10 @@ void init_io(){
 
   MAXCNT = 0xFFFF; // max value (interrupt if overflow)
   POS1CNT = 0xFF;
+  QEIIE_bit = 1;
+  
+  RPINR14 = 10 + (11 << 8); // QEA (low byte of RP): 10, QEB : 11 (high byte of RP)
+  RPINR15 = 12;
 
   // PWM
   P1TCONbits.PTEN = 1; // PWM Time Base Timer Enable bit
