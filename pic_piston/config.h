@@ -11,6 +11,8 @@ sbit LED at PORTB.B13; // output ENABLE
 sbit SWITCH_TOP at PORTB.B5; // top switch
 sbit SWITCH_BOTTOM at PORTB.B6; // bottom switch
 
+unsigned int MOTOR_CMD at P1DC1;
+
 // Watchdog
 extern unsigned short watchdog_restart; // in min
 extern volatile unsigned short watchdog_restart_default;

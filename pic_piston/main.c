@@ -71,9 +71,12 @@ void interrupt(){
 
 void interrupt_switch() org 0x000014{
   if (IFS0bits.INT0IF){
-    if(SWITCH_TOP || SWITCH_BOTTOM)
+    if((!SWITCH_TOP && MOTOR_CMD>MOTOR_STOP) 
+        || (!SWITCH_BOTTOM && MOTOR_CMD<MOTOR_STOP)){
       LED = 1;
-    
+      MOTOR_CMD = MOTOR_STOP;
+    }
+      
     IFS0bits.INT0IF = 0;
   }
 }

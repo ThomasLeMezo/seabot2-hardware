@@ -50,16 +50,18 @@ void init_io(){
   QEI1CONbits.QEIM1 = 1;
   QEI1CONbits.QEIM2 = 1;
   QEI1CONbits.POSRES = 0; // do not reset position with index
+  QEI1CONbits.SWPAB = 1; // Swap Phase A and B
 
   DFLT1CONbits.CEID = 1 ; // count error disable bit (0=enable)
   DFLT1CONbits.QEOUT = 1 ; // Digital filter outputs are enabled
 
   MAXCNT = 0xFFFF; // max value (interrupt if overflow)
   POS1CNT = 0xFF;
-  QEIIE_bit = 1;
   
   RPINR14 = 10 + (11 << 8); // QEA (low byte of RP): 10, QEB : 11 (high byte of RP)
   RPINR15 = 12;
+
+  QEIIE_bit = 1;
 
   // PWM
   P1TCONbits.PTEN = 1; // PWM Time Base Timer Enable bit
