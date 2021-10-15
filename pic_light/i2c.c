@@ -40,8 +40,8 @@ void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
 void init_i2c(const unsigned short address_i2c){
 
   // **** IO I2C **** //
-  TRISB4_bit = 1; // RB4 en entrée
-  TRISB6_bit = 1; // RB6 en entrée
+  TRISB4_bit = 1; // RB4 input
+  TRISB6_bit = 1; // RB6 input
 
   // **** Interruptions **** //
   PIE1.SSPIE = 1; // Synchronous Serial Port Interrupt Enable bit
@@ -64,7 +64,7 @@ void init_i2c(const unsigned short address_i2c){
   // **** SSPCON2 **** //
   SSPCON2 = 0x00;
   SSPCON2.GCEN = 0; // General Call Enable bit (0 = disabled)
-  SSPCON2.SEN = 0; // Start Condition Enable/Stretch Enable bit (1 = enabled)
+  SSPCON2.SEN = 1; // Start Condition Enable/Stretch Enable bit (1 = enabled)
 
   // **** SSPCON1 **** //
   SSPCON1.WCOL = 0; // Write Collision Detect bit
@@ -83,6 +83,7 @@ void interrupt_low(){
   unsigned char state = 0;
 
   if (PIR1.SSPIF){  // I2C Interrupt
+     PIR1.SSPIF = 0; // reset SSP interrupt flag
 
     if(SSPSTAT.S){
       state  = SSPSTAT & MASTER_MASK;
@@ -96,8 +97,6 @@ void interrupt_low(){
           // In both D_A case (transmit data after receive add)
         case MASTER_READ_DATA:
           i2c_write_data_to_buffer(nb_tx_octet);
-          //SSPBUF = 0xC0;
-          //Delay_us(100);
           nb_tx_octet++;
           break;
 
@@ -118,7 +117,6 @@ void interrupt_low(){
     }
 
     SSPCON1.CKP = 1;
-    PIR1.SSPIF = 0; // reset SSP interrupt flag
   }
 
   if(SSPCON1.SSPOV || SSPCON1.WCOL){

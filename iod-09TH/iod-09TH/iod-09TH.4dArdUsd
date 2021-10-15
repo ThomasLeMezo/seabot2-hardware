@@ -61,7 +61,7 @@ StaticText
     Alias                        Statictext_pressure
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      700mbar
+    Caption                      ???mbar
     Color                        BLACK
     Font.Color                   GREEN
     Font.Effects                 []
@@ -72,7 +72,7 @@ StaticText
     Left                         0
     Top                          28
     Transparent                  Yes
-    Width                        48
+    Width                        45
     WordWrap                     Yes
 end
 StaticText
@@ -80,7 +80,7 @@ StaticText
     Alias                        Statictext_name
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      Seabot1
+    Caption                      Seabot_???
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -91,7 +91,7 @@ StaticText
     Left                         0
     Top                          0
     Transparent                  Yes
-    Width                        46
+    Width                        64
     WordWrap                     Yes
 end
 StaticText
@@ -99,7 +99,7 @@ StaticText
     Alias                        Statictext_temp
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      25°C
+    Caption                      ??°C
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -110,7 +110,7 @@ StaticText
     Left                         64
     Top                          28
     Transparent                  Yes
-    Width                        27
+    Width                        25
     WordWrap                     Yes
 end
 StaticText
@@ -118,7 +118,7 @@ StaticText
     Alias                        Statictext5
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      'Mission "test1"'
+    Caption                      Mission_"?????"
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -129,6 +129,6 @@ StaticText
     Left                         0
     Top                          42
     Transparent                  Yes
-    Width                        80
+    Width                        84
     WordWrap                     Yes
 end
