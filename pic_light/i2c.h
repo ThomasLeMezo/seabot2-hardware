@@ -12,10 +12,11 @@
 #define I2C_MASTER_NACK                     5
 
 // define states
-#define MASTER_MASK 0x27
-#define MASTER_WRITE_ADD 0x02         //Master Writes Address
-#define MASTER_WRITE_DATA 0x22        //Master Writes Data
-#define MASTER_READ_ADD 0x06         //Master Reads Address
+#define MASTER_MASK 0x25
+#define MASTER_WRITE_ADD 0x01         //Master Writes Address
+#define MASTER_WRITE_DATA 0x21        //Master Writes Data
+#define MASTER_READ_ADD 0x04         //Master Reads Address
+#define MASTER_READ_ADD2 0x05         //Master Reads Address
 #define MASTER_READ_DATA 0x24        //Master Reads Data
 #define MASTER_UNKNOWN 0x20
 

@@ -67,3 +67,9 @@ dkms.conf
 *.bmk
 *.asm
 pic_piston/mikroC_project/pic_piston.mcpds_callertable.txt
+pic_light/mikroC_project/light_callertable.txt
+iod-09TH/iod-09TH/IOD-09~1.gci
+iod-09TH/iod-09TH/IOD-09~1.dat
+iod-09TH/iod-09TH/iod-09TH.ino
+iod-09TH/iod-09TH/iod-09THConst.h
+iod-09TH/iod-09TH/iod-09TH.4Dino

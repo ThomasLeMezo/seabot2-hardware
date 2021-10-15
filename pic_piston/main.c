@@ -59,16 +59,6 @@ void main(){
   }
 }
 
-/**
- * @brief Interrupt (high)
- */
-void interrupt(){
-  /// ************************************************** //
-  /// ********************** TIMERS  ******************* //
-
-}
-
-
 void interrupt_switch() org 0x000014{
   if (IFS0bits.INT0IF){
     if((!SWITCH_TOP && MOTOR_CMD>MOTOR_STOP) 
