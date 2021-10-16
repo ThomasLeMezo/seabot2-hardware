@@ -42,7 +42,7 @@ StaticText
     Alias                        Statictext_ip
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      IP:XXX.XXX.XXX.XXX
+    Caption                      IP
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -53,7 +53,7 @@ StaticText
     Left                         0
     Top                          14
     Transparent                  Yes
-    Width                        111
+    Width                        11
     WordWrap                     Yes
 end
 StaticText
@@ -61,18 +61,18 @@ StaticText
     Alias                        Statictext_pressure
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      ???mbar
+    Caption                      mbar
     Color                        BLACK
-    Font.Color                   GREEN
+    Font.Color                   clWhite
     Font.Effects                 []
     Font.Name                    Tahoma
     Font.Size                    9
     Font.Style                   []
     Height                       14
-    Left                         0
+    Left                         30
     Top                          28
     Transparent                  Yes
-    Width                        45
+    Width                        27
     WordWrap                     Yes
 end
 StaticText
@@ -80,7 +80,7 @@ StaticText
     Alias                        Statictext_name
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      Seabot_???
+    Caption                      Seabot
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -91,7 +91,7 @@ StaticText
     Left                         0
     Top                          0
     Transparent                  Yes
-    Width                        64
+    Width                        39
     WordWrap                     Yes
 end
 StaticText
@@ -99,7 +99,7 @@ StaticText
     Alias                        Statictext_temp
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      ??°C
+    Caption                      °C
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -107,10 +107,10 @@ StaticText
     Font.Size                    9
     Font.Style                   []
     Height                       14
-    Left                         64
+    Left                         91
     Top                          28
     Transparent                  Yes
-    Width                        25
+    Width                        13
     WordWrap                     Yes
 end
 StaticText
@@ -118,7 +118,7 @@ StaticText
     Alias                        Statictext5
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      Mission_"?????"
+    Caption                      Mission:
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -129,6 +129,44 @@ StaticText
     Left                         0
     Top                          42
     Transparent                  Yes
-    Width                        84
+    Width                        41
+    WordWrap                     Yes
+end
+StaticText
+    Name                         Statictext6
+    Alias                        Statictext6
+    Alignment                    Right
+    AutoSize                     Yes
+    Caption                      ENSTA_Bretagne
+    Color                        BLACK
+    Font.Color                   ORANGE
+    Font.Effects                 []
+    Font.Name                    Tahoma
+    Font.Size                    8
+    Font.Style                   []
+    Height                       13
+    Left                         78
+    Top                          67
+    Transparent                  Yes
+    Width                        82
+    WordWrap                     Yes
+end
+StaticText
+    Name                         Statictext7
+    Alias                        Statictext7
+    Alignment                    Left
+    AutoSize                     Yes
+    Caption                      Wp:
+    Color                        BLACK
+    Font.Color                   WHITE
+    Font.Effects                 []
+    Font.Name                    Tahoma
+    Font.Size                    9
+    Font.Style                   []
+    Height                       14
+    Left                         0
+    Top                          56
+    Transparent                  Yes
+    Width                        23
     WordWrap                     Yes
 end
