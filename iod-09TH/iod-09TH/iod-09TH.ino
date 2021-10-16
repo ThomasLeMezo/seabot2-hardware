@@ -127,12 +127,24 @@ void receiveEvent(int howMany)
               gfx.BacklightOn(true);
           }
         break;
+      case 1:
+        {
+          data_name[0] = '\0';
+          int i=0;
+          while(Wire.available()){
+            char val = Wire.read();
+            if(i<sizeof(data_name)){
+              data_name[i] = val;
+              i++;
+            }
+          }
+        }
+        break;
 
 
       default:
         break;
     }
   }
-
 }
 
