@@ -104,7 +104,8 @@ void receiveEvent(int howMany)
       Wire.write("TEST", howMany);
       break;
     default:
-      Wire.write(0x00);
+      for(int i=0; i<howMany; ++i)
+        Wire.write(0x00);
       break;
    }
   }
@@ -113,33 +114,125 @@ void receiveEvent(int howMany)
   if(Wire.available()){
     reg_i2c = Wire.read(); // receive byte as a character
 
-    switch(reg_i2c){
-      case 0:
-          if(Wire.available()){
-            byte val = Wire.read();
-            if(val==0)
-              gfx.BacklightOn(false); // Sets backlight on or off, Boolean true false
-            else
-              gfx.BacklightOn(true);
-          }
-        break;
-      case 1:  // Name of the robot
-        {
-          data_name[0] = '\0';
-          int i=0;
-          while(Wire.available()){
-            char val = Wire.read();
-            if(i<sizeof(data_name)){
-              data_name[i] = val;
-              i++;
+    if(Wire.available()){
+      switch(reg_i2c){
+        case 0: // Screen light
+            if(Wire.available()){
+              byte val = Wire.read();
+              if(val==0)
+                gfx.BacklightOn(false); // Sets backlight on or off, Boolean true false
+              else
+                gfx.BacklightOn(true);
+            }
+          break;
+        case 1: // Name of the robot
+          {
+            data_name[0] = '\0';
+            int i=0;
+            while(Wire.available()){
+              char val = Wire.read();
+              if(i<sizeof(data_name)){
+                data_name[i] = val;
+                i++;
+              }
             }
           }
-        }
-        break;
+          break;
+        case 2: // IP
+          {
+            if(Wire.available()>3){
+              data_ip[0] = Wire.read();
+              data_ip[1] = Wire.read();
+              data_ip[2] = Wire.read();
+              data_ip[3] = Wire.read();
+            }
+            // byte data_ip[4] = {0, 0, 0, 0};
+          }
+          break;
 
+        case 3: // Pressure
+          {
+            if(Wire.available()>1){
+              byte high = Wire.read();
+              byte low = Wire.read();
+              data_pressure = high << 8 + low;
+            }
+            // short data_pressure = 0;
+          }
+          break;
 
-      default:
-        break;
+        case 4: // Temperature
+          {
+            if(Wire.available()>1){
+              byte high = Wire.read();
+              byte low = Wire.read();
+              data_temp = high << 8 + low;
+            }
+              // short data_temp = 0;
+          }
+          break;
+
+        case 5: // Mission name
+          {
+              // data_mission
+            data_mission[0] = '\0';
+            int i=0;
+            while(Wire.available()){
+              char val = Wire.read();
+              if(i<sizeof(data_mission)){
+                data_mission[i] = val;
+                i++;
+              }
+            }
+          }
+          break;
+
+        case 6: // Waypoint id
+          {
+            if(Wire.available()){
+              data_wp = Wire.read();
+            }
+            // byte data_wp = 0;
+          }
+          break;
+
+        case 7: // Nb waypoints
+          {
+            if(Wire.available()){
+              data_wp_max = Wire.read();
+            }
+            // byte data_wp_max = 0;
+          }
+          break;
+
+        case 8: // Time
+          {
+            if(Wire.available()>1){
+              data_time[0] = Wire.read();
+              data_time[1] = Wire.read();
+            }
+            // byte data_time[2] = {0,0};
+          }
+          break;
+
+        case 9: // Time remaining
+          {
+            if(Wire.available()>1){
+              data_time_remain[0] = Wire.read();
+              data_time_remain[1] = Wire.read();
+            }
+            // byte data_time_remain[2] = {0,0};*/
+          }
+          break;
+
+        default:
+
+          break;
+      }
+
+      while(Wire.available()){
+        Wire.read();
+      }
     }
   }
 }
