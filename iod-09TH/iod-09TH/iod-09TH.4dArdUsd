@@ -57,25 +57,6 @@ StaticText
     WordWrap                     Yes
 end
 StaticText
-    Name                         Statictext2
-    Alias                        Statictext_pressure
-    Alignment                    Left
-    AutoSize                     Yes
-    Caption                      mbar
-    Color                        BLACK
-    Font.Color                   clWhite
-    Font.Effects                 []
-    Font.Name                    Tahoma
-    Font.Size                    9
-    Font.Style                   []
-    Height                       14
-    Left                         30
-    Top                          28
-    Transparent                  Yes
-    Width                        27
-    WordWrap                     Yes
-end
-StaticText
     Name                         Statictext3
     Alias                        Statictext_name
     Alignment                    Left
@@ -95,30 +76,11 @@ StaticText
     WordWrap                     Yes
 end
 StaticText
-    Name                         Statictext4
-    Alias                        Statictext_temp
-    Alignment                    Left
-    AutoSize                     Yes
-    Caption                      °C
-    Color                        BLACK
-    Font.Color                   WHITE
-    Font.Effects                 []
-    Font.Name                    Tahoma
-    Font.Size                    9
-    Font.Style                   []
-    Height                       14
-    Left                         91
-    Top                          28
-    Transparent                  Yes
-    Width                        13
-    WordWrap                     Yes
-end
-StaticText
     Name                         Statictext5
     Alias                        Statictext5
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      Mission:
+    Caption                      Mission
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -129,7 +91,7 @@ StaticText
     Left                         0
     Top                          42
     Transparent                  Yes
-    Width                        41
+    Width                        37
     WordWrap                     Yes
 end
 StaticText
@@ -156,7 +118,7 @@ StaticText
     Alias                        Statictext7
     Alignment                    Left
     AutoSize                     Yes
-    Caption                      Wp:
+    Caption                      Wp
     Color                        BLACK
     Font.Color                   WHITE
     Font.Effects                 []
@@ -167,6 +129,6 @@ StaticText
     Left                         0
     Top                          56
     Transparent                  Yes
-    Width                        23
+    Width                        19
     WordWrap                     Yes
 end
