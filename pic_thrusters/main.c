@@ -24,8 +24,9 @@ External oscillator 16MHZ (HS)
 void main(){
   unsigned short k = 0;
 
-  OSCCON = 0b11110000; // 0=4xPLL OFF, 111=IRCF<2:0>=16Mhz  OSTS=0  SCS<1:0>10 1x = Internal oscillator block
- 
+  OSCCON = 0b01110000; // 0=4xPLL OFF, 111=IRCF<2:0>=16Mhz  OSTS=0  SCS<1:0>10 1x = Internal oscillator block
+  OSCTUNE = 0x40; 
+
   asm CLRWDT;// Watchdog
   SWDTEN_bit = 1; //armement du watchdog
 

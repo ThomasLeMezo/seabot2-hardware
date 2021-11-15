@@ -70,3 +70,9 @@ pic_piston/mikroC_project/pic_piston.mcpds_callertable.txt
 pic_light/mikroC_project/light_callertable.txt
 iod-09TH/iod-09TH/IOD-09~1.gci
 iod-09TH/iod-09TH/IOD-09~1.dat
+pic_uart_i2c.X/debug
+pic_uart_i2c.X/dist
+pic_uart_i2c.X/build
+pic_uart_i2c.X/nbproject/Makefile-*
+pic_uart_i2c.X/nbproject/Package-*
+pic_uart_i2c.X/nbproject/private
