@@ -1,24 +1,24 @@
 /**
-  EPWM1 Generated Driver File
+  @Generated PIC10 / PIC12 / PIC16 / PIC18 MCUs Header File
 
-  @Company
+  @Company:
     Microchip Technology Inc.
 
-  @File Name
-    epwm1.c
+  @File Name:
+    mcc.h
 
-  @Summary
-    This is the generated driver implementation file for the EPWM1 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  @Summary:
+    This is the mcc.h file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description
-    This source file provides implementations for driver APIs for EPWM1.
+  @Description:
+    This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.7
-        Device            :  PIC18F14K22
-        Driver Version    :  2.01
+        Device            :  PIC18LF14K22
+        Driver Version    :  2.00
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.31 and above
-         MPLAB 	          :  MPLAB X 5.45
+        Compiler          :  XC8 2.31 and above or later
+        MPLAB             :  MPLAB X 5.45
 */
 
 /*
@@ -44,56 +44,49 @@
     SOFTWARE.
 */
 
-/**
-  Section: Included Files
-*/
-
+#ifndef MCC_H
+#define	MCC_H
 #include <xc.h>
-#include "epwm1.h"
+#include "device_config.h"
+#include "pin_manager.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <conio.h>
+#include "interrupt_manager.h"
+#include "i2c_slave.h"
+#include "memory.h"
+#include "tmr1.h"
+#include "tmr0.h"
+
+
 
 /**
-  Section: Macro Declarations
-*/
-
-#define PWM1_INITIALIZE_DUTY_VALUE    49
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    Initializes the device to the default states configured in the
+ *                  MCC GUI
+ * @Example
+    SYSTEM_Initialize(void);
+ */
+void SYSTEM_Initialize(void);
 
 /**
-  Section: EPWM Module APIs
-*/
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    Initializes the oscillator to the default states configured in the
+ *                  MCC GUI
+ * @Example
+    OSCILLATOR_Initialize(void);
+ */
+void OSCILLATOR_Initialize(void);
 
-void EPWM1_Initialize(void)
-{
-    // Set the EPWM1 to the options selected in the User Interface
-	
-	// CCP1M P1A,P1C: active high; P1B,P1D: active high; DC1B 1; P1M single; 
-	CCP1CON = 0x1C;    
-	
-	// ECCPASE operating; PSSBD low; PSSAC low; ECCPAS disabled; 
-	ECCP1AS = 0x00;    
-	
-	// PRSEN automatic_restart; PDC 0; 
-	PWM1CON = 0x80;    
-	
-	// STRD P1D_to_port; STRC P1C_to_port; STRB P1B_to_port; STRA P1A_to_CCP1M; STRSYNC start_at_next; 
-	PSTRCON = 0x11;    
-	
-	// CCPR1H 0; 
-	CCPR1H = 0x00;    
-	
-	// CCPR1L 12; 
-	CCPR1L = 0x0C;    
-
-}
-
-void EPWM1_LoadDutyValue(uint16_t dutyValue)
-{
-   // Writing to 8 MSBs of pwm duty cycle in CCPRL register
-    CCPR1L = ((dutyValue & 0x03FC)>>2);
-    
-   // Writing to 2 LSBs of pwm duty cycle in CCPCON register
-    CCP1CON = ((uint8_t)(CCP1CON & 0xCF) | ((dutyValue & 0x0003)<<4));
-}
+#endif	/* MCC_H */
 /**
  End of File
 */
-

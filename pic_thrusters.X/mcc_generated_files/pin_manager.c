@@ -1,24 +1,26 @@
 /**
-  EPWM1 Generated Driver File
+  Generated Pin Manager File
 
-  @Company
+  Company:
     Microchip Technology Inc.
 
-  @File Name
-    epwm1.c
+  File Name:
+    pin_manager.c
 
-  @Summary
-    This is the generated driver implementation file for the EPWM1 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  Summary:
+    This is the Pin Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description
-    This source file provides implementations for driver APIs for EPWM1.
+  Description:
+    This header file provides implementations for pin APIs for all pins selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.7
-        Device            :  PIC18F14K22
-        Driver Version    :  2.01
+        Device            :  PIC18LF14K22
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 2.31 and above
-         MPLAB 	          :  MPLAB X 5.45
+        MPLAB             :  MPLAB X 5.45
+
+    Copyright (c) 2013 - 2015 released Microchip Technology Inc.  All rights reserved.
 */
 
 /*
@@ -44,56 +46,56 @@
     SOFTWARE.
 */
 
-/**
-  Section: Included Files
-*/
+#include "pin_manager.h"
 
-#include <xc.h>
-#include "epwm1.h"
 
-/**
-  Section: Macro Declarations
-*/
 
-#define PWM1_INITIALIZE_DUTY_VALUE    49
 
-/**
-  Section: EPWM Module APIs
-*/
 
-void EPWM1_Initialize(void)
+void PIN_MANAGER_Initialize(void)
 {
-    // Set the EPWM1 to the options selected in the User Interface
-	
-	// CCP1M P1A,P1C: active high; P1B,P1D: active high; DC1B 1; P1M single; 
-	CCP1CON = 0x1C;    
-	
-	// ECCPASE operating; PSSBD low; PSSAC low; ECCPAS disabled; 
-	ECCP1AS = 0x00;    
-	
-	// PRSEN automatic_restart; PDC 0; 
-	PWM1CON = 0x80;    
-	
-	// STRD P1D_to_port; STRC P1C_to_port; STRB P1B_to_port; STRA P1A_to_CCP1M; STRSYNC start_at_next; 
-	PSTRCON = 0x11;    
-	
-	// CCPR1H 0; 
-	CCPR1H = 0x00;    
-	
-	// CCPR1L 12; 
-	CCPR1L = 0x0C;    
+    /**
+    LATx registers
+    */
+    LATA = 0x00;
+    LATB = 0x00;
+    LATC = 0x00;
 
-}
+    /**
+    TRISx registers
+    */
+    TRISA = 0x37;
+    TRISB = 0x70;
+    TRISC = 0xFC;
 
-void EPWM1_LoadDutyValue(uint16_t dutyValue)
-{
-   // Writing to 8 MSBs of pwm duty cycle in CCPRL register
-    CCPR1L = ((dutyValue & 0x03FC)>>2);
+    /**
+    ANSELx registers
+    */
+    ANSEL = 0xCB;
+    ANSELH = 0x0B;
+
+    /**
+    WPUx registers
+    */
+    WPUB = 0x00;
+    WPUA = 0x00;
+    INTCON2bits.nRBPU = 1;
+
+
+
+
+
+
+   
     
-   // Writing to 2 LSBs of pwm duty cycle in CCPCON register
-    CCP1CON = ((uint8_t)(CCP1CON & 0xCF) | ((dutyValue & 0x0003)<<4));
 }
+  
+void PIN_MANAGER_IOC(void)
+{   
+	// Clear global Interrupt-On-Change flag
+    INTCONbits.RABIF = 0;
+}
+
 /**
  End of File
 */
-
