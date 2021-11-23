@@ -62,15 +62,15 @@ void  INTERRUPT_Initialize (void)
     // SSPI - high priority
     IPR1bits.SSPIP = 1;
 
-    // TMRI - high priority
-    IPR2bits.TMR3IP = 1;
-
 
     // TMRI - low priority
     INTCON2bits.TMR0IP = 0;    
 
     // TMRI - low priority
     IPR1bits.TMR1IP = 0;    
+
+    // TMRI - low priority
+    IPR2bits.TMR3IP = 0;    
 
 }
 
@@ -84,10 +84,6 @@ void __interrupt() INTERRUPT_InterruptManagerHigh (void)
     else if(PIE1bits.SSPIE == 1 && PIR1bits.SSPIF == 1)
     {
         MSSP_InterruptHandler();
-    }
-    else if(PIE2bits.TMR3IE == 1 && PIR2bits.TMR3IF == 1)
-    {
-        TMR3_ISR();
     }
     else
     {
@@ -105,6 +101,10 @@ void __interrupt(low_priority) INTERRUPT_InterruptManagerLow (void)
     else if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
     {
         TMR1_ISR();
+    }
+    else if(PIE2bits.TMR3IE == 1 && PIR2bits.TMR3IF == 1)
+    {
+        TMR3_ISR();
     }
     else
     {

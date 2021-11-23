@@ -77,3 +77,5 @@ iod-09TH/iod-09TH/IOD-09~1.dat
 *.X/nbproject/Makefile-*
 *.X/nbproject/Package-*
 *.X/nbproject/private
+*.workspace
+*.pdsbak

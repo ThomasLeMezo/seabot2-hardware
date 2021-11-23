@@ -107,7 +107,7 @@ void i2c_handler_read() {
 }
 
 void i2c_handler_write() {
-    switch (i2c_register + i2c_nb_bytes - 1) {
+    switch (i2c_register + i2c_nb_bytes) {
         case 0x00:
             I2C_Write(battery_voltage[0] & 0xFF);
             break;
@@ -206,6 +206,8 @@ void ils_analysis(unsigned char new_state) {
 }
 
 void measure_power() {
+    // 10-bit ADC converter (0-3.3V)
+    
     battery_voltage[0] = ADC1_GetConversion(BATT_1);
     battery_voltage[1] = ADC1_GetConversion(BATT_2);
     battery_voltage[2] = ADC1_GetConversion(BATT_3);
