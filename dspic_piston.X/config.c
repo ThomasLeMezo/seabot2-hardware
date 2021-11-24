@@ -1,4 +1,5 @@
 #include "config.h"
+#include <xc.h>
 
 volatile unsigned short is_init = 0;
 
@@ -9,35 +10,15 @@ unsigned short watchdog_cpt_sec = 59;
 unsigned short watchdog_cpt_default = 59;
 
 signed  short qei_overflow = 0;
-/** RA3 - ILS
-* RA5 - Relais de puissance
-* RB4 - SDA
-* RB6 - SCL
-* AN11 - VIOUT (courant moteur)
-* RB7 - LED
-* AN8 - VIOUT1 (courant ESC2)
-* AN9 - VIOUT2 (courant ESC1)
-* AN4, 5, 6, 7 - Batt 4,2,3,1*/
-
 
 /**
  * @brief init_io
- * Initialisation des entrées sorties du PIC
+ * Initialize outputs and inputs
  */
 void init_io(){
   // INPUT-OUTPUT
-  TRISA1_bit = 0; // ENABLE output
-  TRISA0_bit = 1; // current measure input
-
-  TRISB10_bit = 1; // Codeur A
-  TRISB11_bit = 1; // Codeur B
-  TRISB12_bit = 1; // Codeur Idx
-
-  TRISB5_bit = 1; // Top switch
-  TRISB6_bit = 1; // Bottom switch
-  TRISB7_bit = 1; // Interrupt for switch
-
-  TRISB13_bit = 0;
+  TRISAbits.TRISA1 = 0; // ENABLE set to output
+  TRISBbits.TRISB13 = 0; // LED set to output 
 
   // Interrupt for switch
   INTCON2bits.INT0EP = 0; // interrupt on positive edge
@@ -56,12 +37,13 @@ void init_io(){
   DFLT1CONbits.QEOUT = 1 ; // Digital filter outputs are enabled
 
   MAXCNT = 0xFFFF; // max value (interrupt if overflow)
-  POS1CNT = 0xFF;
+  POS1CNT = 0x00FF; // Counter inital position
   
+  // Map the QEI to the pin of the coder (3 pins)
   RPINR14 = 10 + (11 << 8); // QEA (low byte of RP): 10, QEB : 11 (high byte of RP)
   RPINR15 = 12;
 
-  QEIIE_bit = 1;
+  _QEIIE = 1; // Enable interrupt from QEI
 
   // PWM
   P1TCONbits.PTEN = 1; // PWM Time Base Timer Enable bit

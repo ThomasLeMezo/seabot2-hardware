@@ -79,3 +79,5 @@ iod-09TH/iod-09TH/IOD-09~1.dat
 *.X/nbproject/private
 *.workspace
 *.pdsbak
+
+*.generated_files/

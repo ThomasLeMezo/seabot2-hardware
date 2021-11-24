@@ -1,5 +1,6 @@
 #include "i2c.h"
 #include "config.h"
+#include <xc.h>
 
 volatile unsigned short rxbuffer_tab[SIZE_RX_BUFFER];
 volatile unsigned short tmp_rx = 0;
@@ -12,10 +13,16 @@ void i2c_read_data_from_buffer(){
   for(i=0; i<(nb_rx_octet-1); i++){
     switch(rxbuffer_tab[0]+i){
       case 0x00:
-        LED = rxbuffer_tab[i+1];
+        if(rxbuffer_tab[i+1])
+            LED_SetHigh();
+        else
+            LED_SetLow();
         break;
       case 0x01:
-        ENABLE = rxbuffer_tab[i+1];
+          if(rxbuffer_tab[i+1])
+            ENABLE_SetHigh();
+        else
+            ENABLE_SetLow();
         break;
       case 0x02:
         P1DC1 = rxbuffer_tab[i+1];
@@ -38,11 +45,11 @@ void i2c_write_data_to_buffer(const unsigned short nb_tx_octet){
       I2C1TRN = qei_overflow;
       break;
     case 0x03:
-      I2C1TRN = !SWITCH_TOP
-                | (!SWITCH_BOTTOM<<1);
+      I2C1TRN = !SWITCH_TOP_GetValue()
+                | (!SWITCH_BOTTOM_GetValue()<<1);
     case 0x10:
-      I2C1TRN = QEI1CONbits.UPDN;
-      break;      
+      I2C1TRN = QEI1CONbits.UPDN; // Direction status
+      break;
     case 0xC0:
       I2C1TRN = CODE_VERSION;
       break;
@@ -61,8 +68,8 @@ void init_i2c(const unsigned short address_i2c){
 // https://ww1.microchip.com/downloads/en/DeviceDoc/70046E.pdf
 
   // **** IO I2C **** //
-  TRISB8_bit = 1; // RB4 input
-  TRISB9_bit = 1; // RB6 input
+  TRISBbits.TRISB8 = 1; // RB4 input
+  TRISBbits.TRISB9 = 1; // RB6 input
 
   I2C1CONbits.I2CEN = 1; // Enable I2C
   I2C1CONbits.A10M = 0; // 7-bit address
@@ -79,10 +86,9 @@ void init_i2c(const unsigned short address_i2c){
 
   IEC1bits.SI2C1IE = 1;
   IFS1bits.SI2C1IF = 0;
-
 }
 
-void interrupt_i2c() org 0x000034{
+void __attribute__((__interrupt__, auto_psv)) _SI2C1Interrupt(){
   unsigned char state = 0;
   
   if (IFS1bits.SI2C1IF){  // I2C Interrupt

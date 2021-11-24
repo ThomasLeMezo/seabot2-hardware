@@ -19,29 +19,23 @@ RA0 : Motor Current Sensor
 
 #include "i2c.h"
 #include "config.h"
+#include <xc.h>
 
 /**
  * @brief main
  */
-void main(){
-  unsigned short k = 0;
-  // External oscillator HS
-  COSC_0_bit = 1;
-  COSC_1_bit = 1;
-  COSC_2_bit = 0;
-
-  //asm CLRWDT;// Watchdog
-  //SWDTEN_bit = 1; //armement du watchdog
+int main(){
+  _COSC = 0b011; // External oscillator (Primary oscillator (XT, HS, EC) with PLL)
 
   init_io(); // Initialize I/O
   init_i2c(0x30); // Initialize I2C
 /*  init_timer0(); // Initialize TIMER0 every 1 seconds
   init_timer3(); // Initialize TIMER3 every 100ms*/
 
-  ADC1_Init();
+  //ADC1_Init();
 
-  ENABLE = 0;
-  LED = 0;
+  ENABLE_SetLow();
+  LED_SetLow();
 
   is_init = 1;
 
@@ -57,25 +51,29 @@ void main(){
         nb_rx_octet = 0;
     }
   }
+  
+  return 0;
 }
 
-void interrupt_switch() org 0x000014{
+void __attribute__((__interrupt__, auto_psv)) _INT0Interrupt(){
   if (IFS0bits.INT0IF){
-    if((!SWITCH_TOP && MOTOR_CMD>MOTOR_STOP) 
-        || (!SWITCH_BOTTOM && MOTOR_CMD<MOTOR_STOP)){
-      LED = 1;
+      IFS0bits.INT0IF = 0;
+    if((!SWITCH_TOP_GetValue() && MOTOR_CMD>MOTOR_STOP) 
+        || (!SWITCH_BOTTOM_GetValue() && MOTOR_CMD<MOTOR_STOP)){
+      LED_SetHigh();
       MOTOR_CMD = MOTOR_STOP;
-    }
-      
-    IFS0bits.INT0IF = 0;
+    }    
   }
 }
 
-void interrupt_qei() org 0x000088{
-  LED = ~LED;
+/*
+ Interruption for QEI when overflow
+ */
+void __attribute__((__interrupt__, auto_psv)) _QEIInterrupt(){
+  _QEIIF = 0;
   if(QEI1CONbits.UPDN)
     qei_overflow += 1;
   else
     qei_overflow -= 1;
-  QEIIF_bit = 0;
+  
 }
