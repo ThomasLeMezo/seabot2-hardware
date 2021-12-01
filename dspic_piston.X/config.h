@@ -1,6 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "interrupt_manager.h"
+#include "i2c_slave.h"
+#include "tmr1.h"
+#include "tmr2.h"
+
 #define CODE_VERSION 0x01
 
 extern volatile unsigned short is_init;
@@ -79,6 +84,16 @@ extern signed short qei_overflow; // number of overflow for the encoder
 #define MOTOR_STOP 80
 
 /**
+ * @brief System initialization
+ */
+void SYSTEM_Initialize();
+
+/**
+ * @brief Clock initialization
+ */
+void CLOCK_Initialize();
+
+/**
  * @brief initialization of input/ouput
  */
 void init_io();
@@ -86,20 +101,20 @@ void init_io();
 /**
  * @brief read current
  */
-void measure_power();
+//void measure_power();
 
 /**
  * @brief init_timer0
  * Initialization of TIMER0
  * Prescaler 1:128; TMR0 Preload = 3036; Actual Interrupt Time : 1 s
  */
-void init_timer0();
+//void init_timer0();
 
 /**
  * @brief init_timer3
  * Initialization of TIMER3
  * Prescaler 1:8; TMR1 Preload = 15536; Actual Interrupt Time : 100 ms
  */
-void init_timer3();
+//void init_timer3();
 
 #endif

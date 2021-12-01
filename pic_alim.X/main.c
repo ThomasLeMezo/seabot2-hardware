@@ -172,7 +172,6 @@ void i2c_handler_write() {
             I2C_Write(0x00);
             break;
     }
-
 }
 
 void i2c_bus_col() {

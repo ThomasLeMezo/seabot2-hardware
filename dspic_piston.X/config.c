@@ -1,5 +1,7 @@
-#include "config.h"
 #include <xc.h>
+#include <stdbool.h>
+
+#include "config.h"
 
 volatile unsigned short is_init = 0;
 
@@ -11,11 +13,47 @@ unsigned short watchdog_cpt_default = 59;
 
 signed  short qei_overflow = 0;
 
+void CLOCK_Initialize(void){
+    // FRCDIV FRC/2; PLLPRE 2; DOZE 1:8; PLLPOST 1:4; DOZEN disabled; ROI disabled; 
+    // Input 16MHz Crystal
+    
+    // DOZE = 1, FRCDIV = 1
+    CLKDIVbits.DOZE = 0b000; // FOSC = FCY/1
+    CLKDIVbits.FRCDIV = 0b000; // FRC div by 1
+    
+    // PLLPRE = 1/2
+    CLKDIVbits.PLLPRE = 0b0; // 16MHz/2 = 8MHz in [0.8, 8]MHz
+    
+    // PLLDIV = 40 (start at 2))
+    PLLFBDbits.PLLDIV = 18; // 8MHz * 20 = 160 in [100,200]MHz
+    
+    // PLLPOST /2
+    CLKDIVbits.PLLPOST = 0b00; // 160MHz / 2 = 80MHz in [12.5, 80]MHz
+    
+    // TUN Center frequency; 
+    OSCTUN = 0x00;
+    
+    OSCCONbits.COSC = 0b011; // External oscillator (Primary oscillator (XT, HS, EC) with PLL)
+    
+//    // CF no clock failure; NOSC PRIPLL; CLKLOCK unlocked; OSWEN Switch is Complete; 
+    __builtin_write_OSCCONH((uint8_t) (0x03));
+    __builtin_write_OSCCONL((uint8_t) (0x01));
+    // Wait for Clock switch to occur
+    while (OSCCONbits.OSWEN != 0);
+    while (OSCCONbits.LOCK != 1);
+}
+
+
 /**
  * @brief init_io
  * Initialize outputs and inputs
  */
 void init_io(){
+    
+  // I2C
+    TRISBbits.TRISB8 = 1; // RB4 input
+    TRISBbits.TRISB9 = 1; // RB6 input
+    
   // INPUT-OUTPUT
   TRISAbits.TRISA1 = 0; // ENABLE set to output
   TRISBbits.TRISB13 = 0; // LED set to output 
@@ -62,17 +100,21 @@ void measure_power(){
   power_current[2] = ADC_Get_Sample(9);*/
 }
 
-void init_timer0(){
-/*  T0CON = 0x05; // TIMER0 ON (1 s)
-  TMR0H = TIMER0_CPT_H;
-  TMR0L = TIMER0_CPT_L;
-  TMR0IE_bit = 0;*/
+void init_timer1(){
+    //TMR1 0; 
+    TMR1 = 0x00;
+    //Period = 0.2 s; Frequency = 40000000 Hz; PR1 31249; 
+    PR1 = 0x7A11;
+    //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TSYNC disabled; TGATE disabled; 
+    T1CON = 0x8030;
+    IFS0bits.T1IF = false;
+    IEC0bits.T1IE = true;
 }
 
-void init_timer3(){
-/*  T3CON = 0x30;
-  TMR3IF_bit = 0;
-  TMR3H = TIMER3_CPT_H;
-  TMR3L = TIMER3_CPT_L;
-  TMR3IE_bit = 0;*/
+void SYSTEM_Initialize(){
+    CLOCK_Initialize();
+    INTERRUPT_Initialize();
+    init_io();
+    TMR1_Initialize();
+    I2C_Open();
 }
