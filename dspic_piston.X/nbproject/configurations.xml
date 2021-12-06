@@ -7,8 +7,9 @@
       <itemPath>config.h</itemPath>
       <itemPath>i2c_slave.h</itemPath>
       <itemPath>interrupt_manager.h</itemPath>
-      <itemPath>tmr1.h</itemPath>
       <itemPath>tmr2.h</itemPath>
+      <itemPath>tmr3.h</itemPath>
+      <itemPath>pwm.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -21,8 +22,9 @@
       <itemPath>config.c</itemPath>
       <itemPath>i2c_slave.c</itemPath>
       <itemPath>interrupt_manager.c</itemPath>
-      <itemPath>tmr1.c</itemPath>
       <itemPath>tmr2.c</itemPath>
+      <itemPath>tmr3.c</itemPath>
+      <itemPath>pwm.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -41,7 +43,7 @@
         <targetDevice>dsPIC33FJ32MC202</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>VSMViewerPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.70</languageToolchainVersion>
         <platform>3</platform>
@@ -213,7 +215,10 @@
         <property key="target.ip.port" value="8001"/>
       </Tool>
       <VSMViewerPlatformTool>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="design.file" value="test/test_dspic_piston.pdsprj"/>
+        <property key="lastid" value=""/>
         <property key="target.ip.address" value="localhost"/>
         <property key="target.ip.port" value="8001"/>
       </VSMViewerPlatformTool>

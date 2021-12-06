@@ -1,18 +1,18 @@
 
 /**
-  TMR1 Generated Driver API Source File 
+  TMR3 Generated Driver API Source File 
 
   @Company
     Microchip Technology Inc.
 
   @File Name
-    tmr1.c
+    tmr3.c
 
   @Summary
-    This is the generated source file for the TMR1 driver using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated source file for the TMR3 driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
-    This source file provides APIs for driver for TMR1. 
+    This source file provides APIs for driver for TMR3. 
     Generation Information : 
         Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.170.0
         Device            :  dsPIC33EV256GM106
@@ -48,13 +48,13 @@
 */
 
 #include <stdio.h>
-#include "tmr1.h"
+#include "tmr3.h"
 
 /**
  Section: File specific functions
 */
-void (*TMR1_InterruptHandler)(void) = NULL;
-void TMR1_CallBack(void);
+void (*TMR3_InterruptHandler)(void) = NULL;
+void TMR3_CallBack(void);
 
 /**
   Section: Data Type Definitions
@@ -82,35 +82,35 @@ typedef struct _TMR_OBJ_STRUCT
 
 } TMR_OBJ;
 
-static TMR_OBJ tmr1_obj;
+static TMR_OBJ tmr3_obj;
 
 /**
   Section: Driver Interface
 */
 
-void TMR1_Initialize (void)
-{
-    //TMR1 0; 
-    TMR1 = 0x00;
-    //Period = 0.2 s; Frequency = 40000000 Hz; PR1 31249; 
-    PR1 = 0x7A11;
-    //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TSYNC disabled; TGATE disabled; 
-    T1CON = 0x8030;
+void TMR3_Initialize (void)
+{    
+    //TMR3 0; 
+    TMR3 = 0x00;
+    //Period = 0.2 s; Frequency = 40000000 Hz; PR3 31249; 
+    PR3 = 0x7A11;
+    //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
+    T3CON = 0x8030;
 
-    if(TMR1_InterruptHandler == NULL)
+    if(TMR3_InterruptHandler == NULL)
     {
-        TMR1_SetInterruptHandler(&TMR1_CallBack);
+        TMR3_SetInterruptHandler(&TMR3_CallBack);
     }
 
-    IFS0bits.T1IF = false;
-    IEC0bits.T1IE = true;
+    IFS0bits.T3IF = false;
+    IEC0bits.T3IE = true;
 	
-    tmr1_obj.timerElapsed = false;
+    tmr3_obj.timerElapsed = false;
 
 }
 
 
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
 {
     /* Check if the Timer Interrupt/Status is set */
 
@@ -118,12 +118,12 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
     static volatile unsigned int CountCallBack = 0;
 
     // callback function - called every 5th pass
-    if (++CountCallBack >= TMR1_INTERRUPT_TICKER_FACTOR)
+    if (++CountCallBack >= TMR3_INTERRUPT_TICKER_FACTOR)
     {
         // ticker function call
-        if(TMR1_InterruptHandler) 
+        if(TMR3_InterruptHandler) 
         { 
-               TMR1_InterruptHandler(); 
+               TMR3_InterruptHandler(); 
         }
 
         // reset ticker counter
@@ -132,92 +132,92 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
 
     //***User Area End
 
-    tmr1_obj.count++;
-    tmr1_obj.timerElapsed = true;
-    IFS0bits.T1IF = false;
+    tmr3_obj.count++;
+    tmr3_obj.timerElapsed = true;
+    IFS0bits.T3IF = false;
 }
 
-void TMR1_Period16BitSet( uint16_t value )
+void TMR3_Period16BitSet( uint16_t value )
 {
     /* Update the counter values */
-    PR1 = value;
+    PR3 = value;
     /* Reset the status information */
-    tmr1_obj.timerElapsed = false;
+    tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR1_Period16BitGet( void )
+uint16_t TMR3_Period16BitGet( void )
 {
-    return( PR1 );
+    return( PR3 );
 }
 
-void TMR1_Counter16BitSet ( uint16_t value )
+void TMR3_Counter16BitSet ( uint16_t value )
 {
     /* Update the counter values */
-    TMR1 = value;
+    TMR3 = value;
     /* Reset the status information */
-    tmr1_obj.timerElapsed = false;
+    tmr3_obj.timerElapsed = false;
 }
 
-uint16_t TMR1_Counter16BitGet( void )
+uint16_t TMR3_Counter16BitGet( void )
 {
-    return( TMR1 );
+    return( TMR3 );
 }
 
 
-void __attribute__ ((weak)) TMR1_CallBack(void)
+void __attribute__ ((weak)) TMR3_CallBack(void)
 {
     // Add your custom callback code here
 }
 
-void  TMR1_SetInterruptHandler(void (* InterruptHandler)(void))
+void  TMR3_SetInterruptHandler(void (* InterruptHandler)(void))
 { 
-    IEC0bits.T1IE = false;
-    TMR1_InterruptHandler = InterruptHandler; 
-    IEC0bits.T1IE = true;
+    IEC0bits.T3IE = false;
+    TMR3_InterruptHandler = InterruptHandler; 
+    IEC0bits.T3IE = true;
 }
 
-void TMR1_Start( void )
+void TMR3_Start( void )
 {
     /* Reset the status information */
-    tmr1_obj.timerElapsed = false;
+    tmr3_obj.timerElapsed = false;
 
     /*Enable the interrupt*/
-    IEC0bits.T1IE = true;
+    IEC0bits.T3IE = true;
 
     /* Start the Timer */
-    T1CONbits.TON = 1;
+    T3CONbits.TON = 1;
 }
 
-void TMR1_Stop( void )
+void TMR3_Stop( void )
 {
     /* Stop the Timer */
-    T1CONbits.TON = false;
+    T3CONbits.TON = false;
 
     /*Disable the interrupt*/
-    IEC0bits.T1IE = false;
+    IEC0bits.T3IE = false;
 }
 
-bool TMR1_GetElapsedThenClear(void)
+bool TMR3_GetElapsedThenClear(void)
 {
     bool status;
     
-    status = tmr1_obj.timerElapsed;
+    status = tmr3_obj.timerElapsed;
 
     if(status == true)
     {
-        tmr1_obj.timerElapsed = false;
+        tmr3_obj.timerElapsed = false;
     }
     return status;
 }
 
-int TMR1_SoftwareCounterGet(void)
+int TMR3_SoftwareCounterGet(void)
 {
-    return tmr1_obj.count;
+    return tmr3_obj.count;
 }
 
-void TMR1_SoftwareCounterClear(void)
+void TMR3_SoftwareCounterClear(void)
 {
-    tmr1_obj.count = 0; 
+    tmr3_obj.count = 0; 
 }
 
 /**

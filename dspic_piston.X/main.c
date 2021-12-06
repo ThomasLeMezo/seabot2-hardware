@@ -18,10 +18,28 @@ RA0 : Motor Current Sensor
  */
 
 #include <xc.h>
+#include <stdlib.h>
 #include "config.h"
 
+// I2C
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
+
+// State machine
+enum state_piston {
+    PISTON_RESET, PISTON_REGULATION
+};
+volatile unsigned char state = PISTON_RESET;
+
+// Set point & position
+volatile unsigned char i2c_set_point_new = 0;
+volatile signed long int position = 0;
+volatile signed long int position_set_point = 0;
+volatile signed long int position_set_point_i2c = 0;
+#define NEW_WAYPOINT_I2C 0b111
+
+volatile uint16_t motor_set_point = MOTOR_STOP;
+volatile uint16_t motor_delta_speed = 100;
 
 void i2c_handler_address() {
     I2C_Read();
@@ -35,19 +53,31 @@ void i2c_handler_read() {
     else {
         switch (i2c_register + i2c_nb_bytes - 1) {
             case 0x00:
-                if (read_byte)
-                    LED_SetHigh();
-                else
-                    LED_SetLow();
+                i2c_set_point_new=0b1;
+                position_set_point_i2c = read_byte;
                 break;
             case 0x01:
+                i2c_set_point_new|=0b10;
+                position_set_point_i2c += (read_byte<<8);
+                break;
+            case 0x02:
+                i2c_set_point_new|=0b100;
+                position_set_point_i2c += (((signed long int)read_byte)<<16);
+                break;
+            case 0x03:
                 if (read_byte)
                     ENABLE_SetHigh();
                 else
                     ENABLE_SetLow();
                 break;
-            case 0x02:
-                P1DC1 = read_byte;
+            case 0x10:
+                if (read_byte)
+                    LED_SetHigh();
+                else
+                    LED_SetLow();
+                break;
+            case 0x11:
+                P1DC1 = read_byte << 4;
                 break;
             default:
                 break;
@@ -112,27 +142,38 @@ void __attribute__((__interrupt__, auto_psv)) _QEIInterrupt() {
 
 }
 
-/**
- * @brief I2C
- */
-void __attribute__((__interrupt__, auto_psv)) _SI2C1Interrupt(void) {
-    if (IEC1bits.SI2C1IE == 1 && IFS1bits.SI2C1IF == 1) {
-        MSSP_InterruptHandler();
-    }
-}
-
 /*
  * @brief Timer 1
  */
-void handle_timer1(){
+void handle_timer_light(){
     LED_Toggle();
 }
 
 /*
  * @brief Timer 2
  */
-void handle_timer2(){
+void handle_timer_regulation(){
+    position = ((signed long int)qei_overflow<<16) + POS1CNT;
     
+    if(i2c_set_point_new==NEW_WAYPOINT_I2C){
+        i2c_set_point_new = 0;
+        position_set_point = position_set_point_i2c;
+    }
+    
+    
+    // Velocity Ramp + Switch protection
+    if((motor_set_point<MOTOR_STOP && SWITCH_BOTTOM_GetValue()==true) 
+            || (motor_set_point>MOTOR_STOP && SWITCH_TOP_GetValue()==true)){
+        MOTOR_CMD = MOTOR_STOP;
+    }
+    else{
+        if(abs(MOTOR_CMD-motor_set_point)>motor_delta_speed){
+            MOTOR_CMD += (MOTOR_CMD<motor_set_point)?motor_delta_speed:-motor_delta_speed;
+        }
+        else{
+            MOTOR_CMD = motor_set_point;
+        }
+    }
 }
 
 /**
@@ -142,8 +183,8 @@ int main() {
     SYSTEM_Initialize();  // 40 MIPS
     
     // Timers
-    TMR1_SetInterruptHandler(handle_timer1);
-    TMR2_SetInterruptHandler(handle_timer2);
+    TMR3_SetInterruptHandler(handle_timer_light);
+    TMR2_SetInterruptHandler(handle_timer_regulation);
     
      // Initialize I/O
     I2C_Open();
@@ -164,9 +205,35 @@ int main() {
     // Resset the  POS1CNT = 0x00;
     POS1CNT = 0x0000;
 
+    // Debug
+    ENABLE_SetHigh();
+    P1DC1 = 3000;
+    
     while (1) {
         //asm CLRWDT;
-
+        
+        if (SWITCH_TOP_GetValue() || SWITCH_BOTTOM_GetValue())
+            LED_SetHigh();
+        
+        switch(state){
+            case PISTON_RESET:
+                
+                if(SWITCH_BOTTOM_GetValue()==true){
+                    MOTOR_CMD = MOTOR_STOP;
+                    state = PISTON_REGULATION;
+                    
+                    QEI_Reset_Count();
+                }
+                else{
+                    motor_set_point = MOTOR_DOWN;
+                }
+                    
+                break;
+            case PISTON_REGULATION:
+                break;
+            default:
+                break;
+        }
         //ENABLE = 1;
     }
 

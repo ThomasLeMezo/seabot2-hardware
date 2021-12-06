@@ -3,27 +3,28 @@
 
 #include "interrupt_manager.h"
 #include "i2c_slave.h"
-#include "tmr1.h"
+#include "tmr3.h"
 #include "tmr2.h"
+#include "pwm.h"
 
 #define CODE_VERSION 0x01
 
 extern volatile unsigned short is_init;
 
 // get/set ENABLE aliases
-#define ENABLE_TRIS                 TRISBbits.TRISB1
-#define ENABLE_LAT                  LATBbits.LATB1
-#define ENABLE_PORT                 PORTBbits.RB1
-#define ENABLE_WPU                  WPUBbits.WPUB1
+#define ENABLE_TRIS                 TRISAbits.TRISA1
+#define ENABLE_LAT                  LATAbits.LATA1
+#define ENABLE_PORT                 PORTAbits.RA1
+#define ENABLE_WPU                  WPUAbits.WPUA1
 #define ENABLE_ANS                  ANSELbits.ANS1
-#define ENABLE_SetHigh()            do { LATBbits.LATB1 = 1; } while(0)
-#define ENABLE_SetLow()             do { LATBbits.LATB1 = 0; } while(0)
-#define ENABLE_Toggle()             do { LATBbits.LATB1 = ~LATBbits.LATB1; } while(0)
-#define ENABLE_GetValue()           PORTAbits.RB1
-#define ENABLE_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
-#define ENABLE_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
-#define ENABLE_SetPullup()          do { WPUBbits.WPUB1 = 1; } while(0)
-#define ENABLE_ResetPullup()        do { WPUBbits.WPUB1 = 0; } while(0)
+#define ENABLE_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
+#define ENABLE_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
+#define ENABLE_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
+#define ENABLE_GetValue()           PORTAbits.RA1
+#define ENABLE_SetDigitalInput()    do { TRISAbits.TRISB1 = 1; } while(0)
+#define ENABLE_SetDigitalOutput()   do { TRISAbits.TRISB1 = 0; } while(0)
+#define ENABLE_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
+#define ENABLE_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
 #define ENABLE_SetAnalogMode()      do { ANSELbits.ANS1 = 1; } while(0)
 #define ENABLE_SetDigitalMode()     do { ANSELbits.ANS1 = 0; } while(0)
 
@@ -69,8 +70,7 @@ extern volatile unsigned short is_init;
 #define SWITCH_BOTTOM_SetPullup()          do { WPUBbits.WPUB6 = 1; } while(0)
 #define SWITCH_BOTTOM_ResetPullup()        do { WPUBbits.WPUB6 = 0; } while(0)
 
-// Motor
-#define MOTOR_CMD P1DC1
+
 
 // Watchdog
 extern unsigned short watchdog_restart; // in min
@@ -80,8 +80,6 @@ extern unsigned short watchdog_cpt_default;
 
 // Count
 extern signed short qei_overflow; // number of overflow for the encoder
-
-#define MOTOR_STOP 80
 
 /**
  * @brief System initialization
@@ -96,25 +94,22 @@ void CLOCK_Initialize();
 /**
  * @brief initialization of input/ouput
  */
-void init_io();
+void PIN_MANAGER_Initialize();
+
+/*
+ @brief initialization of qei
+ */
+void QEI_Initialize();
 
 /**
  * @brief read current
  */
 //void measure_power();
 
-/**
- * @brief init_timer0
- * Initialization of TIMER0
- * Prescaler 1:128; TMR0 Preload = 3036; Actual Interrupt Time : 1 s
+/*
+ @brief Reset the counter
  */
-//void init_timer0();
+inline void QEI_Reset_Count();
 
-/**
- * @brief init_timer3
- * Initialization of TIMER3
- * Prescaler 1:8; TMR1 Preload = 15536; Actual Interrupt Time : 100 ms
- */
-//void init_timer3();
 
 #endif

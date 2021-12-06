@@ -1,17 +1,17 @@
 /**
-  TMR1 Generated Driver API Header File 
+  TMR3 Generated Driver API Header File 
 
   @Company
     Microchip Technology Inc.
 
   @File Name
-    tmr1.h
+    tmr3.h
 
   @Summary
-    This is the generated header file for the TMR1 driver using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated header file for the TMR3 driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
-    This header file provides APIs for driver for TMR1. 
+    This header file provides APIs for driver for TMR3. 
     Generation Information : 
         Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.170.0
         Device            :  dsPIC33EV256GM106
@@ -42,8 +42,8 @@
     TERMS.
 */
 
-#ifndef _TMR1_H
-#define _TMR1_H
+#ifndef _TMR3_H
+#define _TMR3_H
 
 /**
   Section: Included Files
@@ -59,7 +59,7 @@
 
 #endif
 
-#define TMR1_INTERRUPT_TICKER_FACTOR    5
+#define TMR3_INTERRUPT_TICKER_FACTOR    5
 
 /**
   Section: Interface Routines
@@ -88,26 +88,26 @@
 
     period = 0x20;
 
-    TMR1_Initialize();
+    TMR3_Initialize();
 
-    TMR1_Period16BitSet(period);
+    TMR3_Period16BitSet(period);
 
-    if((value = TMR1_Period16BitGet())== period)
+    if((value = TMR3_Period16BitGet())== period)
     {
-        TMR1_Start();
+        TMR3_Start();
     }
 
     while(1)
     {
-        TMR1_Tasks();
-        if( (statusTimer1 = TMR1_GetElapsedThenClear()) == true)
+        TMR3_Tasks();
+        if( (statusTimer1 = TMR3_GetElapsedThenClear()) == true)
         {
-            TMR1_Stop();
+            TMR3_Stop();
         }
     }
     </code>
 */
-void TMR1_Initialize (void);
+void TMR3_Initialize (void);
 
 
 /**
@@ -124,10 +124,10 @@ void TMR1_Initialize (void);
     None
  
   @Example 
-    Refer to the example of TMR1_Initialize();
+    Refer to the example of TMR3_Initialize();
 */
 
-void TMR1_Period16BitSet( uint16_t value );
+void TMR3_Period16BitSet( uint16_t value );
 
 /**
 
@@ -144,10 +144,10 @@ void TMR1_Period16BitSet( uint16_t value );
     Timer 16-bit period value
  
   @Example 
-    Refer to the example of TMR1_Initialize();
+    Refer to the example of TMR3_Initialize();
 */
 
-uint16_t TMR1_Period16BitGet( void );
+uint16_t TMR3_Period16BitGet( void );
 
 /**
   @Summary
@@ -166,20 +166,20 @@ uint16_t TMR1_Period16BitGet( void );
     <code>
     uint16_t value=0xF0F0;
 
-    TMR1_Counter16BitSet(value));
+    TMR3_Counter16BitSet(value));
 
     while(1)
     {
-        TMR1_Tasks();
-        if( (value == TMR1_Counter16BitGet()))
+        TMR3_Tasks();
+        if( (value == TMR3_Counter16BitGet()))
         {
-            TMR1_Stop();
+            TMR3_Stop();
         }
     }
     </code>
 */
 
-void TMR1_Counter16BitSet ( uint16_t value );
+void TMR3_Counter16BitSet ( uint16_t value );
 
 /**
   @Summary
@@ -195,10 +195,10 @@ void TMR1_Counter16BitSet ( uint16_t value );
     16-bit current counter value
  
   @Example 
-    Refer to the example of TMR1_Counter16BitSet();
+    Refer to the example of TMR3_Counter16BitSet();
 */
 
-uint16_t TMR1_Counter16BitGet( void );
+uint16_t TMR3_Counter16BitGet( void );
 
 /**
   @Summary
@@ -215,11 +215,11 @@ uint16_t TMR1_Counter16BitGet( void );
  
   @Example 
     <code>
-        TMR1_SetInterruptHandler(&TMR1_CallBack);
+        TMR3_SetInterruptHandler(&TMR3_CallBack);
     </code>
 */
 
-void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
+void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
 
 /**
   @Summary
@@ -235,10 +235,10 @@ void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
     None
  
   @Example 
-    Refer to the example of TMR1_Initialize();
+    Refer to the example of TMR3_Initialize();
 */
 
-void TMR1_Start( void );
+void TMR3_Start( void );
 
 /**
   @Summary
@@ -254,10 +254,10 @@ void TMR1_Start( void );
     None
  
   @Example 
-    Refer to the example of TMR1_Initialize();
+    Refer to the example of TMR3_Initialize();
 */
 
-void TMR1_Stop( void );
+void TMR3_Stop( void );
 
 /**
   @Summary
@@ -275,10 +275,10 @@ void TMR1_Stop( void );
     False - Timer has not elapsed.
  
   @Example 
-    Refer to the example of TMR1_Initialize();
+    Refer to the example of TMR3_Initialize();
 */
 
-bool TMR1_GetElapsedThenClear(void);
+bool TMR3_GetElapsedThenClear(void);
 
 /**
   @Summary
@@ -294,10 +294,10 @@ bool TMR1_GetElapsedThenClear(void);
     Software counter value.
  
   @Example 
-    Refer to the example of TMR1_Initialize();
+    Refer to the example of TMR3_Initialize();
 */
 
-int TMR1_SoftwareCounterGet(void);
+int TMR3_SoftwareCounterGet(void);
 
 /**
   @Summary
@@ -313,10 +313,10 @@ int TMR1_SoftwareCounterGet(void);
     None
  
   @Example 
-    Refer to the example of TMR1_Initialize();
+    Refer to the example of TMR3_Initialize();
 */
 
-void TMR1_SoftwareCounterClear(void);
+void TMR3_SoftwareCounterClear(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -324,7 +324,7 @@ void TMR1_SoftwareCounterClear(void);
 
 #endif
 
-#endif //_TMR1_H
+#endif //_TMR3_H
     
 /**
  End of File

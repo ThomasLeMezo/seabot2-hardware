@@ -147,6 +147,7 @@ extern void (*I2C_SlaveAddrInterruptHandler)(void);
 extern void (*I2C_SlaveBusColInterruptHandler)(void);
 extern void (*I2C_SlaveWrColInterruptHandler)(void);
 
+void __attribute__((__interrupt__, auto_psv)) _SI2C1Interrupt(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

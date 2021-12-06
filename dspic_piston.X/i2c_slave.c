@@ -68,12 +68,10 @@ static inline bool I2C_SlaveIsOverFlow(void);
 
 void I2C_Initialize()
 {
-    I2C1CONbits.I2CEN = 1; // Enable I2C
     I2C1CONbits.A10M = 0; // 7-bit address
     I2C1CONbits.SMEN = 1; // SMBUS enable
     I2C1CONbits.DISSLW = 0; // Slew rate enable
     I2C1CONbits.STREN = 1; // Clock stretch enable
-
     I2C1CONbits.I2CEN = 0;
 }
 
@@ -227,8 +225,6 @@ static inline bool I2C_SlaveOpen()
         
         I2C1STAT = 0x00;
 
-        I2C1CONbits.I2CEN = 1;
-
         return true;
     }
     return false;
@@ -241,12 +237,12 @@ static inline void I2C_SlaveClose()
 
 static inline void I2C_SlaveSetSlaveAddr(uint8_t slaveAddr)
 {
-    I2C1ADD = (uint8_t) (slaveAddr);
+    I2C1ADD = slaveAddr;
 }
 
 static inline void I2C_SlaveSetSlaveMask(uint8_t maskAddr)
 {
-    I2C1MSK = (uint8_t) (maskAddr);
+    I2C1MSK = maskAddr;
 }
 
 static inline void I2C_SlaveEnableIrq()
@@ -380,4 +376,13 @@ static void I2C_Isr()
             break;
     }
     I2C_SlaveReleaseClock();
+}
+
+/**
+ * @brief I2C
+ */
+void __attribute__((__interrupt__, auto_psv)) _SI2C1Interrupt(void) {
+    if (IEC1bits.SI2C1IE == 1 && IFS1bits.SI2C1IF == 1) {
+        MSSP_InterruptHandler();
+    }
 }
