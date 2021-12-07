@@ -81,3 +81,4 @@ iod-09TH/iod-09TH/IOD-09~1.dat
 *.pdsbak
 
 *.generated_files/
+*.ipynb_checkpoints/
