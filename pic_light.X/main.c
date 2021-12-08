@@ -70,7 +70,7 @@ void i2c_handler_read()
 
 void i2c_handler_write()
 {
-    switch(i2c_register+i2c_nb_bytes-1)
+    switch(i2c_register+i2c_nb_bytes)
     {
         case 0x00:
             I2C_Write(led_enable);
@@ -93,6 +93,7 @@ void i2c_handler_write()
             I2C_Write(0x00);
           break;
     }
+    i2c_nb_bytes++;
 }
 
 void i2c_bus_col(){

@@ -77,13 +77,13 @@ void i2c_handler_read() {
                     LED_SetLow();
                 break;
             case 0x11:
-                P1DC1 = read_byte << 4;
+                P1DC1 = read_byte << 4; // [0, 250], mid at 125
                 break;
             default:
                 break;
         }
-        i2c_nb_bytes++;
     }
+    i2c_nb_bytes++;
 }
 
 void i2c_handler_write() {
@@ -98,8 +98,8 @@ void i2c_handler_write() {
             I2C_Write(qei_overflow);
             break;
         case 0x03:
-            I2C_Write((!SWITCH_TOP_GetValue())
-                       | (!SWITCH_BOTTOM_GetValue() << 1));
+            I2C_Write((SWITCH_TOP_GetValue())
+                       | (SWITCH_BOTTOM_GetValue() << 1));
         case 0x10:
             I2C_Write(QEI1CONbits.UPDN); // Direction status
             break;
@@ -114,6 +114,7 @@ void i2c_handler_write() {
             break;
     }
     watchdog_restart = watchdog_restart_default;
+    i2c_nb_bytes++;
 }
 
 /**
@@ -122,9 +123,8 @@ void i2c_handler_write() {
 void __attribute__((__interrupt__, auto_psv)) _INT0Interrupt() {
     if (IFS0bits.INT0IF) {
         IFS0bits.INT0IF = 0;
-        if ((!SWITCH_TOP_GetValue() && MOTOR_CMD > MOTOR_STOP)
-                || (!SWITCH_BOTTOM_GetValue() && MOTOR_CMD < MOTOR_STOP)) {
-            LED_SetHigh();
+        if ((SWITCH_TOP_GetValue() && MOTOR_CMD > MOTOR_STOP)
+                || (SWITCH_BOTTOM_GetValue() && MOTOR_CMD < MOTOR_STOP)) {
             MOTOR_CMD = MOTOR_STOP;
         }
     }
@@ -146,24 +146,25 @@ void __attribute__((__interrupt__, auto_psv)) _QEIInterrupt() {
  * @brief Timer 1
  */
 void handle_timer_light(){
-    LED_Toggle();
+    //LED_Toggle();
 }
 
 /*
  * @brief Timer 2
  */
 void handle_timer_regulation(){
-    position = ((signed long int)qei_overflow<<16) + POS1CNT;
+    //LED_Toggle();
+    
+    position = ((signed long int)(qei_overflow)<<16) + POS1CNT;
     
     if(i2c_set_point_new==NEW_WAYPOINT_I2C){
         i2c_set_point_new = 0;
         position_set_point = position_set_point_i2c;
     }
     
-    
     // Velocity Ramp + Switch protection
-    if((motor_set_point<MOTOR_STOP && SWITCH_BOTTOM_GetValue()==true) 
-            || (motor_set_point>MOTOR_STOP && SWITCH_TOP_GetValue()==true)){
+    if((motor_set_point<MOTOR_STOP && SWITCH_BOTTOM_GetValue()) 
+            || (motor_set_point>MOTOR_STOP && SWITCH_TOP_GetValue())){
         MOTOR_CMD = MOTOR_STOP;
     }
     else{
@@ -180,48 +181,45 @@ void handle_timer_regulation(){
  * @brief main
  */
 int main() {
+    ENABLE_SetHigh();
     SYSTEM_Initialize();  // 40 MIPS
     
     // Timers
-    TMR3_SetInterruptHandler(handle_timer_light);
-    TMR2_SetInterruptHandler(handle_timer_regulation);
+    TMR3_SetInterruptHandler(handle_timer_light); // 1 s
+    TMR2_SetInterruptHandler(handle_timer_regulation); // 0.02 s
     
      // Initialize I/O
     I2C_Open();
     I2C_SlaveSetReadIntHandler(i2c_handler_read);
     I2C_SlaveSetWriteIntHandler(i2c_handler_write);
     I2C_SlaveSetAddrIntHandler(i2c_handler_address);
-    
-    /*  init_timer0(); // Initialize TIMER0 every 1 seconds
-      init_timer3(); // Initialize TIMER3 every 100ms*/
 
     //ADC1_Init();
 
     ENABLE_SetLow();
-    LED_SetHigh();
+    LED_SetLow();
 
     is_init = 1;
 
     // Resset the  POS1CNT = 0x00;
     POS1CNT = 0x0000;
-
-    // Debug
-    ENABLE_SetHigh();
-    P1DC1 = 3000;
     
     while (1) {
         //asm CLRWDT;
         
         if (SWITCH_TOP_GetValue() || SWITCH_BOTTOM_GetValue())
             LED_SetHigh();
+        else
+            LED_SetLow();
         
         switch(state){
             case PISTON_RESET:
+                ENABLE_SetHigh();
                 
                 if(SWITCH_BOTTOM_GetValue()==true){
                     MOTOR_CMD = MOTOR_STOP;
+                    motor_set_point = MOTOR_STOP;
                     state = PISTON_REGULATION;
-                    
                     QEI_Reset_Count();
                 }
                 else{

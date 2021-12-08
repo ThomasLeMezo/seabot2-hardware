@@ -48,8 +48,8 @@
 #define MOTOR_CMD_MIN 110
 #define MOTOR_CMD_MAX 190
 #define PWM_PERIOD 2000
-volatile unsigned short countdown_thruster_cmd[2];
-volatile unsigned short countdown_thruster[2];
+volatile unsigned char countdown_thruster_cmd[2];
+volatile unsigned char countdown_thruster[2];
 volatile unsigned short countdown_pwm_period = PWM_PERIOD;
 
 // Watchdog
@@ -79,11 +79,11 @@ void i2c_handler_read()
         {
             case 0x00:
                 if(read_byte < MOTOR_CMD_MIN || read_byte > MOTOR_CMD_MAX)
-                countdown_thruster_cmd[0] = read_byte;
+                    countdown_thruster_cmd[0] = read_byte;
                 break;
             case 0x01:  
                 if(read_byte < MOTOR_CMD_MIN || read_byte > MOTOR_CMD_MAX)
-                countdown_thruster_cmd[1] = read_byte;
+                    countdown_thruster_cmd[1] = read_byte;
                 break;
             case 0x02:
                 watchdog_restart_default = read_byte;
@@ -98,7 +98,7 @@ void i2c_handler_read()
 
 void i2c_handler_write()
 {
-    switch(i2c_register+i2c_nb_bytes-1)
+    switch(i2c_register+i2c_nb_bytes)
     {
         case 0x00:
             I2C_Write(countdown_thruster_cmd[0]);
@@ -116,6 +116,7 @@ void i2c_handler_write()
             I2C_Write(0x00);
           break;
     }
+    i2c_nb_bytes++;
 }
 
 void i2c_bus_col(){

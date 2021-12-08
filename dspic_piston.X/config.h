@@ -50,7 +50,7 @@ extern volatile unsigned short is_init;
 #define SWITCH_TOP_SetHigh()            do { LATBbits.LATB5 = 1; } while(0)
 #define SWITCH_TOP_SetLow()             do { LATBbits.LATB5 = 0; } while(0)
 #define SWITCH_TOP_Toggle()             do { LATBbits.LATB5 = ~LATBbits.LATB5; } while(0)
-#define SWITCH_TOP_GetValue()           PORTBbits.RB5
+#define SWITCH_TOP_GetValue()           !PORTBbits.RB5
 #define SWITCH_TOP_SetDigitalInput()    do { TRISBbits.TRISB5 = 1; } while(0)
 #define SWITCH_TOP_SetDigitalOutput()   do { TRISBbits.TRISB5 = 0; } while(0)
 #define SWITCH_TOP_SetPullup()          do { WPUBbits.WPUB5 = 1; } while(0)
@@ -64,7 +64,7 @@ extern volatile unsigned short is_init;
 #define SWITCH_BOTTOM_SetHigh()            do { LATBbits.LATB6 = 1; } while(0)
 #define SWITCH_BOTTOM_SetLow()             do { LATBbits.LATB6 = 0; } while(0)
 #define SWITCH_BOTTOM_Toggle()             do { LATBbits.LATB6 = ~LATBbits.LATB6; } while(0)
-#define SWITCH_BOTTOM_GetValue()           PORTBbits.RB6
+#define SWITCH_BOTTOM_GetValue()           !PORTBbits.RB6
 #define SWITCH_BOTTOM_SetDigitalInput()    do { TRISBbits.TRISB6 = 1; } while(0)
 #define SWITCH_BOTTOM_SetDigitalOutput()   do { TRISBbits.TRISB6 = 0; } while(0)
 #define SWITCH_BOTTOM_SetPullup()          do { WPUBbits.WPUB6 = 1; } while(0)
