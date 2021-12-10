@@ -10,6 +10,11 @@
 // Motor
 #define MOTOR_CMD P1DC1
 
+/*
+ * [0, 4000] => [-16V, 16V] (16,8V to 14,4V)
+ * Limit to +- 1500 around 2000 (1500, 3500)
+ */
+
 #define MOTOR_STOP 2000
 #define MOTOR_DOWN 0
 #define MOTOR_UP 4000

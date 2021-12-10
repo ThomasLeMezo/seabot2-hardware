@@ -39,7 +39,7 @@ volatile signed long int position_set_point_i2c = 0;
 #define NEW_WAYPOINT_I2C 0b111
 
 volatile uint16_t motor_set_point = MOTOR_STOP;
-volatile uint16_t motor_delta_speed = 100;
+volatile uint16_t motor_delta_speed = 100; // 
 
 void i2c_handler_address() {
     I2C_Read();
