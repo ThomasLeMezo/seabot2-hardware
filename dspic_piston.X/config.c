@@ -26,7 +26,7 @@
 #pragma config WDTPOST = PS32768        // Watchdog Timer Postscaler (1:32,768)
 #pragma config WDTPRE = PR128           // WDT Prescaler (1:128)
 #pragma config WINDIS = OFF             // Watchdog Timer Window (Watchdog Timer in Non-Window mode)
-#pragma config FWDTEN = ON              // Watchdog Timer Enable (Watchdog timer always enabled)
+#pragma config FWDTEN = OFF              // Watchdog Timer Enable (Watchdog timer always enabled)
 
 // FPOR
 #pragma config FPWRT = PWR128           // POR Timer Value (128ms)
@@ -89,10 +89,12 @@ void PIN_MANAGER_Initialize(){
     TRISBbits.TRISB9 = 1; // RB6 input
     
     // INPUT-OUTPUT
-    TRISAbits.TRISA1 = 0; // ENABLE set to output
-    TRISBbits.TRISB13 = 0; // LED set to output 
+    ENABLE_SetDigitalOutput();
+    LED_SetDigitalOutput();
 
     // Interrupt for switch
+    SWITCH_TOP_SetDigitalInput();
+    SWITCH_BOTTOM_SetDigitalInput();
     INTCON2bits.INT0EP = 0; // interrupt on positive edge
     IEC0bits.INT0IE = 1; // enable interrupt
     IFS0bits.INT0IF = 0; // set flag to 0
@@ -107,7 +109,7 @@ void QEI_Initialize(){
   QEI1CONbits.POSRES = 0; // do not reset position with index
   QEI1CONbits.SWPAB = 1; // Swap Phase A and B
 
-  DFLT1CONbits.CEID = 1 ; // count error disable bit (0=enable)
+  DFLT1CONbits.CEID = 0 ; // count error disable bit
   DFLT1CONbits.QEOUT = 1 ; // Digital filter outputs are enabled
 
   MAXCNT = 0xFFFF; // max value (interrupt if overflow)

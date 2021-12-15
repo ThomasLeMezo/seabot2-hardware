@@ -39,7 +39,9 @@ volatile signed long int position_set_point_i2c = 0;
 #define NEW_WAYPOINT_I2C 0b111
 
 volatile uint16_t motor_set_point = MOTOR_STOP;
-volatile uint16_t motor_delta_speed = 100; // 
+volatile uint16_t motor_delta_speed = 50; // 0.4 V/0.02us 
+
+unsigned short motor_cmd_i2c = MOTOR_STOP;
 
 void i2c_handler_address() {
     I2C_Read();
@@ -77,7 +79,10 @@ void i2c_handler_read() {
                     LED_SetLow();
                 break;
             case 0x11:
-                P1DC1 = read_byte << 4; // [0, 250], mid at 125
+                motor_cmd_i2c = (unsigned short)read_byte << 4;
+                if(motor_cmd_i2c<=MOTOR_UP && motor_cmd_i2c>=MOTOR_DOWN){
+                    motor_set_point = motor_cmd_i2c;
+                }
                 break;
             default:
                 break;
@@ -100,8 +105,18 @@ void i2c_handler_write() {
         case 0x03:
             I2C_Write((SWITCH_TOP_GetValue())
                        | (SWITCH_BOTTOM_GetValue() << 1));
+            break;
+        case 0x04:
+            I2C_Write(state);
+            break;
         case 0x10:
             I2C_Write(QEI1CONbits.UPDN); // Direction status
+            break;
+        case 0x11:
+            I2C_Write(P1DC1);
+            break;
+        case 0x12:
+            I2C_Write(P1DC1>>8);
             break;
         case 0xC0:
             I2C_Write(CODE_VERSION);
@@ -152,9 +167,7 @@ void handle_timer_light(){
 /*
  * @brief Timer 2
  */
-void handle_timer_regulation(){
-    //LED_Toggle();
-    
+void handle_timer_regulation(){    
     position = ((signed long int)(qei_overflow)<<16) + POS1CNT;
     
     if(i2c_set_point_new==NEW_WAYPOINT_I2C){
@@ -181,7 +194,8 @@ void handle_timer_regulation(){
  * @brief main
  */
 int main() {
-    ENABLE_SetHigh();
+    RCONbits.SWDTEN = 0; // Disable the watchdog
+    
     SYSTEM_Initialize();  // 40 MIPS
     
     // Timers
@@ -205,7 +219,7 @@ int main() {
     POS1CNT = 0x0000;
     
     while (1) {
-        //asm CLRWDT;
+        ClrWdt(); // Clear wdt
         
         if (SWITCH_TOP_GetValue() || SWITCH_BOTTOM_GetValue())
             LED_SetHigh();
@@ -214,20 +228,20 @@ int main() {
         
         switch(state){
             case PISTON_RESET:
-                ENABLE_SetHigh();
-                
-                if(SWITCH_BOTTOM_GetValue()==true){
+                if(SWITCH_BOTTOM_GetValue()){
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
                     state = PISTON_REGULATION;
                     QEI_Reset_Count();
                 }
                 else{
+                    ENABLE_SetHigh();
                     motor_set_point = MOTOR_DOWN;
                 }
                     
                 break;
             case PISTON_REGULATION:
+                ENABLE_SetHigh();
                 break;
             default:
                 break;

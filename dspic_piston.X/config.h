@@ -21,26 +21,33 @@ extern volatile unsigned short is_init;
 #define ENABLE_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
 #define ENABLE_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
 #define ENABLE_GetValue()           PORTAbits.RA1
-#define ENABLE_SetDigitalInput()    do { TRISAbits.TRISB1 = 1; } while(0)
-#define ENABLE_SetDigitalOutput()   do { TRISAbits.TRISB1 = 0; } while(0)
+#define ENABLE_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
+#define ENABLE_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
 #define ENABLE_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
 #define ENABLE_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
 #define ENABLE_SetAnalogMode()      do { ANSELbits.ANS1 = 1; } while(0)
 #define ENABLE_SetDigitalMode()     do { ANSELbits.ANS1 = 0; } while(0)
 
-// get/set LED aliases
-#define LED_TRIS                 TRISBbits.TRISB13
-#define LED_LAT                  LATBbits.LATB13
-#define LED_PORT                 PORTBbits.RB13
-#define LED_WPU                  WPUBbits.WPUB13
-#define LED_SetHigh()            do { LATBbits.LATB13 = 1; } while(0)
-#define LED_SetLow()             do { LATBbits.LATB13 = 0; } while(0)
-#define LED_Toggle()             do { LATBbits.LATB13 = ~LATBbits.LATB13; } while(0)
-#define LED_GetValue()           PORTBbits.RB13
-#define LED_SetDigitalInput()    do { TRISBbits.TRISB13 = 1; } while(0)
-#define LED_SetDigitalOutput()   do { TRISBbits.TRISB13 = 0; } while(0)
-#define LED_SetPullup()          do { WPUBbits.WPUB13 = 1; } while(0)
-#define LED_ResetPullup()        do { WPUBbits.WPUB13 = 0; } while(0)
+//// get/set LED aliases
+//#define LED_TRIS                 TRISBbits.TRISB13
+//#define LED_LAT                  LATBbits.LATB13
+//#define LED_PORT                 PORTBbits.RB13
+//#define LED_WPU                  WPUBbits.WPUB13
+//#define LED_SetHigh()            do { LATBbits.LATB13 = 1; } while(0)
+//#define LED_SetLow()             do { LATBbits.LATB13 = 0; } while(0)
+//#define LED_Toggle()             do { LATBbits.LATB13 = ~LATBbits.LATB13; } while(0)
+//#define LED_GetValue()           PORTBbits.RB13
+//#define LED_SetDigitalInput()    do { TRISBbits.TRISB13 = 1; } while(0)
+//#define LED_SetDigitalOutput()   do { TRISBbits.TRISB13 = 0; } while(0)
+//#define LED_SetPullup()          do { WPUBbits.WPUB13 = 1; } while(0)
+//#define LED_ResetPullup()        do { WPUBbits.WPUB13 = 0; } while(0)
+
+#define LED_SetHigh()          (_LATB13 = 1)
+#define LED_SetLow()           (_LATB13 = 0)
+#define LED_Toggle()           (_LATB13 ^= 1)
+#define LED_GetValue()         _RB13
+#define LED_SetDigitalInput()  (_TRISB13 = 1)
+#define LED_SetDigitalOutput() (_TRISB13 = 0)
 
 // get/set LED aliases
 #define SWITCH_TOP_TRIS                 TRISBbits.TRISB5

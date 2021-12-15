@@ -16,8 +16,8 @@
  */
 
 #define MOTOR_STOP 2000
-#define MOTOR_DOWN 0
-#define MOTOR_UP 4000
+#define MOTOR_DOWN 500
+#define MOTOR_UP 3500
 
 
 
