@@ -21,6 +21,14 @@ RA0 : Motor Current Sensor
 #include <stdlib.h>
 #include "config.h"
 
+
+#include <dsp.h>
+#include <libpic30.h>
+#include <libq.h>
+#include <limits.h>
+#include <float.h>
+#include <ctype.h>
+
 // I2C
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
@@ -39,7 +47,7 @@ volatile signed long int position_set_point_i2c = 0;
 #define NEW_WAYPOINT_I2C 0b111
 
 volatile uint16_t motor_set_point = MOTOR_STOP;
-volatile uint16_t motor_delta_speed = 50; // 0.4 V/0.02us 
+volatile uint16_t motor_delta_speed = 50; // 0.4 V/0.02s 
 
 unsigned short motor_cmd_i2c = MOTOR_STOP;
 
@@ -103,8 +111,8 @@ void i2c_handler_write() {
             I2C_Write(qei_overflow);
             break;
         case 0x03:
-            I2C_Write((SWITCH_TOP_GetValue())
-                       | (SWITCH_BOTTOM_GetValue() << 1));
+            I2C_Write((!SWITCH_TOP_GetValue())
+                       | (!SWITCH_BOTTOM_GetValue() << 1));
             break;
         case 0x04:
             I2C_Write(state);
@@ -138,8 +146,8 @@ void i2c_handler_write() {
 void __attribute__((__interrupt__, auto_psv)) _INT0Interrupt() {
     if (IFS0bits.INT0IF) {
         IFS0bits.INT0IF = 0;
-        if ((SWITCH_TOP_GetValue() && MOTOR_CMD > MOTOR_STOP)
-                || (SWITCH_BOTTOM_GetValue() && MOTOR_CMD < MOTOR_STOP)) {
+        if ((!SWITCH_TOP_GetValue() && MOTOR_CMD > MOTOR_STOP)
+                || (!SWITCH_BOTTOM_GetValue() && MOTOR_CMD < MOTOR_STOP)) {
             MOTOR_CMD = MOTOR_STOP;
         }
     }
@@ -175,9 +183,12 @@ void handle_timer_regulation(){
         position_set_point = position_set_point_i2c;
     }
     
+    ADC1_ConversionResultGet(CURRENT_MOTOR); //=> 0.5*Vcc for 0A
+    ADC1_ConversionResultGet(BATT_VOLTAGE);
+    
     // Velocity Ramp + Switch protection
-    if((motor_set_point<MOTOR_STOP && SWITCH_BOTTOM_GetValue()) 
-            || (motor_set_point>MOTOR_STOP && SWITCH_TOP_GetValue())){
+    if((motor_set_point<MOTOR_STOP && !SWITCH_BOTTOM_GetValue()) 
+            || (motor_set_point>MOTOR_STOP && !SWITCH_TOP_GetValue())){
         MOTOR_CMD = MOTOR_STOP;
     }
     else{
@@ -221,14 +232,14 @@ int main() {
     while (1) {
         ClrWdt(); // Clear wdt
         
-        if (SWITCH_TOP_GetValue() || SWITCH_BOTTOM_GetValue())
+        if (!SWITCH_TOP_GetValue() || !SWITCH_BOTTOM_GetValue())
             LED_SetHigh();
         else
             LED_SetLow();
         
         switch(state){
             case PISTON_RESET:
-                if(SWITCH_BOTTOM_GetValue()){
+                if(!SWITCH_BOTTOM_GetValue()){
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
                     state = PISTON_REGULATION;

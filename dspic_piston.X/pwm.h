@@ -15,6 +15,9 @@
  * Limit to +- 1500 around 2000 (1500, 3500)
  */
 
+#define MOTOR_PWM_MAX = 4000
+#define MOTOR_PWM_MIN = 0
+
 #define MOTOR_STOP 2000
 #define MOTOR_DOWN 500
 #define MOTOR_UP 3500

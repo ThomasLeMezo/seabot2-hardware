@@ -58,10 +58,10 @@ void INTERRUPT_Initialize (void)
         IPC0bits.INT0IP = 1;
     //    MICI: I2C1 Master Events
     //    Priority: 1
-        IPC4bits.MI2C1IP = 1;
+        IPC4bits.MI2C1IP = 2;
     //    SICI: I2C1 Slave Events
     //    Priority: 1
-        IPC4bits.SI2C1IP = 1;
+        IPC4bits.SI2C1IP = 2;
     //    TI: Timer 2
     //    Priority: 1
         IPC1bits.T2IP = 1;

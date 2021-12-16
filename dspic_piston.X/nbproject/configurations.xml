@@ -10,6 +10,7 @@
       <itemPath>tmr2.h</itemPath>
       <itemPath>tmr3.h</itemPath>
       <itemPath>pwm.h</itemPath>
+      <itemPath>adc1.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -25,6 +26,7 @@
       <itemPath>tmr2.c</itemPath>
       <itemPath>tmr3.c</itemPath>
       <itemPath>pwm.c</itemPath>
+      <itemPath>adc1.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

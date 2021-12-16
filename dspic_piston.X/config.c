@@ -90,14 +90,22 @@ void PIN_MANAGER_Initialize(){
     
     // INPUT-OUTPUT
     ENABLE_SetDigitalOutput();
+    SWITCH_BOTTOM_SetDigitalInput();
+    SWITCH_TOP_SetDigitalInput();
+    SWITCH_INT_SetDigitalInput();
     LED_SetDigitalOutput();
 
     // Interrupt for switch
-    SWITCH_TOP_SetDigitalInput();
-    SWITCH_BOTTOM_SetDigitalInput();
     INTCON2bits.INT0EP = 0; // interrupt on positive edge
     IEC0bits.INT0IE = 1; // enable interrupt
     IFS0bits.INT0IF = 0; // set flag to 0
+    
+    // Analog
+    TRISAbits.TRISA0 = 1;
+    TRISBbits.TRISB3 = 1;
+    AD1PCFGLbits.PCFG0 = 0;
+    AD1PCFGLbits.PCFG5 = 0;
+    
 }
 
 void QEI_Initialize(){
@@ -122,12 +130,6 @@ void QEI_Initialize(){
   _QEIIE = 1; // Enable interrupt from QEI
 }
 
-void measure_power(){
-/*  power_current[0] = ADC_Get_Sample(11);
-  power_current[1] = ADC_Get_Sample(8);
-  power_current[2] = ADC_Get_Sample(9);*/
-}
-
 void SYSTEM_Initialize(){
     CLOCK_Initialize();
     INTERRUPT_Initialize();
@@ -137,6 +139,7 @@ void SYSTEM_Initialize(){
     TMR3_Initialize();
     TMR2_Initialize();
     I2C_Initialize();
+    ADC1_Initialize();
 }
 
 void QEI_Reset_Count(){
