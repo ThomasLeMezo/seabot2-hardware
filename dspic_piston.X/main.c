@@ -183,8 +183,11 @@ void handle_timer_regulation(){
         position_set_point = position_set_point_i2c;
     }
     
-    ADC1_ConversionResultGet(CURRENT_MOTOR); //=> 0.5*Vcc for 0A
-    ADC1_ConversionResultGet(BATT_VOLTAGE);
+    ADC1_ConversionResultGet(CURRENT_MOTOR); // => 0.5*Vcc for 0A, 264mV/A, 12bit
+    
+    // => V_batt = (adc_result*3.3/4096)/0.18 = adc_result * 0.00447591
+    // ex : 3574 => 15.99V
+    ADC1_ConversionResultGet(BATT_VOLTAGE); 
     
     // Velocity Ramp + Switch protection
     if((motor_set_point<MOTOR_STOP && !SWITCH_BOTTOM_GetValue()) 

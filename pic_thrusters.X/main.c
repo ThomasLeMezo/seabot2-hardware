@@ -44,9 +44,9 @@
 #include "mcc_generated_files/mcc.h"
 
 // Thrusters
-#define MOTOR_CMD_STOP 150
-#define MOTOR_CMD_MIN 110
-#define MOTOR_CMD_MAX 190
+#define MOTOR_CMD_STOP 151
+#define MOTOR_CMD_MIN 111
+#define MOTOR_CMD_MAX 191
 #define PWM_PERIOD 2000
 volatile unsigned char countdown_thruster_cmd[2];
 volatile unsigned char countdown_thruster[2];
@@ -87,6 +87,15 @@ void i2c_handler_read()
                 break;
             case 0x02:
                 watchdog_restart_default = read_byte;
+                break;
+            case 0x10:
+                if(read_byte==0){
+                    TMR1_StopTimer();
+                    ESC1_SetLow();
+                    ESC2_SetLow();
+                }
+                else
+                    TMR1_StartTimer();
                 break;
         default:
           break;
