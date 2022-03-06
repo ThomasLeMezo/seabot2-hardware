@@ -80,11 +80,11 @@ void i2c_handler_read()
         switch(i2c_register+i2c_nb_bytes-1)
         {
             case 0x00:
-                if(read_byte < MOTOR_CMD_MIN || read_byte > MOTOR_CMD_MAX)
+                if(read_byte > MOTOR_CMD_MIN && read_byte < MOTOR_CMD_MAX)
                     countdown_thruster_cmd[0] = read_byte;
                 break;
             case 0x01:  
-                if(read_byte < MOTOR_CMD_MIN || read_byte > MOTOR_CMD_MAX)
+                if(read_byte > MOTOR_CMD_MIN && read_byte < MOTOR_CMD_MAX)
                     countdown_thruster_cmd[1] = read_byte;
                 break;
             case 0x02:
@@ -117,6 +117,12 @@ void i2c_handler_write()
             break;
         case 0x03:
             I2C_Write(watchdog_restart_default);
+            break;
+        case 0x10:
+            I2C_Write(unable_motor[0]);
+            break;
+        case 0x11:
+            I2C_Write(unable_motor[1]);
             break;
         case 0xC0:
             I2C_Write(CODE_VERSION);
