@@ -52,6 +52,8 @@ volatile unsigned char countdown_thruster_cmd[2];
 volatile unsigned char countdown_thruster[2];
 volatile unsigned short countdown_pwm_period = PWM_PERIOD;
 
+volatile unsigned char unable_motor[2]; 
+
 // Watchdog
 //#define EEPROM_WATCHDOG_RESTART_DEFAULT 0x00
 volatile unsigned char watchdog_restart_default = 3;
@@ -88,14 +90,12 @@ void i2c_handler_read()
             case 0x02:
                 watchdog_restart_default = read_byte;
                 break;
+                
             case 0x10:
-                if(read_byte==0){
-                    TMR1_StopTimer();
-                    ESC1_SetLow();
-                    ESC2_SetLow();
-                }
-                else
-                    TMR1_StartTimer();
+                unable_motor[0] = (read_byte==1);
+                break;
+            case 0x11:
+                unable_motor[1] = (read_byte==1);
                 break;
         default:
           break;
@@ -151,8 +151,10 @@ void timer_watchdog()
 void timer_pwm()
 {
     if(countdown_pwm_period==0){
-        ESC1_SetHigh();
-        ESC2_SetHigh();
+        if(unable_motor[0]==1)
+            ESC1_SetHigh();
+        if(unable_motor[1]==1)
+            ESC2_SetHigh();
         countdown_pwm_period = PWM_PERIOD;
 
         countdown_thruster[0] = countdown_thruster_cmd[0];
@@ -183,6 +185,9 @@ void main(void)
     
     countdown_thruster_cmd[0] = MOTOR_CMD_STOP;
     countdown_thruster_cmd[1] = MOTOR_CMD_STOP;
+    
+    unable_motor[0] = 1;
+    unable_motor[1] = 1;
     
     I2C_Open();
     I2C_SlaveSetReadIntHandler(i2c_handler_read);

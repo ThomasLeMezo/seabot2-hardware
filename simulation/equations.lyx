@@ -169,18 +169,6 @@ model of
 \end_inset
 
 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-is it correct to model the torque like that? Should we talk into acount
- that starting at zero velocity, the torque increase unitl reaching Tfstatic
- while following the motor torque?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Itemize
@@ -191,13 +179,30 @@ zT_{z\text{coeff}} & \text{otherwise}
 \end_inset
 
 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Same remark than previous one
 \end_layout
 
+\begin_layout Standard
+Find 
+\begin_inset Formula $dt$
+\end_inset
+
+ such that 
+\begin_inset Formula $\dot{\theta}=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $0=\dot{\theta}+\left(\frac{K_{t}}{J}i-\frac{T_{z}\left(\dot{\theta},i\right)}{J}-\frac{T_{d}\left(\dot{\theta},i\right)}{J}\right)\cdot dt$
+\end_inset
+
+ 
+\begin_inset Formula $\implies$
+\end_inset
+
+
+\begin_inset Formula $dt=-\frac{\dot{\theta}}{\left(\frac{K_{t}}{J}i-\frac{T_{z}\left(\dot{\theta},i\right)}{J}-\frac{T_{d}\left(\dot{\theta},i\right)}{J}\right)}$
 \end_inset
 
 
@@ -545,7 +550,7 @@ T & =\tanh\left(e\right)\\
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $\ddot{y}=\dddot{\theta}+\beta\alpha\left(\ddot{\theta}\left(1-\tanh\left(e\right)^{2}\right)+\dot{\theta}\left(-2\dot{e}\left(\tanh\left(e\right)-\tanh\left(e\right)^{2}\right)\right)\right)$
+\begin_inset Formula $\ddot{y}=\dddot{\theta}+\gamma\left(\ddot{\theta}\left(1-T^{2}\right)+-2\dot{e}\dot{\theta}\left(\tanh\left(e\right)-\tanh\left(e\right)^{2}\right)\right)$
 \end_inset
 
 
@@ -585,7 +590,7 @@ We chose
 \begin_layout Standard
 \begin_inset Formula 
 \[
-V=K_{e}\dot{\theta}+Ri-\frac{JL}{K_{t}}\left(\gamma\left(\ddot{\theta}\left(1-T^{2}\right)+\dot{\theta}\left(-2\dot{e}\left(T-T^{2}\right)\right)\right)-2s\dot{y}+s^{2}y\right)
+V=K_{e}\dot{\theta}+Ri-\frac{JL}{K_{t}}\left(\gamma\left(\ddot{\theta}\left(1-T^{2}\right)-2\dot{e}\dot{\theta}\left(T-T^{2}\right)\right)-2s\dot{y}+s^{2}y\right)
 \]
 
 \end_inset
