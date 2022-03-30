@@ -48,7 +48,7 @@
 
 // CONFIG1H
 #pragma config FOSC = HS    // Oscillator Selection bits->HS oscillator
-#pragma config PLLEN = OFF    // 4 X PLL Enable bit->PLL is under software control
+#pragma config PLLEN = ON    // 4 X PLL Enable bit->Oscillator multiplied by 4
 #pragma config PCLKEN = ON    // Primary Clock Enable bit->Primary clock enabled
 #pragma config FCMEN = OFF    // Fail-Safe Clock Monitor Enable->Fail-Safe Clock Monitor disabled
 #pragma config IESO = OFF    // Internal/External Oscillator Switchover bit->Oscillator Switchover mode disabled
