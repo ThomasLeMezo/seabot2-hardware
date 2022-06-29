@@ -25,6 +25,8 @@
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
+const char device_name[16] = "PIC_ALIM";
+
 // State machine
 
 enum power_state {
@@ -168,6 +170,11 @@ void i2c_handler_write() {
         case 0xC0:
             I2C_Write(CODE_VERSION);
             break;
+            
+        case 0xF0 ... 0xFF:
+            I2C_Write(device_name[i2c_register + i2c_nb_bytes - 0xF0]);
+            break;
+        
         default:
             I2C_Write(0x00);
             break;

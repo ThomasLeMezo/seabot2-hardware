@@ -30,6 +30,8 @@ volatile unsigned char led_pattern[NB_PATTERN] = {1, 20, 0, 0, 0, 0};
 volatile unsigned char led_pattern_index = NB_PATTERN-1;
 volatile unsigned char led_count_down = 0;
 
+const char device_name[16] = "PIC_LIGHT";
+
 // i2cSlaveState
 
 void i2c_handler_address()
@@ -88,6 +90,9 @@ void i2c_handler_write()
             break;
         case 0xC0:
             I2C_Write(CODE_VERSION);
+            break;
+        case 0xF0 ... 0xFF:
+            I2C_Write(device_name[i2c_register + i2c_nb_bytes - 0xF0]);
             break;
         default:
             I2C_Write(0x00);

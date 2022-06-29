@@ -21,6 +21,8 @@
 #define MOTOR_STOP 2000
 #define MOTOR_DOWN 500
 #define MOTOR_UP 3500
+#define MOTOR_UP_RESET MOTOR_STOP + 100
+#define MOTOR_DEAD_ZONE 100
 
 
 

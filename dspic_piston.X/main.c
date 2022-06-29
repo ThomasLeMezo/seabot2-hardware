@@ -17,11 +17,14 @@ RA0 : Motor Current Sensor
 
  */
 
+#define min(a, b) (a) < (b) ? (a) : (b) 
+#define max(a, b) (a) > (b) ? (a) : (b) 
+
 #include <xc.h>
 #include <stdlib.h>
 #include "config.h"
 
-
+#define FCY 16000000UL
 #include <dsp.h>
 #include <libpic30.h>
 #include <libq.h>
@@ -29,27 +32,39 @@ RA0 : Motor Current Sensor
 #include <float.h>
 #include <ctype.h>
 
+#include <math.h>
+
 // I2C
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
+const char device_name[16] = "DSPIC_PISTON";
+
 // State machine
 enum state_piston {
-    PISTON_RESET, PISTON_REGULATION
+    PISTON_SEARCH_SWITCH_BOTTOM, PISTON_RESET_SWITCH_BOTTOM, PISTON_REGULATION
 };
-volatile unsigned char state = PISTON_RESET;
+volatile unsigned char state = PISTON_SEARCH_SWITCH_BOTTOM;
 
 // Set point & position
 volatile unsigned char i2c_set_point_new = 0;
 volatile signed long int position = 0;
 volatile signed long int position_set_point = 0;
-volatile signed long int position_set_point_i2c = 0;
-#define NEW_WAYPOINT_I2C 0b111
+volatile signed long int position_error = 0;
+volatile unsigned char position_set_point_i2c[4];
+#define NEW_WAYPOINT_I2C 0b1111
 
 volatile uint16_t motor_set_point = MOTOR_STOP;
-volatile uint16_t motor_delta_speed = 50; // 0.4 V/0.02s 
+volatile uint16_t motor_delta_speed = 30; // 0.4 V/0.02s 
+
+volatile uint16_t motor_current = 0;
+volatile uint16_t motor_tension = 0;
 
 unsigned short motor_cmd_i2c = MOTOR_STOP;
+
+// Regulation
+float motor_regulation_K = 0.05;
+unsigned short motor_regulation_dead_zone = 100;
 
 void i2c_handler_address() {
     I2C_Read();
@@ -62,31 +77,23 @@ void i2c_handler_read() {
         i2c_register = read_byte;
     else {
         switch (i2c_register + i2c_nb_bytes - 1) {
-            case 0x00:
-                i2c_set_point_new=0b1;
-                position_set_point_i2c = read_byte;
+            case 0x00 ... 0x03:
+                i2c_set_point_new|=0b1<<(i2c_register + i2c_nb_bytes - 1);
+                position_set_point_i2c[i2c_register + i2c_nb_bytes - 1] = read_byte;
                 break;
-            case 0x01:
-                i2c_set_point_new|=0b10;
-                position_set_point_i2c += (read_byte<<8);
-                break;
-            case 0x02:
-                i2c_set_point_new|=0b100;
-                position_set_point_i2c += (((signed long int)read_byte)<<16);
-                break;
-            case 0x03:
+            case 0x10:
                 if (read_byte)
                     ENABLE_SetHigh();
                 else
                     ENABLE_SetLow();
                 break;
-            case 0x10:
+            case 0x20:
                 if (read_byte)
                     LED_SetHigh();
                 else
                     LED_SetLow();
                 break;
-            case 0x11:
+            case 0x21:
                 motor_cmd_i2c = (unsigned short)read_byte << 4;
                 if(motor_cmd_i2c<=MOTOR_UP && motor_cmd_i2c>=MOTOR_DOWN){
                     motor_set_point = motor_cmd_i2c;
@@ -126,12 +133,49 @@ void i2c_handler_write() {
         case 0x12:
             I2C_Write(P1DC1>>8);
             break;
+        
+        case 0x20 ... 0x23:
+        I2C_Write(position>> (8*(i2c_register + i2c_nb_bytes - 0x20)));
+        break;
+            
+        case 0x30 ... 0x33:
+            I2C_Write(position_set_point >> (8*(i2c_register + i2c_nb_bytes - 0x30)));
+            break;
+            
+        case 0x40 ... 0x43:
+            I2C_Write(position_error>> (8*(i2c_register + i2c_nb_bytes - 0x40)));
+            break;
+            
+        case 0xB0:
+            I2C_Write(motor_tension);
+            break;
+        case 0xB1:
+            I2C_Write(motor_tension>>8);
+            break;
+        case 0xB2:
+            I2C_Write(motor_current);
+            break;
+        case 0xB3:
+            I2C_Write(motor_current>>8);
+            break;
+        case 0xB4:
+            I2C_Write(motor_set_point);
+            break;
+        case 0xB5:
+            I2C_Write(motor_set_point>>8);
+            break;
+            
         case 0xC0:
             I2C_Write(CODE_VERSION);
             break;
         case 0xC1:
             I2C_Write(is_init);
             break;
+            
+        case 0xF0 ... 0xFF:
+            I2C_Write(device_name[i2c_register + i2c_nb_bytes - 0xF0]);
+            break;
+            
         default:
             I2C_Write(0x00);
             break;
@@ -180,15 +224,39 @@ void handle_timer_regulation(){
     
     if(i2c_set_point_new==NEW_WAYPOINT_I2C){
         i2c_set_point_new = 0;
-        position_set_point = position_set_point_i2c;
+        position_set_point = (signed long int)((unsigned long int)position_set_point_i2c[0]
+                + (((unsigned long int)position_set_point_i2c[1])<<8) 
+                + (((unsigned long int)position_set_point_i2c[2])<<16)
+                + (((unsigned long int)position_set_point_i2c[3])<<24));
     }
     
-    ADC1_ConversionResultGet(CURRENT_MOTOR); // => 0.5*Vcc for 0A, 264mV/A, 12bit
+    // ***************************
+    // State measurements
+    motor_current = ADC1_ConversionResultGet(CURRENT_MOTOR); // => 0.5*Vcc for 0A, 264mV/A, 12bit
     
     // => V_batt = (adc_result*3.3/4096)/0.18 = adc_result * 0.00447591
     // ex : 3574 => 15.99V
-    ADC1_ConversionResultGet(BATT_VOLTAGE); 
+    motor_tension = ADC1_ConversionResultGet(BATT_VOLTAGE);
     
+    // ***************************
+    // Regulation (dumy version)
+    if(state==PISTON_REGULATION){
+        position_error = position_set_point-position;
+        if(abs(position_error)>motor_regulation_dead_zone){
+            
+            signed long int val = position_error*motor_regulation_K;
+            
+            if(val>0)
+                motor_set_point = min(max(val+MOTOR_STOP, MOTOR_STOP+MOTOR_DEAD_ZONE), MOTOR_UP);
+            else
+                motor_set_point = max(min(val+MOTOR_STOP, MOTOR_STOP-MOTOR_DEAD_ZONE), MOTOR_DOWN);
+        }
+        else{
+            motor_set_point = MOTOR_STOP;
+        }
+    }
+    
+    // ***************************
     // Velocity Ramp + Switch protection
     if((motor_set_point<MOTOR_STOP && !SWITCH_BOTTOM_GetValue()) 
             || (motor_set_point>MOTOR_STOP && !SWITCH_TOP_GetValue())){
@@ -202,6 +270,8 @@ void handle_timer_regulation(){
             MOTOR_CMD = motor_set_point;
         }
     }
+    
+    // Add a cpt to set enable Low when position set_point is reached in the case Regulation
 }
 
 /**
@@ -222,8 +292,6 @@ int main() {
     I2C_SlaveSetWriteIntHandler(i2c_handler_write);
     I2C_SlaveSetAddrIntHandler(i2c_handler_address);
 
-    //ADC1_Init();
-
     ENABLE_SetLow();
     LED_SetLow();
 
@@ -241,12 +309,12 @@ int main() {
             LED_SetLow();
         
         switch(state){
-            case PISTON_RESET:
+            case PISTON_SEARCH_SWITCH_BOTTOM:
                 if(!SWITCH_BOTTOM_GetValue()){
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
-                    state = PISTON_REGULATION;
-                    QEI_Reset_Count();
+                    state = PISTON_RESET_SWITCH_BOTTOM;
+                    __delay_ms(250);
                 }
                 else{
                     ENABLE_SetHigh();
@@ -254,6 +322,21 @@ int main() {
                 }
                     
                 break;
+            
+            case PISTON_RESET_SWITCH_BOTTOM:
+                if(SWITCH_BOTTOM_GetValue()){
+                    MOTOR_CMD = MOTOR_STOP;
+                    motor_set_point = MOTOR_STOP;
+                    state = PISTON_REGULATION;
+                    __delay_ms(250);
+                    QEI_Reset_Count();
+                }
+                else{
+                    ENABLE_SetHigh();
+                    motor_set_point = MOTOR_UP_RESET;
+                }
+                break;
+                
             case PISTON_REGULATION:
                 ENABLE_SetHigh();
                 break;
