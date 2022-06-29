@@ -55,7 +55,7 @@ volatile unsigned char position_set_point_i2c[4];
 #define NEW_WAYPOINT_I2C 0b1111
 
 volatile uint16_t motor_set_point = MOTOR_STOP;
-volatile uint16_t motor_delta_speed = 30; // 0.4 V/0.02s 
+volatile uint16_t motor_delta_speed = 20; // 0.4 V/0.02s 
 
 volatile uint16_t motor_current = 0;
 volatile uint16_t motor_tension = 0;
@@ -63,8 +63,8 @@ volatile uint16_t motor_tension = 0;
 unsigned short motor_cmd_i2c = MOTOR_STOP;
 
 // Regulation
-float motor_regulation_K = 0.05;
-unsigned short motor_regulation_dead_zone = 100;
+float motor_regulation_K = 0.3;
+unsigned short motor_regulation_dead_zone = 50;
 
 void i2c_handler_address() {
     I2C_Read();
