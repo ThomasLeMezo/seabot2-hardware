@@ -15,14 +15,17 @@
  * Limit to +- 1500 around 2000 (1500, 3500)
  */
 
-#define MOTOR_PWM_MAX = 4000
-#define MOTOR_PWM_MIN = 0
+#define MOTOR_PWM_MAX 4000
+#define MOTOR_PWM_MIN 0
 
 #define MOTOR_STOP 2000
 #define MOTOR_DOWN 500
 #define MOTOR_UP 3500
 #define MOTOR_UP_RESET MOTOR_STOP + 100
-#define MOTOR_DEAD_ZONE 100
+#define MOTOR_DEAD_ZONE 50
+
+// Assuming Vcc=16
+#define MOTOR_V_TO_CMD MOTOR_PWM_MAX/(2*16)
 
 
 

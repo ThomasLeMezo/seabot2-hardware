@@ -17,8 +17,8 @@ RA0 : Motor Current Sensor
 
  */
 
-#define min(a, b) (a) < (b) ? (a) : (b) 
-#define max(a, b) (a) > (b) ? (a) : (b) 
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b)) 
 
 #include <xc.h>
 #include <stdlib.h>
@@ -54,11 +54,17 @@ volatile signed long int position_error = 0;
 volatile unsigned char position_set_point_i2c[4];
 #define NEW_WAYPOINT_I2C 0b1111
 
-volatile uint16_t motor_set_point = MOTOR_STOP;
-volatile uint16_t motor_delta_speed = 20; // 0.4 V/0.02s 
+#define REGULATION_LOOP_FREQ 50
 
-volatile uint16_t motor_current = 0;
-volatile uint16_t motor_tension = 0;
+volatile uint16_t motor_set_point = MOTOR_STOP;
+volatile uint16_t motor_delta_speed = (100/REGULATION_LOOP_FREQ)*MOTOR_V_TO_CMD; // Limit to 100V/s, delta_speed in PWM quantum/0.02s = 250
+
+volatile uint16_t adc_motor_current = 0;
+volatile uint16_t adc_batt_tension = 0;
+
+volatile float motor_current = 0;
+volatile float motor_tension = 0;
+volatile float batt_tension = 0;
 
 unsigned short motor_cmd_i2c = MOTOR_STOP;
 
@@ -128,10 +134,10 @@ void i2c_handler_write() {
             I2C_Write(QEI1CONbits.UPDN); // Direction status
             break;
         case 0x11:
-            I2C_Write(P1DC1);
+            I2C_Write(MOTOR_CMD);
             break;
         case 0x12:
-            I2C_Write(P1DC1>>8);
+            I2C_Write(MOTOR_CMD>>8);
             break;
         
         case 0x20 ... 0x23:
@@ -147,16 +153,16 @@ void i2c_handler_write() {
             break;
             
         case 0xB0:
-            I2C_Write(motor_tension);
+            I2C_Write(adc_batt_tension);
             break;
         case 0xB1:
-            I2C_Write(motor_tension>>8);
+            I2C_Write(adc_batt_tension>>8);
             break;
         case 0xB2:
-            I2C_Write(motor_current);
+            I2C_Write(adc_motor_current);
             break;
         case 0xB3:
-            I2C_Write(motor_current>>8);
+            I2C_Write(adc_motor_current>>8);
             break;
         case 0xB4:
             I2C_Write(motor_set_point);
@@ -231,12 +237,18 @@ void handle_timer_regulation(){
     }
     
     // ***************************
-    // State measurements
-    motor_current = ADC1_ConversionResultGet(CURRENT_MOTOR); // => 0.5*Vcc for 0A, 264mV/A, 12bit
-    
+    // State measurements (adc 12bit : 4096)
+    // sensor: ACS722LLCTR-05AB-T
+
+    adc_motor_current = ADC1_ConversionResultGet(CURRENT_MOTOR); // => 0.5*Vcc for 0A (+-5A), 264mV/A, 12bit
+    motor_current = ((int16_t)adc_motor_current-2048)*(1.65/2048*0.264); // Vcc=3.3
+            
     // => V_batt = (adc_result*3.3/4096)/0.18 = adc_result * 0.00447591
     // ex : 3574 => 15.99V
-    motor_tension = ADC1_ConversionResultGet(BATT_VOLTAGE);
+    adc_batt_tension = ADC1_ConversionResultGet(BATT_VOLTAGE);
+    batt_tension = (adc_batt_tension*3.3/4096.0) / (180.0/(180.0+820.0)); // 180kOhm & 820kOhm
+    
+    motor_tension = batt_tension * ((MOTOR_CMD-MOTOR_STOP)/(MOTOR_PWM_MAX/2.0));
     
     // ***************************
     // Regulation (dumy version)
@@ -244,12 +256,12 @@ void handle_timer_regulation(){
         position_error = position_set_point-position;
         if(abs(position_error)>motor_regulation_dead_zone){
             
-            signed long int val = position_error*motor_regulation_K;
+            signed long int val = floor(((float)position_error)*motor_regulation_K);
             
-            if(val>0)
-                motor_set_point = min(max(val+MOTOR_STOP, MOTOR_STOP+MOTOR_DEAD_ZONE), MOTOR_UP);
+            if(val>=0)
+                motor_set_point = min(max(val, MOTOR_DEAD_ZONE)+MOTOR_STOP, MOTOR_UP);
             else
-                motor_set_point = max(min(val+MOTOR_STOP, MOTOR_STOP-MOTOR_DEAD_ZONE), MOTOR_DOWN);
+                motor_set_point = max(min(val, -MOTOR_DEAD_ZONE)+MOTOR_STOP, MOTOR_DOWN);
         }
         else{
             motor_set_point = MOTOR_STOP;
@@ -263,7 +275,7 @@ void handle_timer_regulation(){
         MOTOR_CMD = MOTOR_STOP;
     }
     else{
-        if(abs(MOTOR_CMD-motor_set_point)>motor_delta_speed){
+        if(abs(motor_set_point-MOTOR_CMD)>motor_delta_speed){
             MOTOR_CMD += (MOTOR_CMD<motor_set_point)?motor_delta_speed:-motor_delta_speed;
         }
         else{
@@ -320,7 +332,6 @@ int main() {
                     ENABLE_SetHigh();
                     motor_set_point = MOTOR_DOWN;
                 }
-                    
                 break;
             
             case PISTON_RESET_SWITCH_BOTTOM:
@@ -328,7 +339,6 @@ int main() {
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
                     state = PISTON_REGULATION;
-                    __delay_ms(250);
                     QEI_Reset_Count();
                 }
                 else{

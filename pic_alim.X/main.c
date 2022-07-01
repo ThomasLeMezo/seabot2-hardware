@@ -30,7 +30,7 @@ const char device_name[16] = "PIC_ALIM";
 // State machine
 
 enum power_state {
-    IDLE, POWER_ON, WAIT_TO_SLEEP, SLEEP
+    IDLE, PRE_POWER_ON, POWER_ON, WAIT_TO_SLEEP, SLEEP
 };
 volatile unsigned char state = POWER_ON;
 volatile unsigned char step_state_machine = 0;
@@ -339,6 +339,11 @@ void main(void) {
                     watchdog_cpt[1] = 0;
 
                     ils_analysis(POWER_ON);
+                    break;
+                    
+                case PRE_POWER_ON:
+                    GLOBAL_POWER_SetLow();
+                    state = POWER_ON;
                     break;
 
                 case POWER_ON:
