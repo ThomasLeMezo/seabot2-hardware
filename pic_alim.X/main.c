@@ -32,7 +32,7 @@ const char device_name[16] = "PIC_ALIM";
 enum power_state {
     IDLE, PRE_POWER_ON, POWER_ON, WAIT_TO_SLEEP, SLEEP
 };
-volatile unsigned char state = POWER_ON;
+volatile unsigned char state = PRE_POWER_ON;
 volatile unsigned char step_state_machine = 0;
 
 // Batteries
