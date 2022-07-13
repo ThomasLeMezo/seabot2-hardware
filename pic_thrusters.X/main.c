@@ -57,14 +57,14 @@ volatile unsigned char unable_motor[2];
 // Watchdog
 //#define EEPROM_WATCHDOG_RESTART_DEFAULT 0x00
 volatile unsigned char watchdog_restart_default = 3;
-volatile unsigned char watchdog_countdown_restart;
+volatile unsigned char watchdog_countdown_restart = 3;
 
 // I2C
 #define CODE_VERSION 0x01
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "PIC_THRUSTER";
+const char device_name[16] = "PIC_THRUSTER v1";
 
 void i2c_handler_address()
 {
@@ -153,7 +153,7 @@ void timer_watchdog()
     else{
       countdown_thruster_cmd[0] = MOTOR_CMD_STOP;
       countdown_thruster_cmd[1] = MOTOR_CMD_STOP;
-      watchdog_countdown_restart = watchdog_restart_default;
+      //watchdog_countdown_restart = watchdog_restart_default;
     }
 }
 

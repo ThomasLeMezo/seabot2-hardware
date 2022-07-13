@@ -54,8 +54,8 @@
 #include <conio.h>
 #include "interrupt_manager.h"
 #include "i2c_slave.h"
-#include "memory.h"
 #include "tmr1.h"
+#include "memory.h"
 #include "tmr0.h"
 
 

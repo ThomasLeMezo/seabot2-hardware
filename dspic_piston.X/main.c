@@ -38,7 +38,7 @@ RA0 : Motor Current Sensor
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "DSPIC_PISTON";
+const char device_name[16] = "DSPIC_PISTON v1";
 
 // State machine
 enum state_piston {
@@ -110,6 +110,7 @@ void i2c_handler_read() {
         }
     }
     i2c_nb_bytes++;
+    watchdog_countdown_restart = watchdog_restart_default;
 }
 
 void i2c_handler_write() {
@@ -186,7 +187,7 @@ void i2c_handler_write() {
             I2C_Write(0x00);
             break;
     }
-    watchdog_restart = watchdog_restart_default;
+    watchdog_countdown_restart = watchdog_restart_default;
     i2c_nb_bytes++;
 }
 
@@ -216,10 +217,15 @@ void __attribute__((__interrupt__, auto_psv)) _QEIInterrupt() {
 }
 
 /*
- * @brief Timer 1
+ * @brief Timer 3
  */
-void handle_timer_light(){
-    //LED_Toggle();
+void handle_timer_watchdog(){
+    if(watchdog_countdown_restart>0)
+      watchdog_countdown_restart--;  
+    else{
+      position_set_point = 0;
+      motor_set_point = 0;
+    }
 }
 
 /*
@@ -241,14 +247,14 @@ void handle_timer_regulation(){
     // sensor: ACS722LLCTR-05AB-T
 
     adc_motor_current = ADC1_ConversionResultGet(CURRENT_MOTOR); // => 0.5*Vcc for 0A (+-5A), 264mV/A, 12bit
-    motor_current = ((int16_t)adc_motor_current-2048)*(1.65/2048*0.264); // Vcc=3.3
+    //motor_current = ((int16_t)adc_motor_current-2048)*(1.65/2048*0.264); // Vcc=3.3
             
-    // => V_batt = (adc_result*3.3/4096)/0.18 = adc_result * 0.00447591
+    // => V_batt = (adc_result*3.3/4096)/(180/(820+180)) = adc_result * 0.00447591
     // ex : 3574 => 15.99V
     adc_batt_tension = ADC1_ConversionResultGet(BATT_VOLTAGE);
-    batt_tension = (adc_batt_tension*3.3/4096.0) / (180.0/(180.0+820.0)); // 180kOhm & 820kOhm
+    //batt_tension = (adc_batt_tension*3.3/4096.0) / (180.0/(180.0+820.0)); // 180kOhm & 820kOhm
     
-    motor_tension = batt_tension * ((MOTOR_CMD-MOTOR_STOP)/(MOTOR_PWM_MAX/2.0));
+    //motor_tension = batt_tension * ((MOTOR_CMD-MOTOR_STOP)/(MOTOR_PWM_MAX/2.0));
     
     // ***************************
     // Regulation (dumy version)
@@ -295,7 +301,7 @@ int main() {
     SYSTEM_Initialize();  // 40 MIPS
     
     // Timers
-    TMR3_SetInterruptHandler(handle_timer_light); // 1 s
+    TMR3_SetInterruptHandler(handle_timer_watchdog); // 1 s
     TMR2_SetInterruptHandler(handle_timer_regulation); // 0.02 s
     
      // Initialize I/O

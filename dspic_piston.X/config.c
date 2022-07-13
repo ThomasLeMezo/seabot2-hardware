@@ -50,10 +50,11 @@
 volatile unsigned short is_init = 0;
 
 // Watchdog
-unsigned short watchdog_restart = 60; // in min
-volatile unsigned short watchdog_restart_default = 60;
-unsigned short watchdog_cpt_sec = 59;
-unsigned short watchdog_cpt_default = 59;
+unsigned short watchdog_restart_default = 30; // in min
+volatile unsigned short watchdog_countdown_restart = 30;
+
+//unsigned short watchdog_cpt_sec = 59;
+//unsigned short watchdog_cpt_default = 59;
 
 signed short qei_overflow = 0;
 

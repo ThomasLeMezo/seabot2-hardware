@@ -25,7 +25,7 @@
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "PIC_ALIM";
+const char device_name[16] = "PIC_ALIM v1";
 
 // State machine
 

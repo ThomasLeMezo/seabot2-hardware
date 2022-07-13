@@ -56,10 +56,10 @@ extern volatile unsigned short is_init;
 #define SWITCH_INT_SetDigitalOutput() (_TRISB7 = 0)
 
 // Watchdog
-extern unsigned short watchdog_restart; // in min
-extern volatile unsigned short watchdog_restart_default;
-extern unsigned short watchdog_cpt_sec;
-extern unsigned short watchdog_cpt_default;
+extern unsigned short watchdog_restart_default; // in sec
+extern volatile unsigned short watchdog_countdown_restart;
+//extern unsigned short watchdog_cpt_sec;
+//extern unsigned short watchdog_cpt_default;
 
 // Count
 extern signed short qei_overflow; // number of overflow for the encoder

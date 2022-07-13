@@ -149,12 +149,20 @@ void TMR1_ISR(void)
     PIR1bits.TMR1IF = 0;    
     TMR1_WriteTimer(timer1ReloadVal);
 
+    // ticker function call;
+    // ticker is 1 -> Callback function gets called every time this ISR executes
+    TMR1_CallBack();
+}
+
+void TMR1_CallBack(void)
+{
+    // Add your custom callback code here
+
     if(TMR1_InterruptHandler)
     {
         TMR1_InterruptHandler();
     }
 }
-
 
 void TMR1_SetInterruptHandler(void (* InterruptHandler)(void)){
     TMR1_InterruptHandler = InterruptHandler;

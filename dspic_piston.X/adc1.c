@@ -64,10 +64,10 @@ void ADC1_Initialize (void)
     // ASAM enabled; ADDMABM disabled; ADSIDL disabled; DONE disabled; SIMSAM Sequential; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Clearing sample bit ends sampling and starts conversion; AD12B 12-bit; ADON enabled; SSRCG disabled; 
     AD1CON1bits.ADON = 0; // ADC is OFF
     AD1CON1bits.ADSIDL = 0; // Continue in idle mode
-    AD1CON1bits.AD12B = 1; // 12bit mode
-    AD1CON1bits.FORM = 0b00; // Integer result
+    AD1CON1bits.AD12B = ADC1_RESOLUTION_12_BIT; // 12bit mode
+    AD1CON1bits.FORM = ADC1_FORM_UNSIGNED_INT; // Integer result
     
-    AD1CON1bits.SSRC = 0b111; // automatic sampling and conversion (Internal counter ends sampling and starts conversion (auto-convert))
+    AD1CON1bits.SSRC = ADC1_SAMPLING_SOURCE_AUTO; // automatic sampling and conversion (Internal counter ends sampling and starts conversion (auto-convert))
     AD1CON1bits.SIMSAM = 0; // sequential sampling
     AD1CON1bits.ASAM = 1; // Auto-restart sampling
     AD1CON1bits.SAMP = 0; // holding
