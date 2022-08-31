@@ -38,7 +38,7 @@ RA0 : Motor Current Sensor
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "DSPIC_PISTON v1";
+const char device_name[16] = "DSPIC_PISTON v2";
 
 // State machine
 enum state_piston {
@@ -72,6 +72,12 @@ unsigned short motor_cmd_i2c = MOTOR_STOP;
 float motor_regulation_K = 0.3;
 unsigned short motor_regulation_dead_zone = 50;
 
+unsigned char i2c_new_data_motor_regulation_K = 0;
+unsigned char i2c_new_motor_regulation_K[2]; /// div by 100 to get float motor_regulation
+
+unsigned char i2c_new_data_motor_regulation_dead_zone = 0;
+unsigned char i2c_new_motor_regulation_dead_zone[2];
+
 void i2c_handler_address() {
     I2C_Read();
     i2c_nb_bytes = 0;
@@ -99,11 +105,18 @@ void i2c_handler_read() {
                 else
                     LED_SetLow();
                 break;
-            case 0x21:
-                motor_cmd_i2c = (unsigned short)read_byte << 4;
-                if(motor_cmd_i2c<=MOTOR_UP && motor_cmd_i2c>=MOTOR_DOWN){
-                    motor_set_point = motor_cmd_i2c;
-                }
+            case 0x05:
+                if(read_byte==1)
+                    state = PISTON_SEARCH_SWITCH_BOTTOM;
+                break;
+                    /// Regulation data
+            case 0x30:
+                i2c_new_data_motor_regulation_dead_zone|=0b1<<(i2c_register + i2c_nb_bytes - 1 - 0x30);
+                i2c_new_motor_regulation_dead_zone[i2c_register + i2c_nb_bytes - 1 - 0x30] = read_byte;
+                break;
+            case 0x32:
+                i2c_new_data_motor_regulation_K|=0b1<<(i2c_register + i2c_nb_bytes - 1 - 0x32);
+                i2c_new_motor_regulation_K[i2c_register + i2c_nb_bytes - 1 - 0x32] = read_byte;
                 break;
             default:
                 break;
@@ -115,61 +128,49 @@ void i2c_handler_read() {
 
 void i2c_handler_write() {
     switch (i2c_register + i2c_nb_bytes) {
-        case 0x00:
-            I2C_Write(POS1CNT);
-            break;
-        case 0x01:
-            I2C_Write((POS1CNT >> 8)); // not recommended (two reads)
-            break;
-        case 0x02:
-            I2C_Write(qei_overflow);
-            break;
-        case 0x03:
+        case 0x00 ... 0x03: /// Position of the piston
+            I2C_Write(position>> (8*(i2c_register + i2c_nb_bytes - 0x00)));
+        break;
+        case 0x04: /// Switchs of the piston
             I2C_Write((!SWITCH_TOP_GetValue())
-                       | (!SWITCH_BOTTOM_GetValue() << 1));
+                       | (!SWITCH_BOTTOM_GetValue() << 1)
+                        | (ENABLE_GetValue() << 2)
+                        | (QEI1CONbits.UPDN << 3)); /// Direction status
             break;
-        case 0x04:
+        case 0x05: /// State of the state-machine
             I2C_Write(state);
             break;
-        case 0x10:
-            I2C_Write(QEI1CONbits.UPDN); // Direction status
+        case 0x06 ... 0x09: /// Set point
+            I2C_Write(position_set_point >> (8*(i2c_register + i2c_nb_bytes - 0x06)));
             break;
-        case 0x11:
+        case 0x0A ... 0x0B:
+            I2C_Write(adc_batt_tension>> (8*(i2c_register + i2c_nb_bytes - 0x0A)));
+            break;
+        case 0x0C ... 0x0D:
+            I2C_Write(adc_motor_current>> (8*(i2c_register + i2c_nb_bytes - 0x0C)));
+            break;
+        case 0x0E ... 0x0F:
+            I2C_Write(motor_set_point>> (8*(i2c_register + i2c_nb_bytes - 0x0C)));
+            break;
+        case 0x10:
             I2C_Write(MOTOR_CMD);
             break;
-        case 0x12:
+        case 0x11:
             I2C_Write(MOTOR_CMD>>8);
             break;
-        
-        case 0x20 ... 0x23:
-        I2C_Write(position>> (8*(i2c_register + i2c_nb_bytes - 0x20)));
-        break;
             
-        case 0x30 ... 0x33:
-            I2C_Write(position_set_point >> (8*(i2c_register + i2c_nb_bytes - 0x30)));
+            /// End of status data
+            
+        /// Regulation data
+        case 0x30 ... 0x31:
+            I2C_Write(motor_regulation_dead_zone >> (8*(i2c_register + i2c_nb_bytes - 0x30)));
+            break;
+        case 0x32 ... 0x33:
+            I2C_Write((unsigned short)(motor_regulation_K*100) >> (8*(i2c_register + i2c_nb_bytes - 0x30)));
             break;
             
         case 0x40 ... 0x43:
             I2C_Write(position_error>> (8*(i2c_register + i2c_nb_bytes - 0x40)));
-            break;
-            
-        case 0xB0:
-            I2C_Write(adc_batt_tension);
-            break;
-        case 0xB1:
-            I2C_Write(adc_batt_tension>>8);
-            break;
-        case 0xB2:
-            I2C_Write(adc_motor_current);
-            break;
-        case 0xB3:
-            I2C_Write(adc_motor_current>>8);
-            break;
-        case 0xB4:
-            I2C_Write(motor_set_point);
-            break;
-        case 0xB5:
-            I2C_Write(motor_set_point>>8);
             break;
             
         case 0xC0:
@@ -240,6 +241,16 @@ void handle_timer_regulation(){
                 + (((unsigned long int)position_set_point_i2c[1])<<8) 
                 + (((unsigned long int)position_set_point_i2c[2])<<16)
                 + (((unsigned long int)position_set_point_i2c[3])<<24));
+    }
+    
+    if(i2c_new_data_motor_regulation_dead_zone==0b11){
+        motor_regulation_dead_zone = i2c_new_motor_regulation_dead_zone[0] + (i2c_new_motor_regulation_dead_zone[1]<<8);
+        i2c_new_data_motor_regulation_dead_zone = 0;
+    }
+    
+    if(i2c_new_data_motor_regulation_K==0b11){
+        motor_regulation_K = (float)(i2c_new_motor_regulation_K[0] + (i2c_new_motor_regulation_K[1]<<8))/100;
+        i2c_new_data_motor_regulation_K = 0;
     }
     
     // ***************************

@@ -8,7 +8,7 @@
 #include "pwm.h"
 #include "adc1.h"
 
-#define CODE_VERSION 0x01
+#define CODE_VERSION 0x02
 #define VCC 3.3 // dsPIC VCC
 
 extern volatile unsigned short is_init;
