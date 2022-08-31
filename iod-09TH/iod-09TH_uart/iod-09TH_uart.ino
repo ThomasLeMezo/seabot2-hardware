@@ -21,7 +21,7 @@ short data_pressure = 9999;
 short data_temperature = 999;
 short data_hygro = 99;
 byte data_tension = 0;
-char data_name[9] = "TestNom";
+char data_name[16] = "TestNom";
 char data_mission[16] = "TestMission";
 byte data_wp = 0;
 byte data_wp_max = 0;
@@ -68,7 +68,7 @@ void print_screen()
   // Robot Name
   gfx.MoveTo(0, 0);
   gfx.TextColor(WHITE);
-  gfx.print(String("Seabot ") + data_name);
+  gfx.print(data_name);
 
   // Time
   gfx.MoveTo(128, 0);
@@ -90,7 +90,7 @@ void print_screen()
   // Hygro
   gfx.MoveTo(112, 14);
   if(data_hygro < hygro_threshold)
-    gfx.TextColor(GREEN);
+    gfx.TextColor(WHITE);
   else
     gfx.TextColor(RED);
   char s_hygro[4] = "00%";
@@ -100,7 +100,7 @@ void print_screen()
   // Pressure
   gfx.MoveTo(0, 28);
   if(data_pressure < pressure_threshold)
-    gfx.TextColor(GREEN);
+    gfx.TextColor(WHITE);
   else
     gfx.TextColor(RED);
   char s_pressure[10] = "XXXX mbar";
@@ -121,7 +121,7 @@ void print_screen()
   // Tension
   gfx.MoveTo(112, 28);
   if(data_tension > tension_threshold)
-    gfx.TextColor(GREEN);
+    gfx.TextColor(WHITE);
   else
     gfx.TextColor(RED);
   char s_tens[7] = "00.0 V";
@@ -187,10 +187,9 @@ void parseUART()
 
     //if(Serial.available()){
       switch(reg_uart){
-        case 0: // errase screen
-            if(Serial.read()==0){
-              gfx.Cls();
-              screen_errase = true;
+        case 0: // write to screen
+            if(Serial.read()==1){
+              print_screen();
             }
           break;
         case 1: // Name of the robot
@@ -210,7 +209,7 @@ void parseUART()
             byte val[2];
             size_t nb_bytes = Serial.readBytes(val, 2);
             if(nb_bytes == 2)
-              data_pressure = (val[0] << 8) + val[1];
+              data_pressure = (val[1] << 8) + val[0];
           }
           break;
 
@@ -219,7 +218,7 @@ void parseUART()
             byte val[2];
             size_t nb_bytes = Serial.readBytes(val, 2);
             if(nb_bytes == 2)
-              data_temperature = (val[0] << 8) + val[1];
+              data_temperature = (val[1] << 8) + val[0];
           }
           break;
 
@@ -275,9 +274,5 @@ void parseUART()
 
           break;
       }
-
-      if(!screen_errase)
-        print_screen();
-      screen_errase = false;
   }
 }

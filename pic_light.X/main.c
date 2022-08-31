@@ -55,12 +55,7 @@ void i2c_handler_read()
             case 0x01:  // Power
                 led_pwm = read_byte; // 0 to 199
                 break;
-            case 0x02: // Pattern
-            case 0x03: // Pattern
-            case 0x04: // Pattern
-            case 0x05: // Pattern
-            case 0x06: // Pattern
-            case 0x07: // Pattern
+            case 0x02 ... 0x07: // Pattern
                 led_pattern[i2c_register+i2c_nb_bytes-1-2] = read_byte;
                 break;
         default:
