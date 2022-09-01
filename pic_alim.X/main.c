@@ -21,11 +21,11 @@
 #include "mcc_generated_files/mcc.h"
 
 // I2C
-#define CODE_VERSION 0x01
+#define CODE_VERSION 0x02
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "PIC_ALIM v1";
+const char device_name[16] = "PIC_ALIM v2";
 
 // State machine
 
@@ -129,7 +129,7 @@ void i2c_handler_write() {
             I2C_Write(battery_voltage[2] >> 8);
             break;
         case 0x06:
-            I2C_Write((char) battery_voltage[3]);
+            I2C_Write(battery_voltage[3] & 0xFF);
             break;
         case 0x07:
             I2C_Write(battery_voltage[3] >> 8);
@@ -152,10 +152,10 @@ void i2c_handler_write() {
         case 0x0D:
             I2C_Write(power_current[2] >> 8);
             break;
-
-        case 0xA0:
+        case 0x0E:
             I2C_Write(state);
             break;
+            
         case 0xA1:
             I2C_Write(watchdog_cpt[0]);
             break;
