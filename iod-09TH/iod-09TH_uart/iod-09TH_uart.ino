@@ -194,8 +194,7 @@ void parseUART()
           break;
         case 1: // Name of the robot
           {
-            size_t nb_bytes = Serial.readBytesUntil('\n', data_name, sizeof(data_name)-1);
-            data_name[nb_bytes] = '\0';
+            size_t nb_bytes = Serial.readBytesUntil('\n', data_name, sizeof(data_name));
           }
           break;
         case 2: // IP
@@ -236,8 +235,7 @@ void parseUART()
         case 7: // Mission name
           {
               // data_mission
-            size_t nb_bytes = Serial.readBytesUntil('\n', data_mission, sizeof(data_mission)-1);
-            data_mission[nb_bytes] = '\0';
+            size_t nb_bytes = Serial.readBytesUntil('\n', data_mission, sizeof(data_mission));
           }
           break;
 
