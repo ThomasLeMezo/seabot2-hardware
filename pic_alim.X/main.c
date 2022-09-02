@@ -299,6 +299,10 @@ void timer_sleep() {
     }
 }
 
+void ils_interrupt(){
+    
+}
+
 /*
                          Main application
  */
@@ -319,7 +323,9 @@ void main(void) {
     TMR0_SetInterruptHandler(timer_sleep);
     TMR1_SetInterruptHandler(timer_led);
     TMR3_SetInterruptHandler(timer_state_machine);
-
+    
+    //IOCA2_SetInterruptHandler(ils_interrupt);
+    
     // Interruptions
 
     INTERRUPT_GlobalInterruptHighEnable();
@@ -338,6 +344,8 @@ void main(void) {
                     watchdog_cpt[0] = watchdog_cpt_default;
                     watchdog_cpt[1] = 0;
 
+                    //if (ILS_GetValue() == 1) /// ILS not detected
+                    //    SLEEP();
                     ils_analysis(POWER_ON);
                     break;
                     

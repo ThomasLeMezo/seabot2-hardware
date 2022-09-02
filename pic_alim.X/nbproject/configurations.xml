@@ -57,7 +57,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.36</languageToolchainVersion>
+        <languageToolchainVersion>2.32</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -206,6 +206,8 @@
         <property key="memories.programmemory.ranges" value="0-3fff"/>
         <property key="memories.rww" value="true"/>
         <property key="poweroptions.powerenable" value="true"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/Thomas/Documents/seabot2-hardware/pic_alim.X/debug/default/pic_alim_ptg"/>
         <property key="programmerToGoImageName" value="pic_alim_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
@@ -290,6 +292,8 @@
         <property key="memories.programmemory.ranges" value="0-3fff"/>
         <property key="memories.rww" value="true"/>
         <property key="poweroptions.powerenable" value="true"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/Thomas/Documents/seabot2-hardware/pic_alim.X/debug/default/pic_alim_ptg"/>
         <property key="programmerToGoImageName" value="pic_alim_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>

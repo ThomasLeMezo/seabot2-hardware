@@ -93,6 +93,10 @@ void i2c_handler_read() {
                 i2c_set_point_new|=0b1<<(i2c_register + i2c_nb_bytes - 1);
                 position_set_point_i2c[i2c_register + i2c_nb_bytes - 1] = read_byte;
                 break;
+            case 0x05:
+                if(read_byte==1)
+                    state = PISTON_SEARCH_SWITCH_BOTTOM;
+                break;
             case 0x10:
                 if (read_byte)
                     ENABLE_SetHigh();
@@ -104,10 +108,6 @@ void i2c_handler_read() {
                     LED_SetHigh();
                 else
                     LED_SetLow();
-                break;
-            case 0x05:
-                if(read_byte==1)
-                    state = PISTON_SEARCH_SWITCH_BOTTOM;
                 break;
                     /// Regulation data
             case 0x30:
@@ -150,12 +150,12 @@ void i2c_handler_write() {
             I2C_Write(adc_motor_current>> (8*(i2c_register + i2c_nb_bytes - 0x0C)));
             break;
         case 0x0E ... 0x0F:
-            I2C_Write(motor_set_point>> (8*(i2c_register + i2c_nb_bytes - 0x0C)));
+            I2C_Write(motor_set_point>> (8*(i2c_register + i2c_nb_bytes - 0x0E)));
             break;
-        case 0x10:
+        case 0x20:
             I2C_Write(MOTOR_CMD);
             break;
-        case 0x11:
+        case 0x21:
             I2C_Write(MOTOR_CMD>>8);
             break;
             
@@ -166,7 +166,7 @@ void i2c_handler_write() {
             I2C_Write(motor_regulation_dead_zone >> (8*(i2c_register + i2c_nb_bytes - 0x30)));
             break;
         case 0x32 ... 0x33:
-            I2C_Write((unsigned short)(motor_regulation_K*100) >> (8*(i2c_register + i2c_nb_bytes - 0x30)));
+            I2C_Write((unsigned short)(motor_regulation_K*100) >> (8*(i2c_register + i2c_nb_bytes - 0x32)));
             break;
             
         case 0x40 ... 0x43:
@@ -225,7 +225,6 @@ void handle_timer_watchdog(){
       watchdog_countdown_restart--;  
     else{
       position_set_point = 0;
-      motor_set_point = 0;
     }
 }
 

@@ -72,6 +72,9 @@ void  INTERRUPT_Initialize (void)
     // TMRI - low priority
     IPR2bits.TMR3IP = 0;    
 
+    // RABI - low priority
+    INTCON2bits.RABIP = 0;    
+
 }
 
 void __interrupt() INTERRUPT_InterruptManagerHigh (void)
@@ -105,6 +108,10 @@ void __interrupt(low_priority) INTERRUPT_InterruptManagerLow (void)
     else if(PIE2bits.TMR3IE == 1 && PIR2bits.TMR3IF == 1)
     {
         TMR3_ISR();
+    }
+    else if(INTCONbits.RABIE == 1 && INTCONbits.RABIF == 1)
+    {
+        PIN_MANAGER_IOC();
     }
     else
     {

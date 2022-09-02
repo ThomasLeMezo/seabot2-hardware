@@ -87,6 +87,8 @@ void PIN_MANAGER_Initialize(void)
 
 
    
+    // Enable RABI interrupt 
+    INTCONbits.RABIE = 1; 
     
 }
   

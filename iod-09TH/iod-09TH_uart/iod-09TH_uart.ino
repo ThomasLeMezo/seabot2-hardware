@@ -132,7 +132,7 @@ void print_screen()
   // Mission name
   gfx.MoveTo(0, 42);
   gfx.TextColor(WHITE);
-  gfx.print(String("Mission ") + data_mission);
+  gfx.print(data_mission);
 
   // Waypoint
   gfx.MoveTo(0, 56);
