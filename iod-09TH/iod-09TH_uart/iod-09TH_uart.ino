@@ -1,6 +1,5 @@
 
 /*
- * 
  * Compiler & board : https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
  * File>Preference>Additional Boards Manager add link above
  * In Tools>Board select "4D Systems gen4 IoD Range"
@@ -37,8 +36,7 @@ short hygro_threshold = 70;
 
 bool screen_errase = false;
 
-void setup()
-{
+void setup(){
   gfx.begin();
   gfx.Cls();
   gfx.ScrollEnable(false);
@@ -51,18 +49,15 @@ void setup()
   //Serial.setTimeout(200);
 
   print_screen();
-
 } // end Setup **do not alter, remove or duplicate this line**
 
-void loop()
-{
-   parseUART();
+void loop(){
+  parseUART();
 
   yield(); // Required for ESP
 }
 
-void print_screen()
-{
+void print_screen(){
   gfx.Cls();
 
   // Robot Name
@@ -179,98 +174,98 @@ void print_screen()
 
 }
 
-void parseUART()
-{
-  if(Serial.available()){
-    reg_uart = (int)Serial.read(); // receive byte as a character
-    while (Serial.available() == 0);
-
-    //if(Serial.available()){
-      switch(reg_uart){
-        case 0: // write to screen
-            if(Serial.read()==1){
-              print_screen();
-            }
-          break;
-        case 1: // Name of the robot
-          {
-            size_t nb_bytes = Serial.readBytesUntil('\n', data_name, sizeof(data_name));
+void parseUART(){
+  while(Serial.available()>0){
+    reg_uart = (int)Serial.read(); // receive byte as a character0
+    Serial.write(reg_uart);
+    while(Serial.available() == 0){
+      // wait;
+    }
+    
+    switch(reg_uart){
+      case 0: // write to screen
+          if(Serial.read()==1){
+            print_screen();
           }
-          break;
-        case 2: // IP
-          {
-            Serial.readBytes(data_ip, 4);
-          }
-          break;
-
-        case 3: // Pressure
-          {
-            byte val[2];
-            size_t nb_bytes = Serial.readBytes(val, 2);
-            if(nb_bytes == 2)
-              data_pressure = (val[1] << 8) + val[0];
-          }
-          break;
-
-        case 4: // Temperature
-          {
-            byte val[2];
-            size_t nb_bytes = Serial.readBytes(val, 2);
-            if(nb_bytes == 2)
-              data_temperature = (val[1] << 8) + val[0];
-          }
-          break;
-
-        case 5: // Tension
-          {
-            data_tension = Serial.read();
-          }
-          break;
-
-        case 6: // Hygro
-          {
-            data_hygro = Serial.read();
-          }
-
-        case 7: // Mission name
-          {
-              // data_mission
-            size_t nb_bytes = Serial.readBytesUntil('\n', data_mission, sizeof(data_mission));
-          }
-          break;
-
-        case 9: // Waypoint id
-          {            
-            data_wp = Serial.read();
-          }
-          break;
-
-        case 10: // Nb waypoints
-          {
-            data_wp_max = Serial.read();
-          }
-          break;
-
-        case 11: // Time
-          {
-            Serial.readBytes(data_time, 2);
-          }
-          break;
-
-        case 12: // Time remaining
-          {
-            Serial.readBytes(data_time_remain, 2);
-          }
-          break;
-
-        case 13:
+        break;
+      case 1: // Name of the robot
         {
-          data_status = Serial.read();
+          size_t nb_bytes = Serial.readBytesUntil('\n', data_name, sizeof(data_name));
+        }
+        break;
+      case 2: // IP
+        {
+          Serial.readBytes(data_ip, 4);
+        }
+        break;
+
+      case 3: // Pressure
+        {
+          byte val[2];
+          size_t nb_bytes = Serial.readBytes(val, 2);
+          if(nb_bytes == 2)
+            data_pressure = (val[1] << 8) + val[0];
+        }
+        break;
+
+      case 4: // Temperature
+        {
+          byte val[2];
+          size_t nb_bytes = Serial.readBytes(val, 2);
+          if(nb_bytes == 2)
+            data_temperature = (val[1] << 8) + val[0];
+        }
+        break;
+
+      case 5: // Tension
+        {
+          data_tension = Serial.read();
+        }
+        break;
+
+      case 6: // Hygro
+        {
+          data_hygro = Serial.read();
         }
 
-        default:
+      case 7: // Mission name
+        {
+            // data_mission
+          size_t nb_bytes = Serial.readBytesUntil('\n', data_mission, sizeof(data_mission));
+        }
+        break;
 
-          break;
+      case 9: // Waypoint id
+        {            
+          data_wp = Serial.read();
+        }
+        break;
+
+      case 10: // Nb waypoints
+        {
+          data_wp_max = Serial.read();
+        }
+        break;
+
+      case 11: // Time
+        {
+          Serial.readBytes(data_time, 2);
+        }
+        break;
+
+      case 12: // Time remaining
+        {
+          Serial.readBytes(data_time_remain, 2);
+        }
+        break;
+
+      case 13:
+      {
+        data_status = Serial.read();
       }
+
+      default:
+        break;
+    }
   }
 }

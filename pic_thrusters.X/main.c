@@ -129,7 +129,22 @@ void i2c_handler_write()
         case 0xC0:
             I2C_Write(CODE_VERSION);
             break;
-        case 0xF0 ... 0xFF:
+        case 0xF0:
+        case 0xF1:
+        case 0xF2:
+        case 0xF3:
+        case 0xF4:
+        case 0xF5:
+        case 0xF6:
+        case 0xF7:
+        case 0xF8:
+        case 0xF9:
+        case 0xFA:
+        case 0xFB:
+        case 0xFC:
+        case 0xFD:
+        case 0xFE:
+        case 0xFF:
             I2C_Write(device_name[i2c_register + i2c_nb_bytes - 0xF0]);
             break;
         
