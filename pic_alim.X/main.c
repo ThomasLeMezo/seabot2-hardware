@@ -156,10 +156,10 @@ void i2c_handler_write() {
             I2C_Write(state);
             break;
             
-        case 0xA1:
+        case 0xA0:
             I2C_Write(watchdog_cpt[0]);
             break;
-        case 0xA2:
+        case 0xA1:
             I2C_Write(watchdog_cpt[1]);
             break;
 

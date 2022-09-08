@@ -63,9 +63,6 @@ void  INTERRUPT_Initialize (void)
     IPR1bits.SSPIP = 1;
 
 
-    // RABI - low priority
-    INTCON2bits.RABIP = 0;    
-
 }
 
 void __interrupt() INTERRUPT_InterruptManagerHigh (void)
@@ -81,18 +78,6 @@ void __interrupt() INTERRUPT_InterruptManagerHigh (void)
     }
 }
 
-void __interrupt(low_priority) INTERRUPT_InterruptManagerLow (void)
-{
-    // interrupt handler
-    if(INTCONbits.RABIE == 1 && INTCONbits.RABIF == 1)
-    {
-        PIN_MANAGER_IOC();
-    }
-    else
-    {
-        //Unhandled Interrupt
-    }
-}
 /**
  End of File
 */

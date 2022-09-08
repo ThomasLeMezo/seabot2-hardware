@@ -11,6 +11,7 @@
 
 #include <GFX4dIoD9.h>
 #define DEBUG false
+#define CODE_VERSION 0x02
 
 GFX4dIoD9 gfx = GFX4dIoD9();
 
@@ -140,7 +141,7 @@ void print_screen(){
   gfx.MoveTo(80, 56);
   gfx.TextColor(WHITE);
   char s_time_remain[7] = "-00:00";
-  sprintf(s_time_remain, "-%02u:%02u", data_time_remain[0], data_time_remain[1]);
+  sprintf(s_time_remain, "%02u:%02u", data_time_remain[0], data_time_remain[1]);
   gfx.print(s_time_remain);
 
   // Status
@@ -263,6 +264,14 @@ void parseUART(){
       {
         data_status = Serial.read();
       }
+      break;
+
+      case 14:
+      {
+        Serial.write(CODE_VERSION);
+      }
+      break;
+      
 
       default:
         break;

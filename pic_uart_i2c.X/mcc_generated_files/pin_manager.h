@@ -109,34 +109,6 @@
 #define RB7_SetPullup()             do { WPUBbits.WPUB7 = 1; } while(0)
 #define RB7_ResetPullup()           do { WPUBbits.WPUB7 = 0; } while(0)
 
-// get/set LED aliases
-#define LED_TRIS                 TRISCbits.TRISC0
-#define LED_LAT                  LATCbits.LATC0
-#define LED_PORT                 PORTCbits.RC0
-#define LED_ANS                  ANSELbits.ANS4
-#define LED_SetHigh()            do { LATCbits.LATC0 = 1; } while(0)
-#define LED_SetLow()             do { LATCbits.LATC0 = 0; } while(0)
-#define LED_Toggle()             do { LATCbits.LATC0 = ~LATCbits.LATC0; } while(0)
-#define LED_GetValue()           PORTCbits.RC0
-#define LED_SetDigitalInput()    do { TRISCbits.TRISC0 = 1; } while(0)
-#define LED_SetDigitalOutput()   do { TRISCbits.TRISC0 = 0; } while(0)
-#define LED_SetAnalogMode()      do { ANSELbits.ANS4 = 1; } while(0)
-#define LED_SetDigitalMode()     do { ANSELbits.ANS4 = 0; } while(0)
-
-// get/set SWITCH aliases
-#define SWITCH_TRIS                 TRISCbits.TRISC1
-#define SWITCH_LAT                  LATCbits.LATC1
-#define SWITCH_PORT                 PORTCbits.RC1
-#define SWITCH_ANS                  ANSELbits.ANS5
-#define SWITCH_SetHigh()            do { LATCbits.LATC1 = 1; } while(0)
-#define SWITCH_SetLow()             do { LATCbits.LATC1 = 0; } while(0)
-#define SWITCH_Toggle()             do { LATCbits.LATC1 = ~LATCbits.LATC1; } while(0)
-#define SWITCH_GetValue()           PORTCbits.RC1
-#define SWITCH_SetDigitalInput()    do { TRISCbits.TRISC1 = 1; } while(0)
-#define SWITCH_SetDigitalOutput()   do { TRISCbits.TRISC1 = 0; } while(0)
-#define SWITCH_SetAnalogMode()      do { ANSELbits.ANS5 = 1; } while(0)
-#define SWITCH_SetDigitalMode()     do { ANSELbits.ANS5 = 0; } while(0)
-
 /**
    @Param
     none

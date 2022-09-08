@@ -61,6 +61,7 @@ static void (*ADC1_DefaultInterruptHandler)(void) = NULL;
 
 void ADC1_Initialize (void)
 {
+    
     // ASAM enabled; ADDMABM disabled; ADSIDL disabled; DONE disabled; SIMSAM Sequential; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Clearing sample bit ends sampling and starts conversion; AD12B 12-bit; ADON enabled; SSRCG disabled; 
     AD1CON1bits.ADON = 0; // ADC is OFF
     AD1CON1bits.ADSIDL = 0; // Continue in idle mode
@@ -81,9 +82,9 @@ void ADC1_Initialize (void)
     AD1CON2bits.BUFM = 0b0;
     AD1CON2bits.ALTS = 0b0;
     
-    // SAMC 1; ADRC FOSC/2; ADCS 4; 
-    AD1CON3bits.ADRC = 0b0;
-    AD1CON3bits.SAMC = 1; // 1 TAD (Auto Sample Time bits)
+    // SAMC 14; ADRC FOSC/2; ADCS 4; 
+    AD1CON3bits.ADRC = 0b0; // ADRC FOSC/2
+    AD1CON3bits.SAMC = 14; // 1 TAD (Auto Sample Time bits)
     AD1CON3bits.ADCS = 4; // TAD  4 * TCY
 
     // CH0SA OA2/AN0; CH0SB OA2/AN0; CH0NB VREFL; CH0NA VREFL; 
@@ -102,6 +103,24 @@ void ADC1_Initialize (void)
     ADC1_SetInterruptHandler(&ADC1_CallBack);
    
     AD1CON1bits.ADON = 1; // Start ADC
+    
+    
+//        // ASAM enabled; ADDMABM disabled; ADSIDL disabled; DONE disabled; SIMSAM Simultaneous; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Clearing sample bit ends sampling and starts conversion; AD12B 12-bit; ADON enabled; SSRCG disabled; 
+//    AD1CON1 = 0x840C;
+//    // CSCNA enabled; VCFG0 AVDD; VCFG1 AVSS; ALTS disabled; BUFM disabled; SMPI Generates interrupt after completion of every 2nd sample/conversion operation; CHPS 1 Channel; 
+//    AD1CON2 = 0x404;
+//    // SAMC 14; ADRC FOSC/2; ADCS 4; 
+//    AD1CON3 = 0xE04;
+//    // CH0SA OA2/AN0; CH0SB OA2/AN0; CH0NB VREFL; CH0NA VREFL; 
+//    AD1CHS0 = 0x00;
+//    // CSS26 disabled; CSS25 disabled; CSS24 disabled; CSS31 disabled; CSS30 disabled; CSS19 disabled; CSS18 disabled; CSS29 disabled; CSS17 disabled; CSS28 disabled; CSS16 disabled; CSS27 disabled; 
+//    AD1CSSH = 0x00;
+//    // CSS9 disabled; CSS8 disabled; CSS7 disabled; CSS6 disabled; CSS5 enabled; CSS4 disabled; CSS3 disabled; CSS2 disabled; CSS15 disabled; CSS1 disabled; CSS14 disabled; CSS0 enabled; CSS13 disabled; CSS12 disabled; CSS11 disabled; CSS10 disabled; 
+//    AD1CSSL = 0x21;
+//    // DMABL Allocates 1 word of buffer to each analog input; ADDMAEN disabled; 
+//    AD1CON4 = 0x00;
+//    // CH123SA2 disabled; CH123SB2 CH1=OA2/AN0,CH2=AN1,CH3=AN2; CH123NA disabled; CH123NB CH1=VREF-,CH2=VREF-,CH3=VREF-; 
+//    AD1CHS123 = 0x00;
 }
 
 void __attribute__ ((weak)) ADC1_CallBack(void)

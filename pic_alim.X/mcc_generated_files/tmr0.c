@@ -144,14 +144,22 @@ void TMR0_ISR(void)
     TMR0H = timer0ReloadVal >> 8;
     TMR0L = (uint8_t) timer0ReloadVal;
 
-    if(TMR0_InterruptHandler)
-    {
-        TMR0_InterruptHandler();
-    }
+    // ticker function call;
+    // ticker is 1 -> Callback function gets called every time this ISR executes
+    TMR0_CallBack();
 
     // add your TMR0 interrupt custom code
 }
 
+void TMR0_CallBack(void)
+{
+    // Add your custom callback code here
+
+    if(TMR0_InterruptHandler)
+    {
+        TMR0_InterruptHandler();
+    }
+}
 
 void TMR0_SetInterruptHandler(void (* InterruptHandler)(void)){
     TMR0_InterruptHandler = InterruptHandler;

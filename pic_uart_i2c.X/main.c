@@ -43,9 +43,16 @@
 
 #include "mcc_generated_files/mcc.h"
 
-void i2c_handler_read()
-{
+void i2c_handler_read() {
     EUSART_Write(I2C_Read());
+}
+
+void i2c_handler_write() {
+    if(EUSART_is_rx_ready()){
+        I2C_Write(EUSART_Read());
+    }
+    else
+        I2C_Write(0x00);
 }
 
 void i2c_bus_col(){
@@ -64,6 +71,7 @@ void main(void)
     
     I2C_Open();
     I2C_SlaveSetReadIntHandler(i2c_handler_read);
+    I2C_SlaveSetWriteIntHandler(i2c_handler_write);
     I2C_SlaveSetBusColIntHandler(i2c_bus_col);
     I2C_SlaveSetWrColIntHandler(i2c_bus_col);
 
@@ -88,9 +96,12 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-
+    
+    //SWDTEN_bit = 1; /// Enable watchdog
+    
     while (1)
     {
+        ClrWdt();
         // Add your application code
         
     }

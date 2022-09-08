@@ -66,12 +66,12 @@ void PIN_MANAGER_Initialize(void)
     */
     TRISA = 0x37;
     TRISB = 0x70;
-    TRISC = 0xFC;
+    TRISC = 0xFF;
 
     /**
     ANSELx registers
     */
-    ANSEL = 0xFF;
+    ANSEL = 0xCF;
     ANSELH = 0x03;
 
     /**
@@ -87,8 +87,6 @@ void PIN_MANAGER_Initialize(void)
 
 
    
-    // Enable RABI interrupt 
-    INTCONbits.RABIE = 1; 
     
 }
   
