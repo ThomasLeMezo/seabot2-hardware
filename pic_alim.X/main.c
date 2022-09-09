@@ -17,15 +17,16 @@
         Driver Version    :  2.00
  */
 
-
 #include "mcc_generated_files/mcc.h"
 
+#define _XTAL_FREQ 16000000
+#define ADC_DELAY_BETWEEN_SAMPLE 4
+
 // I2C
-#define CODE_VERSION 0x02
+const char device_name[16] = "PIC_ALIM v3";
+#define CODE_VERSION 0x03
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
-
-const char device_name[16] = "PIC_ALIM v2";
 
 // State machine
 
@@ -162,6 +163,9 @@ void i2c_handler_write() {
         case 0xA1:
             I2C_Write(watchdog_cpt[1]);
             break;
+        case 0xA2:
+            I2C_Write(watchdog_cpt_default);
+            break;
 
         case 0xB0:
             I2C_Write(ILS_GetValue());
@@ -231,13 +235,20 @@ void measure_power() {
     // 10-bit ADC converter (0-3.3V)
     
     battery_voltage[0] = ADC1_GetConversion(BATT_1);
+    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     battery_voltage[1] = ADC1_GetConversion(BATT_2);
+    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     battery_voltage[2] = ADC1_GetConversion(BATT_3);
+    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     battery_voltage[3] = ADC1_GetConversion(BATT_4);
+    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
 
     power_current[0] = ADC1_GetConversion(CURRENT_ESC1);
+    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     power_current[1] = ADC1_GetConversion(CURRENT_ESC2);
+    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     power_current[2] = ADC1_GetConversion(CURRENT_MOTOR);
+    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
 }
 
 /*
@@ -348,10 +359,12 @@ void main(void) {
     INTERRUPT_PeripheralInterruptEnable();
 
     while (1) {
-        if (step_state_machine == 1) {
-            step_state_machine = 0;
+        if(state==POWER_ON)
             measure_power();
 
+        if (step_state_machine == 1) {
+            step_state_machine = 0;
+            
             switch (state) {
                 case IDLE: // Idle state
                     GLOBAL_POWER_SetLow();

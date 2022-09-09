@@ -148,7 +148,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC1" name="samplingFrequency"/>
-         <value>64.5161 kHz</value>
+         <value>29.8507 kHz</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC1" name="sysClock"/>
@@ -332,7 +332,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="ADC1" registerAlias="ADCON2"/>
-         <value>142</value>
+         <value>190</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="ADC1" registerAlias="ADRESH"/>
@@ -364,7 +364,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="ACQT"/>
-         <value>2</value>
+         <value>20</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC1" registerAlias="ADCON2" settingAlias="ADCS"/>
@@ -1292,11 +1292,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC1"/>
-         <value>BATT_3</value>
+         <value>BATT_2</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC2"/>
-         <value>BATT_2</value>
+         <value>BATT_3</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC3"/>
@@ -3810,7 +3810,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\adc1.c</file>
-         <hash>e83d8c1db77369adb07e58646b3b5b986421fea0d454337f02367600c9bede20</hash>
+         <hash>125c2da8e75290cb2ca97a9909ea0ee522f8d3048f243f22e41b63da4b80f148</hash>
       </entry>
       <entry>
          <file>main.c</file>
@@ -3822,7 +3822,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
-         <hash>1d799ff44f94dfadc2075347f5bb9ac7adc45aef5fdea58acc033554b93b3951</hash>
+         <hash>f014cce8f092c4a28ab5a5f0fec37c0d442a05988a7aea2d1b37b85228568ae7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr1.c</file>
@@ -3850,7 +3850,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\adc1.h</file>
-         <hash>81dadb995ae4f341030e37fa24820d43165d34894f0ce15b8ac3b467156e05b9</hash>
+         <hash>49dfb30f0d197738552a9d4af58042bd27f30bea760e4f1a4cdb6da9611576ea</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\interrupt_manager.c</file>
