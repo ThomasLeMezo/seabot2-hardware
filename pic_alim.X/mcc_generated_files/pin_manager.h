@@ -163,33 +163,33 @@
 #define BATT_4_SetAnalogMode()      do { ANSELbits.ANS4 = 1; } while(0)
 #define BATT_4_SetDigitalMode()     do { ANSELbits.ANS4 = 0; } while(0)
 
-// get/set BATT_2 aliases
-#define BATT_2_TRIS                 TRISCbits.TRISC1
-#define BATT_2_LAT                  LATCbits.LATC1
-#define BATT_2_PORT                 PORTCbits.RC1
-#define BATT_2_ANS                  ANSELbits.ANS5
-#define BATT_2_SetHigh()            do { LATCbits.LATC1 = 1; } while(0)
-#define BATT_2_SetLow()             do { LATCbits.LATC1 = 0; } while(0)
-#define BATT_2_Toggle()             do { LATCbits.LATC1 = ~LATCbits.LATC1; } while(0)
-#define BATT_2_GetValue()           PORTCbits.RC1
-#define BATT_2_SetDigitalInput()    do { TRISCbits.TRISC1 = 1; } while(0)
-#define BATT_2_SetDigitalOutput()   do { TRISCbits.TRISC1 = 0; } while(0)
-#define BATT_2_SetAnalogMode()      do { ANSELbits.ANS5 = 1; } while(0)
-#define BATT_2_SetDigitalMode()     do { ANSELbits.ANS5 = 0; } while(0)
-
 // get/set BATT_3 aliases
-#define BATT_3_TRIS                 TRISCbits.TRISC2
-#define BATT_3_LAT                  LATCbits.LATC2
-#define BATT_3_PORT                 PORTCbits.RC2
-#define BATT_3_ANS                  ANSELbits.ANS6
-#define BATT_3_SetHigh()            do { LATCbits.LATC2 = 1; } while(0)
-#define BATT_3_SetLow()             do { LATCbits.LATC2 = 0; } while(0)
-#define BATT_3_Toggle()             do { LATCbits.LATC2 = ~LATCbits.LATC2; } while(0)
-#define BATT_3_GetValue()           PORTCbits.RC2
-#define BATT_3_SetDigitalInput()    do { TRISCbits.TRISC2 = 1; } while(0)
-#define BATT_3_SetDigitalOutput()   do { TRISCbits.TRISC2 = 0; } while(0)
-#define BATT_3_SetAnalogMode()      do { ANSELbits.ANS6 = 1; } while(0)
-#define BATT_3_SetDigitalMode()     do { ANSELbits.ANS6 = 0; } while(0)
+#define BATT_3_TRIS                 TRISCbits.TRISC1
+#define BATT_3_LAT                  LATCbits.LATC1
+#define BATT_3_PORT                 PORTCbits.RC1
+#define BATT_3_ANS                  ANSELbits.ANS5
+#define BATT_3_SetHigh()            do { LATCbits.LATC1 = 1; } while(0)
+#define BATT_3_SetLow()             do { LATCbits.LATC1 = 0; } while(0)
+#define BATT_3_Toggle()             do { LATCbits.LATC1 = ~LATCbits.LATC1; } while(0)
+#define BATT_3_GetValue()           PORTCbits.RC1
+#define BATT_3_SetDigitalInput()    do { TRISCbits.TRISC1 = 1; } while(0)
+#define BATT_3_SetDigitalOutput()   do { TRISCbits.TRISC1 = 0; } while(0)
+#define BATT_3_SetAnalogMode()      do { ANSELbits.ANS5 = 1; } while(0)
+#define BATT_3_SetDigitalMode()     do { ANSELbits.ANS5 = 0; } while(0)
+
+// get/set BATT_2 aliases
+#define BATT_2_TRIS                 TRISCbits.TRISC2
+#define BATT_2_LAT                  LATCbits.LATC2
+#define BATT_2_PORT                 PORTCbits.RC2
+#define BATT_2_ANS                  ANSELbits.ANS6
+#define BATT_2_SetHigh()            do { LATCbits.LATC2 = 1; } while(0)
+#define BATT_2_SetLow()             do { LATCbits.LATC2 = 0; } while(0)
+#define BATT_2_Toggle()             do { LATCbits.LATC2 = ~LATCbits.LATC2; } while(0)
+#define BATT_2_GetValue()           PORTCbits.RC2
+#define BATT_2_SetDigitalInput()    do { TRISCbits.TRISC2 = 1; } while(0)
+#define BATT_2_SetDigitalOutput()   do { TRISCbits.TRISC2 = 0; } while(0)
+#define BATT_2_SetAnalogMode()      do { ANSELbits.ANS6 = 1; } while(0)
+#define BATT_2_SetDigitalMode()     do { ANSELbits.ANS6 = 0; } while(0)
 
 // get/set BATT_1 aliases
 #define BATT_1_TRIS                 TRISCbits.TRISC3
@@ -256,6 +256,90 @@ void PIN_MANAGER_Initialize (void);
     PIN_MANAGER_IOC();
  */
 void PIN_MANAGER_IOC(void);
+
+
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    Interrupt on Change Handler for the IOCA2 pin functionality
+ * @Example
+    IOCA2_ISR();
+ */
+void IOCA2_ISR(void);
+
+/**
+  @Summary
+    Interrupt Handler Setter for IOCA2 pin interrupt-on-change functionality
+
+  @Description
+    Allows selecting an interrupt handler for IOCA2 at application runtime
+    
+  @Preconditions
+    Pin Manager intializer called
+
+  @Returns
+    None.
+
+  @Param
+    InterruptHandler function pointer.
+
+  @Example
+    PIN_MANAGER_Initialize();
+    IOCA2_SetInterruptHandler(MyInterruptHandler);
+
+*/
+void IOCA2_SetInterruptHandler(void (* InterruptHandler)(void));
+
+/**
+  @Summary
+    Dynamic Interrupt Handler for IOCA2 pin
+
+  @Description
+    This is a dynamic interrupt handler to be used together with the IOCA2_SetInterruptHandler() method.
+    This handler is called every time the IOCA2 ISR is executed and allows any function to be registered at runtime.
+    
+  @Preconditions
+    Pin Manager intializer called
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    PIN_MANAGER_Initialize();
+    IOCA2_SetInterruptHandler(IOCA2_InterruptHandler);
+
+*/
+extern void (*IOCA2_InterruptHandler)(void);
+
+/**
+  @Summary
+    Default Interrupt Handler for IOCA2 pin
+
+  @Description
+    This is a predefined interrupt handler to be used together with the IOCA2_SetInterruptHandler() method.
+    This handler is called every time the IOCA2 ISR is executed. 
+    
+  @Preconditions
+    Pin Manager intializer called
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    PIN_MANAGER_Initialize();
+    IOCA2_SetInterruptHandler(IOCA2_DefaultInterruptHandler);
+
+*/
+void IOCA2_DefaultInterruptHandler(void);
 
 
 

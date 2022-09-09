@@ -95,8 +95,8 @@ typedef struct
 typedef enum
 {
     BATT_4 =  0x4,
-    BATT_2 =  0x5,
-    BATT_3 =  0x6,
+    BATT_3 =  0x5,
+    BATT_2 =  0x6,
     BATT_1 =  0x7,
     CURRENT_ESC1 =  0x8,
     CURRENT_ESC2 =  0x9,

@@ -19,7 +19,7 @@
 
 #include "mcc_generated_files/mcc.h"
 
-#define _XTAL_FREQ 16000000
+
 #define ADC_DELAY_BETWEEN_SAMPLE 4
 
 // I2C
@@ -326,7 +326,8 @@ void timer_sleep() {
 }
 
 void ils_interrupt(){
-    
+    char read_portA = PORTA; /// See datasheet to avoid new interruptions
+    char read_portB = PORTB;
 }
 
 /*
@@ -350,7 +351,7 @@ void main(void) {
     TMR1_SetInterruptHandler(timer_led);
     TMR3_SetInterruptHandler(timer_state_machine);
     
-    //IOCA2_SetInterruptHandler(ils_interrupt);
+    IOCA2_SetInterruptHandler(ils_interrupt);
     
     // Interruptions
 
@@ -372,8 +373,9 @@ void main(void) {
                     watchdog_cpt[0] = watchdog_cpt_default;
                     watchdog_cpt[1] = 0;
 
-                    //if (ILS_GetValue() == 1) /// ILS not detected
-                    //    SLEEP();
+                    ils_analysis(POWER_ON); // Before and after to reset ils not detected
+                    if (ILS_GetValue() == 1) /// ILS not detected
+                        SLEEP();
                     ils_analysis(POWER_ON);
                     break;
                     

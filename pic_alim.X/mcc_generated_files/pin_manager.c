@@ -51,6 +51,8 @@
 
 
 
+void (*IOCA2_InterruptHandler)(void);
+
 
 void PIN_MANAGER_Initialize(void)
 {
@@ -83,9 +85,16 @@ void PIN_MANAGER_Initialize(void)
 
 
 
+    /**
+    IOCx registers 
+    */
+    //interrupt on change for group IOCA - flag
+    IOCAbits.IOCA2 = 1;
 
 
 
+    // register default IOC callback functions at runtime; use these methods to register a custom function
+    IOCA2_SetInterruptHandler(IOCA2_DefaultInterruptHandler);
    
     // Enable RABI interrupt 
     INTCONbits.RABIE = 1; 
@@ -94,8 +103,42 @@ void PIN_MANAGER_Initialize(void)
   
 void PIN_MANAGER_IOC(void)
 {   
+	// interrupt on change for pin IOCA2
+    if(IOCAbits.IOCA2 == 1)
+    {
+        IOCA2_ISR();  
+    }	
 	// Clear global Interrupt-On-Change flag
     INTCONbits.RABIF = 0;
+}
+
+/**
+   IOCA2 Interrupt Service Routine
+*/
+void IOCA2_ISR(void) {
+
+    // Add custom IOCA2 code
+
+    // Call the interrupt handler for the callback registered at runtime
+    if(IOCA2_InterruptHandler)
+    {
+        IOCA2_InterruptHandler();
+    }
+}
+
+/**
+  Allows selecting an interrupt handler for IOCA2 at application runtime
+*/
+void IOCA2_SetInterruptHandler(void (* InterruptHandler)(void)){
+    IOCA2_InterruptHandler = InterruptHandler;
+}
+
+/**
+  Default interrupt handler for IOCA2
+*/
+void IOCA2_DefaultInterruptHandler(void){
+    // add your IOCA2 interrupt custom code
+    // or set custom function using IOCA2_SetInterruptHandler()
 }
 
 /**

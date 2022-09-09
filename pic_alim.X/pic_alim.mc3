@@ -1292,11 +1292,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC1"/>
-         <value>BATT_2</value>
+         <value>BATT_3</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC2"/>
-         <value>BATT_3</value>
+         <value>BATT_2</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC3"/>
@@ -1524,7 +1524,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="ioc RA2"/>
-         <value>none</value>
+         <value>any</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="ioc RA3"/>
@@ -3822,7 +3822,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
-         <hash>f014cce8f092c4a28ab5a5f0fec37c0d442a05988a7aea2d1b37b85228568ae7</hash>
+         <hash>580499310ad00129615563b651edbb6344d4eb53d264f131e630d5b2f9d59b0c</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr1.c</file>
@@ -3846,11 +3846,11 @@
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.c</file>
-         <hash>1ee2ae6e87a0e27c840fd08096826b06a95f6e01dec56b840fdbfa595c10e472</hash>
+         <hash>8025a4b65c4e8fdaaadb674e2685a8ded6d506520edac7b419b248fae9e0d2d5</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\adc1.h</file>
-         <hash>49dfb30f0d197738552a9d4af58042bd27f30bea760e4f1a4cdb6da9611576ea</hash>
+         <hash>81dadb995ae4f341030e37fa24820d43165d34894f0ce15b8ac3b467156e05b9</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\interrupt_manager.c</file>
