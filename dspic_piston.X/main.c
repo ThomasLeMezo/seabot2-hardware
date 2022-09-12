@@ -261,6 +261,8 @@ void handle_timer_regulation(){
             
     // => V_batt = (adc_result*3.3/4096)/(180/(820+180)) = adc_result * 0.00447591
     // ex : 3574 => 15.99V
+    
+    __delay_us(3);
     adc_batt_tension = ADC1_ConversionResultGet(BATT_VOLTAGE);
     //batt_tension = (adc_batt_tension*3.3/4096.0) / (180.0/(180.0+820.0)); // 180kOhm & 820kOhm
     

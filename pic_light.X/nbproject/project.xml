@@ -15,7 +15,11 @@
             <sourceRootList/>
             <confList>
                 <confElem>
-                    <name>default</name>
+                    <name>PIC18F14K22_J7</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>PIC18F13K22_J7</name>
                     <type>2</type>
                 </confElem>
             </confList>
