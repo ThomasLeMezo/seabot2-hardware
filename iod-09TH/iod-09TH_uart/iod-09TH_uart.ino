@@ -106,7 +106,7 @@ void print_screen(){
   // Temperature
   gfx.MoveTo(64, 28);
   if(data_temperature < temperature_threshold)
-    gfx.TextColor(GREEN);
+    gfx.TextColor(WHITE);
   else
     gfx.TextColor(RED);
   char s_temp[8] = "00.0C";
