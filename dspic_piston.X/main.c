@@ -152,10 +152,10 @@ void i2c_handler_write() {
         case 0x0E ... 0x0F:
             I2C_Write(motor_set_point>> (8*(i2c_register + i2c_nb_bytes - 0x0E)));
             break;
-        case 0x20:
+        case 0x10:
             I2C_Write(MOTOR_CMD);
             break;
-        case 0x21:
+        case 0x11:
             I2C_Write(MOTOR_CMD>>8);
             break;
             

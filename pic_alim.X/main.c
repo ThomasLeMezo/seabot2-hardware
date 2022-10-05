@@ -23,8 +23,8 @@
 #define ADC_DELAY_BETWEEN_SAMPLE 4
 
 // I2C
-const char device_name[16] = "PIC_ALIM v3";
-#define CODE_VERSION 0x03
+const char device_name[16] = "PIC_ALIM v4";
+#define CODE_VERSION 0x04
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
@@ -37,8 +37,8 @@ volatile unsigned char state = PRE_POWER_ON;
 volatile unsigned char step_state_machine = 0;
 
 // Batteries
-volatile unsigned short battery_voltage[4] = {0, 0, 0, 0};
-volatile unsigned short power_current[3] = {0, 0, 0};
+volatile uint8_t battery_voltage[8] = {0, 0, 0, 0};
+volatile uint8_t power_current[6] = {0, 0, 0};
 
 // ILS
 
@@ -110,48 +110,27 @@ void i2c_handler_read() {
 }
 
 void i2c_handler_write() {
-    switch (i2c_register + i2c_nb_bytes) {
-        case 0x00:
-            I2C_Write(battery_voltage[0] & 0xFF);
-            break;
-        case 0x01:
-            I2C_Write(battery_voltage[0] >> 8);
-            break;
-        case 0x02:
-            I2C_Write(battery_voltage[1] & 0xFF);
-            break;
-        case 0x03:
-            I2C_Write(battery_voltage[1] >> 8);
-            break;
-        case 0x04:
-            I2C_Write(battery_voltage[2] & 0xFF);
-            break;
-        case 0x05:
-            I2C_Write(battery_voltage[2] >> 8);
-            break;
-        case 0x06:
-            I2C_Write(battery_voltage[3] & 0xFF);
-            break;
+    unsigned char resgister = i2c_register + i2c_nb_bytes;
+    switch (resgister) {
+        case 0x00:            
+        case 0x01:            
+        case 0x02:            
+        case 0x03:            
+        case 0x04:            
+        case 0x05:            
+        case 0x06:            
         case 0x07:
-            I2C_Write(battery_voltage[3] >> 8);
+            I2C_Write(battery_voltage[resgister]);
+            __delay_us(20);
             break;
         case 0x08:
-            I2C_Write(power_current[0] & 0xFF);
-            break;
         case 0x09:
-            I2C_Write(power_current[0] >> 8);
-            break;
         case 0x0A:
-            I2C_Write(power_current[1] & 0xFF);
-            break;
         case 0x0B:
-            I2C_Write(power_current[1] >> 8);
-            break;
         case 0x0C:
-            I2C_Write(power_current[2] & 0xFF);
-            break;
         case 0x0D:
-            I2C_Write(power_current[2] >> 8);
+            I2C_Write(power_current[resgister-0x08]);
+            __delay_us(20);
             break;
         case 0x0E:
             I2C_Write(state);
@@ -191,7 +170,7 @@ void i2c_handler_write() {
         case 0xFD:
         case 0xFE:
         case 0xFF:
-            I2C_Write(device_name[i2c_register + i2c_nb_bytes - 0xF0]);
+            I2C_Write(device_name[resgister - 0xF0]);
             break;
         
         default:
@@ -231,24 +210,24 @@ void ils_analysis(unsigned char new_state) {
     }
 }
 
+const char ADC_BATT[4] = {BATT_1, BATT_2, BATT_3, BATT_4};
+const char ADC_CURRENT[3] = {CURRENT_ESC1, CURRENT_ESC2, CURRENT_MOTOR};
 void measure_power() {
     // 10-bit ADC converter (0-3.3V)
     
-    battery_voltage[0] = ADC1_GetConversion(BATT_1);
-    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
-    battery_voltage[1] = ADC1_GetConversion(BATT_2);
-    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
-    battery_voltage[2] = ADC1_GetConversion(BATT_3);
-    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
-    battery_voltage[3] = ADC1_GetConversion(BATT_4);
-    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
-
-    power_current[0] = ADC1_GetConversion(CURRENT_ESC1);
-    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
-    power_current[1] = ADC1_GetConversion(CURRENT_ESC2);
-    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
-    power_current[2] = ADC1_GetConversion(CURRENT_MOTOR);
-    __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
+    for(int i=0; i<4; i++){
+        uint16_t result = ADC1_GetConversion(ADC_BATT[i]);
+        battery_voltage[i*2] = result & 0xFF;
+        battery_voltage[i*2+1] = result >> 8;
+        __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
+    }
+    
+    for(int i=0; i<3; i++){
+        uint16_t result = ADC1_GetConversion(ADC_CURRENT[i]);
+        power_current[i*2] = result & 0xFF;
+        power_current[i*2+1] = result >> 8;
+        __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
+    }
 }
 
 /*
