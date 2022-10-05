@@ -11,7 +11,7 @@
 
 #include <GFX4dIoD9.h>
 #define DEBUG false
-#define CODE_VERSION 0x02
+#define CODE_VERSION 0x03
 
 GFX4dIoD9 gfx = GFX4dIoD9();
 
@@ -30,7 +30,7 @@ byte data_time_remain[2] = {0,0};
 byte data_status = 0;
 
 
-short pressure_threshold = 700;
+short pressure_threshold = 750;
 short tension_threshold = 120;
 short temperature_threshold = 400;
 short hygro_threshold = 70;
@@ -228,6 +228,7 @@ void parseUART(){
         {
           data_hygro = Serial.read();
         }
+        break;
 
       case 7: // Mission name
         {
