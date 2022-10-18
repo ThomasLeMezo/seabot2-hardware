@@ -53,10 +53,7 @@ volatile unsigned short is_init = 0;
 unsigned short watchdog_restart_default = 30; // in min
 volatile unsigned short watchdog_countdown_restart = 30;
 
-//unsigned short watchdog_cpt_sec = 59;
-//unsigned short watchdog_cpt_default = 59;
 
-signed short qei_overflow = 0;
 
 void CLOCK_Initialize(void){
     // FRCDIV FRC/2; PLLPRE 2; DOZE 1:8; PLLPOST 1:4; DOZEN disabled; ROI disabled; 
@@ -144,6 +141,5 @@ void SYSTEM_Initialize(){
 }
 
 void QEI_Reset_Count(){
-    qei_overflow = 0;
-    POS1CNT = 0;
+    POS1CNT = POS1CNT_MIDDLE;
 }

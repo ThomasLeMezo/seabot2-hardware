@@ -38,17 +38,19 @@ RA0 : Motor Current Sensor
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "DSPIC_PISTON v2";
+const char device_name[16] = "DSPIC_PISTON v3";
 
 // State machine
 enum state_piston {
-    PISTON_SEARCH_SWITCH_BOTTOM, PISTON_RESET_SWITCH_BOTTOM, PISTON_REGULATION
+    PISTON_SEARCH_SWITCH_BOTTOM, PISTON_RELEASE_SWITCH_BOTTOM, PISTON_BACK_SWITCH_BOTTOM, PISTON_REGULATION, PISTON_EXIT
 };
 volatile unsigned char state = PISTON_SEARCH_SWITCH_BOTTOM;
+unsigned char is_reset_once = false;
 
 // Set point & position
 volatile unsigned char i2c_set_point_new = 0;
 volatile signed long int position = 0;
+volatile signed long int position_reset = 0;
 volatile signed long int position_set_point = 0;
 volatile signed long int position_error = 0;
 volatile unsigned char position_set_point_i2c[4];
@@ -70,10 +72,14 @@ unsigned short motor_cmd_i2c = MOTOR_STOP;
 
 // Regulation
 float motor_regulation_K = 0.3;
+float motor_regulation_Ki = 0.0;
 unsigned short motor_regulation_dead_zone = 50;
 
 unsigned char i2c_new_data_motor_regulation_K = 0;
 unsigned char i2c_new_motor_regulation_K[2]; /// div by 100 to get float motor_regulation
+
+unsigned char i2c_new_data_motor_regulation_Ki = 0;
+unsigned char i2c_new_motor_regulation_Ki[2]; /// div by 100 to get float motor_regulation
 
 unsigned char i2c_new_data_motor_regulation_dead_zone = 0;
 unsigned char i2c_new_motor_regulation_dead_zone[2];
@@ -94,8 +100,12 @@ void i2c_handler_read() {
                 position_set_point_i2c[i2c_register + i2c_nb_bytes - 1] = read_byte;
                 break;
             case 0x05:
-                if(read_byte==1)
-                    state = PISTON_SEARCH_SWITCH_BOTTOM;
+                if(read_byte==PISTON_REGULATION){
+                    if(is_reset_once)
+                        state = PISTON_REGULATION;
+                }
+                else
+                    state = read_byte;
                 break;
             case 0x10:
                 if (read_byte)
@@ -158,6 +168,8 @@ void i2c_handler_write() {
         case 0x11:
             I2C_Write(MOTOR_CMD>>8);
             break;
+        case 0x12 ... 0x15:
+            I2C_Write(position_reset>> (8*(i2c_register + i2c_nb_bytes - 0x00)));
             
             /// End of status data
             
@@ -210,11 +222,7 @@ void __attribute__((__interrupt__, auto_psv)) _INT0Interrupt() {
  */
 void __attribute__((__interrupt__, auto_psv)) _QEIInterrupt() {
     _QEIIF = 0;
-    if (QEI1CONbits.UPDN)
-        qei_overflow += 1;
-    else
-        qei_overflow -= 1;
-
+    /// ToDo : reset if overflow ?
 }
 
 /*
@@ -224,15 +232,17 @@ void handle_timer_watchdog(){
     if(watchdog_countdown_restart>0)
       watchdog_countdown_restart--;  
     else{
-      position_set_point = 0;
+        state = PISTON_EXIT;
     }
 }
 
 /*
  * @brief Timer 2
  */
-void handle_timer_regulation(){    
-    position = ((signed long int)(qei_overflow)<<16) + POS1CNT;
+void handle_timer_regulation(){
+    int read_pos1cnt = POS1CNT - POS1CNT_MIDDLE;
+    POS1CNT -= read_pos1cnt;
+    position += read_pos1cnt;
     
     if(i2c_set_point_new==NEW_WAYPOINT_I2C){
         i2c_set_point_new = 0;
@@ -328,7 +338,7 @@ int main() {
     is_init = 1;
 
     // Resset the  POS1CNT = 0x00;
-    POS1CNT = 0x0000;
+    QEI_Reset_Count();
     
     while (1) {
         ClrWdt(); // Clear wdt
@@ -339,12 +349,15 @@ int main() {
             LED_SetLow();
         
         switch(state){
+            /// Rapid move to bottom to find the bottom switch
             case PISTON_SEARCH_SWITCH_BOTTOM:
                 if(!SWITCH_BOTTOM_GetValue()){
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
-                    state = PISTON_RESET_SWITCH_BOTTOM;
                     __delay_ms(250);
+                    if(!SWITCH_BOTTOM_GetValue()){
+                        state = PISTON_RELEASE_SWITCH_BOTTOM;
+                    }
                 }
                 else{
                     ENABLE_SetHigh();
@@ -352,12 +365,14 @@ int main() {
                 }
                 break;
             
-            case PISTON_RESET_SWITCH_BOTTOM:
+            /// Slow move upward to release the switch
+            case PISTON_RELEASE_SWITCH_BOTTOM:
                 if(SWITCH_BOTTOM_GetValue()){
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
-                    state = PISTON_REGULATION;
-                    QEI_Reset_Count();
+                    if(SWITCH_BOTTOM_GetValue()){
+                        state = PISTON_BACK_SWITCH_BOTTOM;
+                    }
                 }
                 else{
                     ENABLE_SetHigh();
@@ -365,9 +380,42 @@ int main() {
                 }
                 break;
                 
+            /// Slow move backward to enable the switch and make the zero
+            case PISTON_BACK_SWITCH_BOTTOM:
+                if(!SWITCH_BOTTOM_GetValue()){
+                    MOTOR_CMD = MOTOR_STOP;
+                    motor_set_point = MOTOR_STOP;
+                    if(SWITCH_BOTTOM_GetValue()){
+                        state = PISTON_REGULATION;
+                        QEI_Reset_Count();
+                        position_reset = position;
+                        position = 0;
+                        is_reset_once = true;
+                    }
+                }
+                else{
+                    ENABLE_SetHigh();
+                    motor_set_point = MOTOR_DOWN_RESET;
+                }
+                break;
+                
             case PISTON_REGULATION:
                 ENABLE_SetHigh();
                 break;
+                
+            case PISTON_EXIT:
+                ENABLE_SetHigh();
+                if(!SWITCH_BOTTOM_GetValue()){
+                    MOTOR_CMD = MOTOR_STOP;
+                    motor_set_point = MOTOR_STOP;
+                    position_set_point = position;
+                }
+                else{
+                    ENABLE_SetHigh();
+                    motor_set_point = MOTOR_DOWN;
+                }
+                break;
+                
             default:
                 break;
         }
