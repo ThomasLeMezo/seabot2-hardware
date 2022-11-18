@@ -38,7 +38,7 @@ RA0 : Motor Current Sensor
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "DSPIC_PISTON v3";
+const char device_name[16] = "DSPIC_PISTON v4";
 
 // State machine
 enum state_piston {
@@ -60,6 +60,8 @@ volatile unsigned char position_set_point_i2c[4];
 
 volatile uint16_t motor_set_point = MOTOR_STOP;
 volatile uint16_t motor_delta_speed = (100/REGULATION_LOOP_FREQ)*MOTOR_V_TO_CMD; // Limit to 100V/s, delta_speed in PWM quantum/0.02s = 250
+volatile unsigned char motor_enable_cpt_reset = 5;
+volatile unsigned char motor_enable_cpt = 5;
 
 volatile uint16_t adc_motor_current = 0;
 volatile uint16_t adc_batt_tension = 0;
@@ -106,6 +108,9 @@ void i2c_handler_read() {
                 }
                 else
                     state = read_byte;
+                break;
+            case 0x06:
+                motor_enable_cpt_reset = read_byte;
                 break;
             case 0x10:
                 if (read_byte)
@@ -311,6 +316,16 @@ void handle_timer_regulation(){
         }
     }
     
+    if(MOTOR_CMD == MOTOR_STOP){
+        if(motor_enable_cpt>0)
+            motor_enable_cpt--;
+        else
+            ENABLE_SetLow();
+    }
+    else{
+        ENABLE_SetHigh();
+        motor_enable_cpt = motor_enable_cpt_reset;
+    }
     // Add a cpt to set enable Low when position set_point is reached in the case Regulation
 }
 
@@ -360,7 +375,6 @@ int main() {
                     }
                 }
                 else{
-                    ENABLE_SetHigh();
                     motor_set_point = MOTOR_DOWN;
                 }
                 break;
@@ -375,7 +389,6 @@ int main() {
                     }
                 }
                 else{
-                    ENABLE_SetHigh();
                     motor_set_point = MOTOR_UP_RESET;
                 }
                 break;
@@ -394,24 +407,20 @@ int main() {
                     }
                 }
                 else{
-                    ENABLE_SetHigh();
                     motor_set_point = MOTOR_DOWN_RESET;
                 }
                 break;
                 
             case PISTON_REGULATION:
-                ENABLE_SetHigh();
                 break;
                 
             case PISTON_EXIT:
-                ENABLE_SetHigh();
                 if(!SWITCH_BOTTOM_GetValue()){
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
                     position_set_point = position;
                 }
                 else{
-                    ENABLE_SetHigh();
                     motor_set_point = MOTOR_DOWN;
                 }
                 break;

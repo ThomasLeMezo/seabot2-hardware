@@ -24,6 +24,10 @@
                     <name>Proteus</name>
                     <type>2</type>
                 </confElem>
+                <confElem>
+                    <name>Program_With_Supply</name>
+                    <type>2</type>
+                </confElem>
             </confList>
             <formatting>
                 <project-formatting-style>false</project-formatting-style>
