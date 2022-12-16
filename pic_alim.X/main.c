@@ -23,8 +23,8 @@
 #define ADC_DELAY_BETWEEN_SAMPLE 4
 
 // I2C
-const char device_name[16] = "PIC_ALIM v4";
-#define CODE_VERSION 0x04
+const char device_name[16] = "PIC_ALIM v5";
+#define CODE_VERSION 0x05
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
@@ -237,7 +237,7 @@ void measure_power() {
         __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     }
     battery_voltage_adc = (unsigned short)round((battery_voltage_adc*0.9)
-                            +((battery_voltage[7]<<8)+(battery_voltage[6]<<4))*0.1);
+                            +(((battery_voltage[7]<<8)+battery_voltage[6])<<4)*0.1);
     
     for(int i=0; i<3; i++){
         uint16_t result = ADC1_GetConversion(ADC_CURRENT[i]);
