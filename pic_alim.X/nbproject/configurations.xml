@@ -57,7 +57,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.32</languageToolchainVersion>
+        <languageToolchainVersion>2.40</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -240,14 +240,6 @@
                   value="Press to select which tool pack to use"/>
         <property key="voltagevalue" value="3.3"/>
       </Tool>
-      <VSMViewerPlatformTool>
-        <property key="debugoptions.debug-startup" value="Use system settings"/>
-        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
-        <property key="design.file" value="test/test_pic_alim.pdsprj"/>
-        <property key="lastid" value=""/>
-        <property key="target.ip.address" value="localhost"/>
-        <property key="target.ip.port" value="8001"/>
-      </VSMViewerPlatformTool>
       <XC8-CO>
         <property key="coverage-enable" value=""/>
         <property key="stack-guidance" value="false"/>
@@ -337,9 +329,9 @@
         <targetDevice>PIC18LF14K22</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>VSMViewerPlatformTool</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.32</languageToolchainVersion>
+        <languageToolchainVersion>2.40</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -522,14 +514,6 @@
                   value="Press to select which tool pack to use"/>
         <property key="voltagevalue" value="3.25"/>
       </Tool>
-      <VSMViewerPlatformTool>
-        <property key="debugoptions.debug-startup" value="Use system settings"/>
-        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
-        <property key="design.file" value="test/test_pic_alim.pdsprj"/>
-        <property key="lastid" value=""/>
-        <property key="target.ip.address" value="localhost"/>
-        <property key="target.ip.port" value="8001"/>
-      </VSMViewerPlatformTool>
       <XC8-CO>
         <property key="coverage-enable" value=""/>
         <property key="stack-guidance" value="false"/>
