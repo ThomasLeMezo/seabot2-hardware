@@ -66,8 +66,8 @@ volatile unsigned short cpt_led = 100;
 // Sleep mode
 volatile unsigned char time_to_start[3] = {0, 0, 5}; // hour, min, sec
 volatile unsigned char default_time_to_start[3] = {0, 0, 5}; // hour, min, sec
-volatile unsigned char time_to_stop = 60; // in sec (max 255 sec)
-volatile unsigned char default_time_to_stop = 60;
+volatile unsigned short time_to_stop = 350; // in sec (max 255 sec)
+volatile unsigned short default_time_to_stop = 350;
 
 // Watchdog
 volatile unsigned char watchdog_cpt[2] = {60, 0}; // min, sec (only min can be set by the user)
@@ -105,7 +105,7 @@ void i2c_handler_read() {
                 default_time_to_start[2] = read_byte;
                 break;
             case 0x04:
-                default_time_to_stop = read_byte;
+                default_time_to_stop = (((unsigned short)read_byte)<<2);
                 break;
             case 0x05:
                 watchdog_cpt_default = read_byte;

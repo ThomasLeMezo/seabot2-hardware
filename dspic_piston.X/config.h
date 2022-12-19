@@ -10,7 +10,7 @@
 
 #define POS1CNT_MIDDLE 32768
 
-#define CODE_VERSION 0x04
+#define CODE_VERSION 0x05
 #define VCC 3.3 // dsPIC VCC
 
 extern volatile unsigned short is_init;

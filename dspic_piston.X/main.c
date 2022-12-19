@@ -38,11 +38,11 @@ RA0 : Motor Current Sensor
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "DSPIC_PISTON v4";
+const char device_name[16] = "DSPIC_PISTON v5";
 
 // State machine
 enum state_piston {
-    PISTON_SEARCH_SWITCH_BOTTOM, PISTON_RELEASE_SWITCH_BOTTOM, PISTON_BACK_SWITCH_BOTTOM, PISTON_REGULATION, PISTON_EXIT
+    PISTON_SEARCH_SWITCH_BOTTOM, PISTON_RELEASE_SWITCH_BOTTOM, PISTON_BACK_SWITCH_BOTTOM, PISTON_REGULATION, PISTON_EXIT, PISTON_BATT_LOW
 };
 volatile unsigned char state = PISTON_SEARCH_SWITCH_BOTTOM;
 unsigned char is_reset_once = false;
@@ -65,6 +65,9 @@ volatile unsigned char motor_enable_cpt = 5;
 
 volatile uint16_t adc_motor_current = 0;
 volatile uint16_t adc_batt_tension = 0;
+#define ADC_BATT_TENSION_THRESHOLD 2703.0
+#define ADC_BATT_TENSION_FILTER_COEFF 0.9
+volatile float adc_batt_tension_filtered = ADC_BATT_TENSION_THRESHOLD;
 
 volatile float motor_current = 0;
 volatile float motor_tension = 0;
@@ -280,6 +283,8 @@ void handle_timer_regulation(){
     __delay_us(3);
     adc_batt_tension = ADC1_ConversionResultGet(BATT_VOLTAGE);
     //batt_tension = (adc_batt_tension*3.3/4096.0) / (180.0/(180.0+820.0)); // 180kOhm & 820kOhm
+    adc_batt_tension_filtered = adc_batt_tension_filtered*ADC_BATT_TENSION_FILTER_COEFF
+            + adc_batt_tension*(1.0-ADC_BATT_TENSION_FILTER_COEFF);
     
     //motor_tension = batt_tension * ((MOTOR_CMD-MOTOR_STOP)/(MOTOR_PWM_MAX/2.0));
     
@@ -412,9 +417,22 @@ int main() {
                 break;
                 
             case PISTON_REGULATION:
+                if(adc_batt_tension_filtered<ADC_BATT_TENSION_THRESHOLD)
+                    state = PISTON_BATT_LOW;
                 break;
                 
             case PISTON_EXIT:
+                if(!SWITCH_BOTTOM_GetValue()){
+                    MOTOR_CMD = MOTOR_STOP;
+                    motor_set_point = MOTOR_STOP;
+                    position_set_point = position;
+                }
+                else{
+                    motor_set_point = MOTOR_DOWN;
+                }
+                break;
+                
+            case PISTON_BATT_LOW:
                 if(!SWITCH_BOTTOM_GetValue()){
                     MOTOR_CMD = MOTOR_STOP;
                     motor_set_point = MOTOR_STOP;
