@@ -38,7 +38,7 @@ RA0 : Motor Current Sensor
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "DSPIC_PISTON v5";
+const char device_name[16] = "DSPIC_PISTON v6";
 
 // State machine
 enum state_piston {
@@ -240,7 +240,8 @@ void handle_timer_watchdog(){
     if(watchdog_countdown_restart>0)
       watchdog_countdown_restart--;  
     else{
-        state = PISTON_EXIT;
+        if(state == PISTON_REGULATION)
+            state = PISTON_EXIT;
     }
 }
 

@@ -203,6 +203,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3fff"/>
         <property key="poweroptions.powerenable" value="true"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/Thomas/Documents/seabot2-hardware/pic_light.X/debug/PIC18F14K22_J7/pic_light_ptg"/>
         <property key="programmerToGoImageName" value="pic_light_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>

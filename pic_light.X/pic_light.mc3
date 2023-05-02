@@ -1,4 +1,4 @@
-<config configName="default" projectName="pic_light" configVersion="1.1" device="PIC18F14K22" deviceLibraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" coreVersion="5.3.3">
+<config configName="default" projectName="pic_light" configVersion="1.1" device="PIC18F14K22" deviceLibraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" coreVersion="5.5.0">
    <usedPackages class="java.util.ArrayList"/>
    <usedClasses class="java.util.TreeMap">
       <entry>

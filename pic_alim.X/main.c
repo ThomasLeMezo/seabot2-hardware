@@ -23,13 +23,12 @@
 #define ADC_DELAY_BETWEEN_SAMPLE 4
 
 // I2C
-const char device_name[16] = "PIC_ALIM v5";
-#define CODE_VERSION 0x05
+#define CODE_VERSION 0x06
+const char device_name[16] = "PIC_ALIM v6";
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
 // State machine
-
 enum power_state {
     IDLE, MEASURE_VOLTAGE, POWER_ON, WAIT_TO_SLEEP, SLEEP
 };
@@ -37,7 +36,6 @@ volatile unsigned char state = MEASURE_VOLTAGE;
 volatile unsigned char step_state_machine = 0;
 
 // Batteries
-volatile uint8_t battery_voltage[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 volatile uint8_t power_current[6] = {0, 0, 0, 0, 0, 0};
 
 // Battery minimum voltage = 12V
@@ -47,8 +45,8 @@ volatile uint8_t power_current[6] = {0, 0, 0, 0, 0, 0};
 // 12 * (180/(820+180)) * (2^10 / 3.3) = 670
 // Increase resolution for rounding : 1<<4 => 670<<4 = 10720
 #define BATTERY_VOLTAGE_MIN_DEFAULT 10720
-volatile unsigned short battery_voltage_adc_min = BATTERY_VOLTAGE_MIN_DEFAULT;
-volatile unsigned short battery_voltage_adc = BATTERY_VOLTAGE_MIN_DEFAULT;
+const unsigned short battery_voltage_adc_min = BATTERY_VOLTAGE_MIN_DEFAULT;
+uint16_t battery_voltage_adc[2] = {BATTERY_VOLTAGE_MIN_DEFAULT, BATTERY_VOLTAGE_MIN_DEFAULT};
 #define BATT_FILTER_VOLTAGE 0.1
 
 // ILS
@@ -122,15 +120,20 @@ void i2c_handler_read() {
 void i2c_handler_write() {
     unsigned char mem_add = i2c_register + i2c_nb_bytes;
     switch (mem_add) {
-        case 0x00:            
-        case 0x01:            
-        case 0x02:            
-        case 0x03:            
-        case 0x04:            
-        case 0x05:            
-        case 0x06:            
-        case 0x07:
-            I2C_Write(battery_voltage[mem_add]);
+        case 0x00:
+            I2C_Write(battery_voltage_adc[0]&0xFF);
+            __delay_us(20);
+            break;
+        case 0x01:  
+            I2C_Write(battery_voltage_adc[0]>>8);
+            __delay_us(20);
+            break;
+        case 0x02:   
+            I2C_Write(battery_voltage_adc[1]&0xFF);
+            __delay_us(20);
+            break;
+        case 0x03:   
+            I2C_Write(battery_voltage_adc[1]>>8);
             __delay_us(20);
             break;
         case 0x08:
@@ -144,11 +147,6 @@ void i2c_handler_write() {
             break;
         case 0x0E:
             I2C_Write(state);
-            break;
-        case 0x0F:
-        case 0x10:
-            I2C_Write((uint8_t)(battery_voltage_adc>>(mem_add-0x0F)));
-            __delay_us(20);
             break;
             
         case 0xA0:
@@ -203,19 +201,29 @@ void i2c_bus_col() {
 
 void ils_analysis(unsigned char new_state) {
     switch (state_ils) {
+        // Start with ILS not detected
         case ILS_STATE_NOT_DETECTED:
-            ils_cpt = ils_duration_detection;
-            if (ILS_GetValue() == 0)
+            ils_cpt = ils_duration_detection; // Reset ILS detection duration
+            if (ILS_GetValue() == 0) // Check if ILS detected
                 state_ils = ILS_STATE_DETECTED;
             break;
+            
+        // Verify ILS is detected sufficient amount of time
         case ILS_STATE_DETECTED:
-            if (ils_cpt > 0)
-                ils_cpt--;
-            else {
-                state_ils = ILS_STATE_WAIT_REMOVED;
-                state = new_state;
+            if (ILS_GetValue() == 0){ // Check if ILS is still detected
+                if (ils_cpt > 0)
+                    ils_cpt--;
+                else {
+                    state_ils = ILS_STATE_WAIT_REMOVED;
+                    state = new_state; // Change the global state machine status
+                }
+            }
+            else{
+                state_ils = ILS_STATE_NOT_DETECTED;
             }
             break;
+            
+        // Check if ILS was removed to avoid turn on followed by turn off
         case ILS_STATE_WAIT_REMOVED:
             if (ILS_GetValue() == 1)
                 state_ils = ILS_STATE_NOT_DETECTED;
@@ -225,19 +233,16 @@ void ils_analysis(unsigned char new_state) {
     }
 }
 
-const char ADC_BATT[4] = {BATT_1, BATT_2, BATT_3, BATT_4};
+const char ADC_BATT[2] = {BATT_1, BATT_2};
 const char ADC_CURRENT[3] = {CURRENT_ESC1, CURRENT_ESC2, CURRENT_MOTOR};
 void measure_power() {
     // 10-bit ADC converter (0-3.3V)
     
-    for(int i=0; i<4; i++){
+    for(int i=0; i<2; i++){
         uint16_t result = ADC1_GetConversion(ADC_BATT[i]);
-        battery_voltage[i*2] = result & 0xFF;
-        battery_voltage[i*2+1] = result >> 8;
+        battery_voltage_adc[i] = (uint16_t)(battery_voltage_adc[i]*0.9 + result*0.1);
         __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     }
-    battery_voltage_adc = (unsigned short)round((battery_voltage_adc*0.9)
-                            +(((battery_voltage[7]<<8)+battery_voltage[6])<<4)*0.1);
     
     for(int i=0; i<3; i++){
         uint16_t result = ADC1_GetConversion(ADC_CURRENT[i]);
@@ -328,7 +333,7 @@ void ils_interrupt(){
 }
 
 /*
-                         Main application
+   Main application
  */
 void main(void) {
     // Initialize the device
@@ -357,25 +362,42 @@ void main(void) {
     INTERRUPT_PeripheralInterruptEnable();
 
     while (1) {
+        // State machine running at 500ms
         if (step_state_machine == 1) {
             step_state_machine = 0;
             
             switch (state) {
-                case IDLE: // Idle state
+                /* Idle state
+                 * Wait for ILS to be activated
+                 */
+                case IDLE: 
                     GLOBAL_POWER_SetLow();
                     led_delay = 100;
                     watchdog_cpt[0] = watchdog_cpt_default;
                     watchdog_cpt[1] = 0;
 
-                    ils_analysis(MEASURE_VOLTAGE); // Before and after to reset ils not detected
-                    if (ILS_GetValue() == 1) /// ILS not detected
+                    ils_analysis(MEASURE_VOLTAGE); // Before and after to reset when ils not detected
+                    if (ILS_GetValue() == 1){ /// ILS not detected
+                        // Ensure light is off before going to sleep
+                        cpt_led = led_delay;
+                        LED_SetLow();
+                        // Go to sleep
                         SLEEP();
-                    ils_analysis(MEASURE_VOLTAGE);
+                        
+                        // Go out of sleep if interruption of ILS
+                        // Set the ILS state to detected as it comes from interruption
+                        ils_cpt = ils_duration_detection; // Reset coundown
+                        state_ils = ILS_STATE_DETECTED; // Set ILS state
+                    }
                     break;
                     
+                /*  Measure the voltage of the battery          
+                 *  Ensure voltage is more than a minimum voltage
+                 */
                 case MEASURE_VOLTAGE:
                     GLOBAL_POWER_SetLow();
-                    if(battery_voltage_adc>battery_voltage_adc_min)
+                    if(battery_voltage_adc[0] > battery_voltage_adc_min ||
+                                battery_voltage_adc[1] > battery_voltage_adc_min)
                         state = POWER_ON;
                     else
                         state = IDLE;
@@ -387,7 +409,8 @@ void main(void) {
 
                     ils_analysis(IDLE);
                     
-                    if(battery_voltage_adc<battery_voltage_adc_min)
+                    if(battery_voltage_adc[0] < battery_voltage_adc_min &&
+                                battery_voltage_adc[1] < battery_voltage_adc_min)
                         state = WAIT_TO_SLEEP;
                     break;
 
@@ -397,7 +420,8 @@ void main(void) {
                     if (time_to_stop == 0) {
                         for (char k = 0; k < 3; k++)
                             time_to_start[k] = default_time_to_start[k];
-                        if(battery_voltage_adc<battery_voltage_adc_min)
+                        if(battery_voltage_adc[0] < battery_voltage_adc_min &&
+                                battery_voltage_adc[1] < battery_voltage_adc_min)
                             state = IDLE;
                         else
                             state = SLEEP;

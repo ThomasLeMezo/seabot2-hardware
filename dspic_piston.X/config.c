@@ -50,7 +50,7 @@
 volatile unsigned short is_init = 0;
 
 // Watchdog
-unsigned short watchdog_restart_default = 30; // in min
+unsigned short watchdog_restart_default = 30; // in s
 volatile unsigned short watchdog_countdown_restart = 30;
 
 
