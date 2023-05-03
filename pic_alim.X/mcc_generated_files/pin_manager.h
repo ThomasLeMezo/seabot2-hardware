@@ -177,34 +177,6 @@
 #define BATT_3_SetAnalogMode()      do { ANSELbits.ANS5 = 1; } while(0)
 #define BATT_3_SetDigitalMode()     do { ANSELbits.ANS5 = 0; } while(0)
 
-// get/set BATT_2 aliases
-#define BATT_2_TRIS                 TRISCbits.TRISC2
-#define BATT_2_LAT                  LATCbits.LATC2
-#define BATT_2_PORT                 PORTCbits.RC2
-#define BATT_2_ANS                  ANSELbits.ANS6
-#define BATT_2_SetHigh()            do { LATCbits.LATC2 = 1; } while(0)
-#define BATT_2_SetLow()             do { LATCbits.LATC2 = 0; } while(0)
-#define BATT_2_Toggle()             do { LATCbits.LATC2 = ~LATCbits.LATC2; } while(0)
-#define BATT_2_GetValue()           PORTCbits.RC2
-#define BATT_2_SetDigitalInput()    do { TRISCbits.TRISC2 = 1; } while(0)
-#define BATT_2_SetDigitalOutput()   do { TRISCbits.TRISC2 = 0; } while(0)
-#define BATT_2_SetAnalogMode()      do { ANSELbits.ANS6 = 1; } while(0)
-#define BATT_2_SetDigitalMode()     do { ANSELbits.ANS6 = 0; } while(0)
-
-// get/set BATT_1 aliases
-#define BATT_1_TRIS                 TRISCbits.TRISC3
-#define BATT_1_LAT                  LATCbits.LATC3
-#define BATT_1_PORT                 PORTCbits.RC3
-#define BATT_1_ANS                  ANSELbits.ANS7
-#define BATT_1_SetHigh()            do { LATCbits.LATC3 = 1; } while(0)
-#define BATT_1_SetLow()             do { LATCbits.LATC3 = 0; } while(0)
-#define BATT_1_Toggle()             do { LATCbits.LATC3 = ~LATCbits.LATC3; } while(0)
-#define BATT_1_GetValue()           PORTCbits.RC3
-#define BATT_1_SetDigitalInput()    do { TRISCbits.TRISC3 = 1; } while(0)
-#define BATT_1_SetDigitalOutput()   do { TRISCbits.TRISC3 = 0; } while(0)
-#define BATT_1_SetAnalogMode()      do { ANSELbits.ANS7 = 1; } while(0)
-#define BATT_1_SetDigitalMode()     do { ANSELbits.ANS7 = 0; } while(0)
-
 // get/set CURRENT_ESC1 aliases
 #define CURRENT_ESC1_TRIS                 TRISCbits.TRISC6
 #define CURRENT_ESC1_LAT                  LATCbits.LATC6

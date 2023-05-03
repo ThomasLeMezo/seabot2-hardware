@@ -233,7 +233,7 @@ void ils_analysis(unsigned char new_state) {
     }
 }
 
-const char ADC_BATT[2] = {BATT_1, BATT_2};
+const char ADC_BATT[2] = {BATT_4, BATT_3};
 const char ADC_CURRENT[3] = {CURRENT_ESC1, CURRENT_ESC2, CURRENT_MOTOR};
 void measure_power() {
     // 10-bit ADC converter (0-3.3V)
