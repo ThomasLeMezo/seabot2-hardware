@@ -239,15 +239,15 @@ void measure_power() {
     // 10-bit ADC converter (0-3.3V)
     
     for(int i=0; i<2; i++){
-        uint16_t result = ADC1_GetConversion(ADC_BATT[i]);
-        battery_voltage_adc[i] = (uint16_t)(battery_voltage_adc[i]*0.9 + result*0.1);
+        uint16_t result_volt = (ADC1_GetConversion(ADC_BATT[i]))<<4; // increase resolution for rounding
+        battery_voltage_adc[i] = (uint16_t)(battery_voltage_adc[i]*0.9 + result_volt*0.1);
         __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     }
     
-    for(int i=0; i<3; i++){
-        uint16_t result = ADC1_GetConversion(ADC_CURRENT[i]);
-        power_current[i*2] = result & 0xFF;
-        power_current[i*2+1] = result >> 8;
+    for(int j=0; j<3; j++){
+        uint16_t result_current = ADC1_GetConversion(ADC_CURRENT[j]);
+        power_current[j*2] = result_current & 0xFF;
+        power_current[j*2+1] = result_current >> 8;
         __delay_us(ADC_DELAY_BETWEEN_SAMPLE);
     }
 }
@@ -378,16 +378,14 @@ void main(void) {
 
                     ils_analysis(MEASURE_VOLTAGE); // Before and after to reset when ils not detected
                     if (ILS_GetValue() == 1){ /// ILS not detected
+                        ils_cpt = ils_duration_detection;
+                        state_ils = ILS_STATE_NOT_DETECTED;
                         // Ensure light is off before going to sleep
                         cpt_led = led_delay;
                         LED_SetLow();
                         // Go to sleep
                         SLEEP();
-                        
                         // Go out of sleep if interruption of ILS
-                        // Set the ILS state to detected as it comes from interruption
-                        ils_cpt = ils_duration_detection; // Reset coundown
-                        state_ils = ILS_STATE_DETECTED; // Set ILS state
                     }
                     break;
                     
