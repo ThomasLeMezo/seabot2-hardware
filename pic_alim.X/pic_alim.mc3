@@ -1,4 +1,4 @@
-<config configName="default" projectName="pic_alim" configVersion="1.1" device="PIC18LF14K22" deviceLibraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" coreVersion="5.5.0">
+<config configName="default" projectName="pic_alim" configVersion="1.1" device="PIC18LF14K22" deviceLibraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" coreVersion="5.5.7">
    <usedPackages class="java.util.ArrayList"/>
    <usedClasses class="java.util.TreeMap">
       <entry>
@@ -1304,11 +1304,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC4"/>
-         <value/>
+         <value>WIRE_LEVEL</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC5"/>
-         <value/>
+         <value>IO_RC5</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC6"/>
@@ -1380,11 +1380,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RC4"/>
-         <value>disabled</value>
+         <value>input</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RC5"/>
-         <value>disabled</value>
+         <value>input</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RC6"/>
@@ -1500,7 +1500,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RC4"/>
-         <value>disabled</value>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RC5"/>
@@ -3822,15 +3822,15 @@
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
-         <hash>c4b8dea40911333012f8e8dfe2db966e8f39e1520fab0668ff0ceea034126574</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr1.c</file>
-         <hash>4ccc1aae11446053373df58fbf4fc65c2c8c803680c82375610bb8317d71d45f</hash>
+         <hash>8c536e56dbaeb9fb86302472e27d0411c8888b9c49dcb8b6e7840ec725bb1041</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\i2c_slave.c</file>
          <hash>de712c5866a05c9f404aaf70d5315e7feaf02728f8cf1cf2f734596e4cbc4176</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr1.c</file>
+         <hash>4ccc1aae11446053373df58fbf4fc65c2c8c803680c82375610bb8317d71d45f</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr3.c</file>

@@ -24,16 +24,17 @@
 
 // I2C
 #define CODE_VERSION 0x06
-const char device_name[16] = "PIC_ALIM v6";
+const char device_name[16] = "PIC_ALIM v7";
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
 // State machine
 enum power_state {
-    IDLE, MEASURE_VOLTAGE, POWER_ON, WAIT_TO_SLEEP, SLEEP
+    IDLE, MEASURE_VOLTAGE, WIRE_DETECTION, POWER_ON, WAIT_TO_SLEEP, SLEEP
 };
 volatile unsigned char state = MEASURE_VOLTAGE;
 volatile unsigned char step_state_machine = 0;
+volatile unsigned char has_been_first_init = 0;
 
 // Batteries
 volatile uint8_t power_current[6] = {0, 0, 0, 0, 0, 0};
@@ -136,16 +137,16 @@ void i2c_handler_write() {
             I2C_Write(battery_voltage_adc[1]>>8);
             __delay_us(20);
             break;
+        case 0x04:
+        case 0x05:
+        case 0x06:
+        case 0x07:
         case 0x08:
         case 0x09:
-        case 0x0A:
-        case 0x0B:
-        case 0x0C:
-        case 0x0D:
-            I2C_Write(power_current[mem_add-0x08]);
+            I2C_Write(power_current[mem_add-0x04]);
             __delay_us(20);
             break;
-        case 0x0E:
+        case 0x0A:
             I2C_Write(state);
             break;
             
@@ -396,9 +397,24 @@ void main(void) {
                     GLOBAL_POWER_SetLow();
                     if(battery_voltage_adc[0] > battery_voltage_adc_min ||
                                 battery_voltage_adc[1] > battery_voltage_adc_min)
-                        state = POWER_ON;
+                        if(has_been_first_init)
+                            state = POWER_ON;
+                        else{
+                            state = WIRE_DETECTION;
+                            has_been_first_init = 1;
+                        }
                     else
                         state = IDLE;
+                    break;
+                    
+                case WIRE_DETECTION:
+                    GLOBAL_POWER_SetHigh();
+                    if(WIRE_LEVEL_GetValue()){
+                        state = POWER_ON;
+                    }
+                    else{
+                        state = IDLE;
+                    }
                     break;
 
                 case POWER_ON:

@@ -177,6 +177,28 @@
 #define BATT_3_SetAnalogMode()      do { ANSELbits.ANS5 = 1; } while(0)
 #define BATT_3_SetDigitalMode()     do { ANSELbits.ANS5 = 0; } while(0)
 
+// get/set WIRE_LEVEL aliases
+#define WIRE_LEVEL_TRIS                 TRISCbits.TRISC4
+#define WIRE_LEVEL_LAT                  LATCbits.LATC4
+#define WIRE_LEVEL_PORT                 PORTCbits.RC4
+#define WIRE_LEVEL_SetHigh()            do { LATCbits.LATC4 = 1; } while(0)
+#define WIRE_LEVEL_SetLow()             do { LATCbits.LATC4 = 0; } while(0)
+#define WIRE_LEVEL_Toggle()             do { LATCbits.LATC4 = ~LATCbits.LATC4; } while(0)
+#define WIRE_LEVEL_GetValue()           PORTCbits.RC4
+#define WIRE_LEVEL_SetDigitalInput()    do { TRISCbits.TRISC4 = 1; } while(0)
+#define WIRE_LEVEL_SetDigitalOutput()   do { TRISCbits.TRISC4 = 0; } while(0)
+
+// get/set IO_RC5 aliases
+#define IO_RC5_TRIS                 TRISCbits.TRISC5
+#define IO_RC5_LAT                  LATCbits.LATC5
+#define IO_RC5_PORT                 PORTCbits.RC5
+#define IO_RC5_SetHigh()            do { LATCbits.LATC5 = 1; } while(0)
+#define IO_RC5_SetLow()             do { LATCbits.LATC5 = 0; } while(0)
+#define IO_RC5_Toggle()             do { LATCbits.LATC5 = ~LATCbits.LATC5; } while(0)
+#define IO_RC5_GetValue()           PORTCbits.RC5
+#define IO_RC5_SetDigitalInput()    do { TRISCbits.TRISC5 = 1; } while(0)
+#define IO_RC5_SetDigitalOutput()   do { TRISCbits.TRISC5 = 0; } while(0)
+
 // get/set CURRENT_ESC1 aliases
 #define CURRENT_ESC1_TRIS                 TRISCbits.TRISC6
 #define CURRENT_ESC1_LAT                  LATCbits.LATC6
