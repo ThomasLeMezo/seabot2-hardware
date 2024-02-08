@@ -38,7 +38,7 @@ RA0 : Motor Current Sensor
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-const char device_name[16] = "DSPIC_PISTON v6";
+const char device_name[16] = "DSPIC_PISTON v7";
 
 // State machine
 enum state_piston {
@@ -46,6 +46,8 @@ enum state_piston {
 };
 volatile unsigned char state = PISTON_SEARCH_SWITCH_BOTTOM;
 unsigned char is_reset_once = false;
+
+volatile unsigned char enable_ = 0;
 
 // Set point & position
 volatile unsigned char i2c_set_point_new = 0;
@@ -60,7 +62,7 @@ volatile unsigned char position_set_point_i2c[4];
 
 volatile uint16_t motor_set_point = MOTOR_STOP;
 volatile uint16_t motor_delta_speed = (100/REGULATION_LOOP_FREQ)*MOTOR_V_TO_CMD; // Limit to 100V/s, delta_speed in PWM quantum/0.02s = 250
-volatile unsigned char motor_enable_cpt_reset = 5;
+volatile unsigned char motor_enable_cpt_reset = 5; // 100 ms (?))
 volatile unsigned char motor_enable_cpt = 5;
 
 volatile uint16_t adc_motor_current = 0;
@@ -116,10 +118,14 @@ void i2c_handler_read() {
                 motor_enable_cpt_reset = read_byte;
                 break;
             case 0x10:
-                if (read_byte)
+                if (read_byte){
                     ENABLE_SetHigh();
-                else
+                    enable_ = 1;
+                }
+                else{
                     ENABLE_SetLow();
+                    enable_ = 0;
+                }
                 break;
             case 0x20:
                 if (read_byte)
@@ -152,7 +158,7 @@ void i2c_handler_write() {
         case 0x04: /// Switchs of the piston
             I2C_Write((!SWITCH_TOP_GetValue())
                        | (!SWITCH_BOTTOM_GetValue() << 1)
-                        | (ENABLE_GetValue() << 2)
+                        | (enable_ << 2)
                         | (QEI1CONbits.UPDN << 3)); /// Direction status
             break;
         case 0x05: /// State of the state-machine
@@ -325,11 +331,14 @@ void handle_timer_regulation(){
     if(MOTOR_CMD == MOTOR_STOP){
         if(motor_enable_cpt>0)
             motor_enable_cpt--;
-        else
+        else{
             ENABLE_SetLow();
+            enable_ = 0;
+        }
     }
     else{
         ENABLE_SetHigh();
+        enable_ = 1;
         motor_enable_cpt = motor_enable_cpt_reset;
     }
     // Add a cpt to set enable Low when position set_point is reached in the case Regulation
@@ -354,6 +363,7 @@ int main() {
     I2C_SlaveSetAddrIntHandler(i2c_handler_address);
 
     ENABLE_SetLow();
+    enable_ = 0;
     LED_SetLow();
 
     is_init = 1;

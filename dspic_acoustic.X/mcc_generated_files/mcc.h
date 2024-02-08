@@ -53,17 +53,16 @@
 #include "system_types.h"
 #include "reset.h"
 
+#include "i2c1.h"
+#include "i2c2.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "adc1.h"
-#include "tmr1.h"
-#include "watchdog.h"
-#include "i2c2.h"
+#include "reset.h"
+#include "dma.h"
 #include "pwm.h"
 #include "ext_int.h"
-#include "cmp1.h"
-#include "reset.h"
-#include "i2c1.h"
+#include "watchdog.h"
+#include "cmp2.h"
 
 #warning "This file will be removed in future MCC releases. Use system.h instead."
 

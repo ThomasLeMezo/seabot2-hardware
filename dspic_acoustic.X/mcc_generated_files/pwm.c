@@ -130,12 +130,12 @@ void PWM_Initialize (void)
     PG1LEBH = 0x00;
     // PHASE 0; 
     PG1PHASE = 0x00;
-    // DC 0; 
-    PG1DC = 0x00;
+    // DC 50; 
+    PG1DC = 0x32;
     // DCA 0; 
     PG1DCA = 0x00;
-    // PER 16; 
-    PG1PER = 0x10;
+    // PER 99; 
+    PG1PER = 0x63;
     // TRIGA 0; 
     PG1TRIGA = 0x00;
     // TRIGB 0; 
@@ -148,8 +148,8 @@ void PWM_Initialize (void)
     PG1DTH = 0x00;
     
 
-    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock; ON disabled; 
-    PG1CONL = 0x08;
+    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock divided by clock divider circuit; ON enabled; 
+    PG1CONL = 0x8010;
 }
 
 void __attribute__ ((weak)) PWM_Generator1_CallBack(void)

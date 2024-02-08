@@ -52,12 +52,6 @@
 */
 void INTERRUPT_Initialize (void)
 {
-    //    ADCAN24: ADC AN24 Convert Done
-    //    Priority: 1
-        IPC48bits.ADCAN24IP = 1;
-    //    ADCAN25: ADC AN25 Convert Done
-    //    Priority: 1
-        IPC48bits.ADCAN25IP = 1;
     //    INT1I: External Interrupt 1
     //    Priority: 1
         IPC3bits.INT1IP = 1;
@@ -73,7 +67,4 @@ void INTERRUPT_Initialize (void)
     //    SICI: I2C2 Slave Event
     //    Priority: 1
         IPC9bits.SI2C2IP = 1;
-    //    TI: Timer 1
-    //    Priority: 1
-        IPC0bits.T1IP = 1;
 }

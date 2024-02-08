@@ -50,18 +50,18 @@ void CLOCK_Initialize(void)
 {
     // FRCDIV FRC/1; PLLPRE 1; DOZE 1:8; DOZEN disabled; ROI disabled; 
     CLKDIV = 0x3001;
-    // PLLFBDIV 50; 
-    PLLFBD = 0x32;
+    // PLLFBDIV 100; 
+    PLLFBD = 0x64;
     // TUN Center frequency; 
     OSCTUN = 0x00;
-    // POST1DIV 1:1; VCODIV FVCO/2; POST2DIV 1:1; 
-    PLLDIV = 0x211;
+    // POST1DIV 1:4; VCODIV FVCO/2; POST2DIV 1:1; 
+    PLLDIV = 0x241;
     // APLLEN disabled; FRCSEL FRC; APLLPRE 1:1; 
     ACLKCON1 = 0x101;
     // APLLFBDIV 150; 
     APLLFBD1 = 0x96;
-    // APOST1DIV 1:4; APOST2DIV 1:1; AVCODIV FVCO/3; 
-    APLLDIV1 = 0x141;
+    // APOST1DIV 1:4; APOST2DIV 1:1; AVCODIV FVCO/2; 
+    APLLDIV1 = 0x241;
     // ROEN disabled; ROSWEN disabled; ROSLP disabled; ROSEL FOSC; ROOUT disabled; ROSIDL disabled; 
     REFOCONL = 0x00;
     // RODIV 0; 

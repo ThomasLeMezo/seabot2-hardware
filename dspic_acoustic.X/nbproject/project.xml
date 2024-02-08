@@ -16,15 +16,7 @@
             <sourceRootList/>
             <confList>
                 <confElem>
-                    <name>default</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>with_power</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>without_power</name>
+                    <name>Conf</name>
                     <type>2</type>
                 </confElem>
             </confList>

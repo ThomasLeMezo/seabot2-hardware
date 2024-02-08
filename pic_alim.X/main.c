@@ -22,8 +22,10 @@
 
 #define ADC_DELAY_BETWEEN_SAMPLE 4
 
+// Connector J16
+
 // I2C
-#define CODE_VERSION 0x06
+#define CODE_VERSION 0x07
 const char device_name[16] = "PIC_ALIM v7";
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
@@ -402,6 +404,7 @@ void main(void) {
                         else{
                             state = WIRE_DETECTION;
                             has_been_first_init = 1;
+                            GLOBAL_POWER_SetHigh();
                         }
                     else
                         state = IDLE;

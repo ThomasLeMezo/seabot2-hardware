@@ -55,11 +55,57 @@
 #include <xc.h>
 #include <libpic30.h>
 
+#define SAMPLE_NUMBER 8000
+uint16_t data_chirp[SAMPLE_NUMBER] __attribute__((address(0x1001)));
+
 const char device_name[16] = "DSPIC_ACOUSTIC";
 const char code_version = 0x02;
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
+uint16_t freq_middle = 12500.0;
+uint16_t freq_range = 2500.0; //2500.0;
+const float sampling_duration = 4e-6;
+uint8_t pps_sync = 0;
+uint8_t pps_sync_max = 15;
+uint8_t pps_sync_chirp = 0;
+bool recompute_chirp = false;
+bool enable_chirp = false;
+
+void enable_emission(){
+    RELAIS_1_SetLow();
+    RELAIS_2_SetLow();
+    SIGNAL_ENABLE_SetHigh();
+}
+
+void enable_reception(){
+    RELAIS_1_SetHigh();
+    RELAIS_2_SetHigh();
+    SIGNAL_ENABLE_SetLow();
+}
+
+void compute_chirp(){
+    float t = 0.;
+    for(int i = 0; i < SAMPLE_NUMBER; i++){
+        data_chirp[i] = round(1842.5*sin(2.0*M_PI*t*(freq_middle+freq_range*(t/(2.0*SAMPLE_NUMBER*sampling_duration)-0.5))) + 2047.0);
+        t+=sampling_duration;
+    }
+}
+
+void EX_INT0_CallBack(){
+    pps_sync++;
+    if(pps_sync>pps_sync_max)
+        pps_sync = 0;
+    if(pps_sync == pps_sync_chirp){
+        if(!recompute_chirp && enable_chirp){
+            LED_SetLow();
+            enable_emission();
+            DMA_ChannelEnable(0);
+            enable_reception();
+            LED_SetHigh();
+        }
+    }
+}
 
 bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status)
 {
@@ -80,6 +126,27 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status)
 //                case 0x10 ... 0x34: // Channels
 //                    I2C1_ReadPointerSet(&(((char*)channels)[i2c_address-0x10]));
 //                    break;
+                case 0x00:
+                    I2C1_ReadPointerSet(&pps_sync);
+                    break;
+                case 0x01:
+                    I2C1_ReadPointerSet(&pps_sync_max);
+                    break;
+                case 0x02:
+                    I2C1_ReadPointerSet(&pps_sync_chirp);
+                    break;
+                case 0x03 ... 0x04:
+                    I2C1_ReadPointerSet(&freq_middle + (i2c_address - 0x03));
+                    break;
+                case 0x05 ... 0x06:
+                    I2C1_ReadPointerSet(&freq_range + (i2c_address - 0x05));
+                    break;
+                case 0x07:
+                    I2C1_ReadPointerSet(&recompute_chirp);
+                    break;
+                case 0x08:
+                    I2C1_ReadPointerSet(&enable_chirp);
+                    break;                
                 
                 case 0xC0:
                     I2C1_ReadPointerSet(&code_version);
@@ -108,11 +175,46 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status)
             }
             else{
                 switch(i2c_address){
-//                    case 0x00 ... 0x01:
-//                        half_pwm = ((float)i2c_data)*((motor_cmd_max-motor_cmd_min)/255.0)+motor_cmd_min;
-//                        countdown_pwm_cmd[i2c_address] = round(half_pwm); // (PWM_MAX-PWM_MIN)/255+PWM_MIN => 1102 for rounding
-//                        watchdog_countdown_restart = watchdog_restart_default;
-//                        break;
+                    case 0x00:
+                        pps_sync = i2c_data;
+                        break;
+                    case 0x01:
+                        pps_sync_max = i2c_data;
+                        break;
+                    case 0x02:
+                        pps_sync_chirp = i2c_data;
+                        break;
+                    case 0x03:
+                        freq_middle = (freq_middle & 0xFF00) + i2c_data;
+                        break;
+                    case 0x04:
+                        freq_middle = (freq_middle & 0xFF) + (i2c_data<<8);
+                        break;
+                    case 0x05:
+                        freq_range = (freq_range & 0xFF00) + i2c_data;
+                        break;
+                    case 0x06:
+                        freq_range = (freq_range & 0xFF) + (i2c_data<<8);
+                        break;
+                    case 0x07:
+                        if(i2c_data == 1)
+                            recompute_chirp = true;
+                        break;
+                    case 0x08:
+                        if(i2c_data == 1)
+                            enable_chirp = true;
+                        else
+                            enable_chirp = false;
+                        break;
+                    
+                    case 0xA0:
+                        if(i2c_data == 1){
+                            enable_emission();
+                        }
+                        else{
+                            enable_reception();
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -127,32 +229,27 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status)
     return true;
 }
 
-//void get_battery( uint16_t adcVal ){
-//    battery_volt[0] = adcVal;
-//    battery_volt[1] = adcVal>>8;
-//}
-
 /*
                          Main application
  */
 int main(void)
 { 
+    LED_SetLow();
+    compute_chirp();
+    LED_SetHigh();
+    
     // initialize the device
     SYSTEM_Initialize();
-
-    // Timers
-//    TMR1_SetInterruptHandler(&timer_pwm);
-//    ADC1_SetV_BATTInterruptHandler(&get_battery);
-    
-    for(int i=0; i<20; i++){
-        LED_Toggle();
-        __delay_ms(100);        
-    }
     
     while (1)
     {
         ClrWdt();
         // Add your application code
+        if(recompute_chirp){
+            
+            compute_chirp();
+            recompute_chirp = false;
+        }
                 
     }
     return 1; 
