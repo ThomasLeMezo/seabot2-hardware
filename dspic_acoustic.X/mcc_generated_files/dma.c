@@ -66,16 +66,16 @@ void DMA_Initialize(void)
     // HADDR 20479; 
     DMAH= 0x4FFF;
 
-    // CHEN enabled; DAMODE Unchanged; TRMODE One-Shot; CHREQ disabled; RELOAD enabled; SIZE 16 bit; NULLW disabled; SAMODE Incremented; 
-    DMACH0 = 0x241 & 0xFFFE; //Enable DMA Channel later;
+    // CHEN disabled; DAMODE Unchanged; TRMODE One-Shot; CHREQ disabled; RELOAD enabled; SIZE 16 bit; NULLW disabled; SAMODE Incremented; 
+    DMACH0 = 0x240 & 0xFFFE; //Enable DMA Channel later;
     // HALFIF disabled; LOWIF disabled; HALFEN disabled; DONEIF disabled; OVRUNIF disabled; CHSEL PWM Generator 1; HIGHIF disabled; 
     DMAINT0= 0x1C00;
-    // SADDR 4097; 
-    DMASRC0= 0x1001;
+    // SADDR 4218; 
+    DMASRC0= 0x107A;
     // DADDR 3230; 
     DMADST0= 0xC9E;
-    // CNT 8000; 
-    DMACNT0= 0x1F40;
+    // CNT 80000; 
+    DMACNT0= 0x3880;
     // Clearing Channel 0 Interrupt Flag;
     IFS0bits.DMA0IF = false;
 
@@ -121,8 +121,6 @@ void DMA_Initialize(void)
     //Enable DMA
     DMACONbits.DMAEN = 1; 
     
-    //Enable DMA Channel 0
-    DMACH0bits.CHEN = 1;
 }
 
 void __attribute__ ((weak)) DMA_Channel0_CallBack(void)
