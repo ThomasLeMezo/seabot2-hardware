@@ -50,6 +50,7 @@
 #include "mcc_generated_files/i2c1.h"
 #include "mcc_generated_files/dma.h"
 #include "stdbool.h"
+#include "mcc_generated_files/ext_int.h"
 #include <math.h>
 
 #define FCY 4000000UL
@@ -57,35 +58,36 @@
 #include <libpic30.h>
 
 #define SAMPLE_NUMBER 8000
-uint16_t data_chirp[SAMPLE_NUMBER] __attribute__((address(0x107a)));
+uint16_t data_chirp[SAMPLE_NUMBER] __attribute__((address(0x1080)));
 
 const char device_name[16] = "DSPIC_ACOUSTIC";
-const char code_version = 0x03;
+const char code_version = 0x04;
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-uint16_t freq_middle = 12500.0;
-uint16_t freq_range = 2500.0; //2500.0;
+uint16_t freq_middle = 12500;
+uint16_t freq_range = 2500; //2500.0;
 const float sampling_duration = 4e-6;
-uint8_t pps_sync = 0;
+volatile uint8_t pps_sync = 0;
 uint8_t pps_sync_max = 15;
 uint8_t pps_sync_chirp = 0;
-bool recompute_chirp = true;
+bool recompute_signal = true;
 bool enable_chirp = false;
 
 bool shoot_chirp_i2c = false;
 
-float dac_mean = 2047;
-float dac_amplitude = 1000;
+float dac_mean = 1300; //2047;
+float dac_amplitude = 1100;
 
-uint16_t dac_mean_16= 2047;
-uint16_t dac_amplitude_16 = 1000;
+uint16_t dac_mean_16= 1300;
+uint16_t dac_amplitude_16 = 1100;
+
+uint8_t signal_selection = 0;
 
 void enable_emission(){
     RELAIS_1_SetLow();
     RELAIS_2_SetLow();  // 0.35ms
     SIGNAL_ENABLE_SetHigh(); // 3us
-    __delay_ms(1);
 }
 
 void enable_reception(){
@@ -97,29 +99,65 @@ void enable_reception(){
 void compute_chirp(){
     float t = 0.;
     for(int i = 0; i < SAMPLE_NUMBER; i++){
-        data_chirp[i] = round(dac_amplitude*sin(2.0*M_PI*t*(freq_middle+freq_range*(t/(2.0*SAMPLE_NUMBER*sampling_duration)-0.5))) + dac_mean);
+        data_chirp[i] = round(dac_amplitude*sin(2.0*M_PI*t*((float)freq_middle+(float)freq_range*(t/(2.0*(float)SAMPLE_NUMBER*sampling_duration)-0.5))) + dac_mean);
         t+=sampling_duration;
+    }
+}
+
+void compute_cw(){
+    float t = 0.;
+    for(int i = 0; i < SAMPLE_NUMBER; i++){
+        data_chirp[i] = round(dac_amplitude*sin(2.0*M_PI*t*(float)freq_middle) + dac_mean);
+        t+=sampling_duration;
+    }
+}
+
+compute_signal(){
+    switch (signal_selection){
+        case 0x00:
+            compute_chirp();
+            break;
+        case 0x01:
+            compute_cw();
+            break;
+        default:
+            break;
     }
 }
 
 void shoot_chirp(){
     LED_SetHigh();
     enable_emission();
-    DMA_ChannelEnable(0);
-    __delay_ms(200);
+    DMA_ChannelEnable(0);  
+//    __delay_ms(200);
+//    enable_reception();
+//    LED_SetLow();
+}
+
+void set_dma_forward(){
+    
+}
+
+void set_dma_backward(){
+    
+}
+
+void DMA_Channel0_CallBack(){
     enable_reception();
     LED_SetLow();
 }
 
-void EX_INT0_CallBack(){
+void EX_INT1_CallBack(){
+    EX_INT1_InterruptDisable();
     pps_sync++;
     if(pps_sync>pps_sync_max)
         pps_sync = 0;
     if(pps_sync == pps_sync_chirp){
-        if(!recompute_chirp && enable_chirp){
+        if(!recompute_signal && enable_chirp){
             shoot_chirp();
         }
     }
+    EX_INT1_InterruptEnable();
 }
 
 bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
@@ -150,7 +188,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&freq_range + (i2c_address - 0x05));
                     break;
                 case 0x07:
-                    I2C1_ReadPointerSet(&recompute_chirp);
+                    I2C1_ReadPointerSet(&recompute_signal);
                     break;
                 case 0x08:
                     I2C1_ReadPointerSet(&enable_chirp);
@@ -160,6 +198,9 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     break;
                 case 0x0B ... 0x0C:
                     I2C1_ReadPointerSet(&dac_amplitude_16 + (i2c_address - 0x05));
+                    break;
+                case 0x0D:
+                    I2C1_ReadPointerSet(&signal_selection);
                     break;
                 
                 case 0xC0:
@@ -189,9 +230,6 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
             }
             else{
                 switch(i2c_address){
-                    case 0x00:
-                        pps_sync = i2c_data;
-                        break;
                     case 0x01:
                         pps_sync_max = i2c_data;
                         break;
@@ -212,7 +250,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         break;
                     case 0x07:
                         if(i2c_data == 1)
-                            recompute_chirp = true;
+                            recompute_signal = true;
                         break;
                     case 0x08:
                         if(i2c_data == 1)
@@ -234,6 +272,9 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         dac_amplitude_16 = (dac_amplitude_16 & 0xFF) + (i2c_data<<8);
                         dac_amplitude = dac_amplitude_16;
                         break;
+                    case 0x0D:
+                        signal_selection = i2c_data;
+                        break;
                     
                     case 0xA0:
                         if(i2c_data == 0x01){
@@ -247,6 +288,10 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         if(i2c_data == 1){
                             shoot_chirp_i2c = true;
                         }
+                        break;
+                    case 0xA2:
+                        if(i2c_data==1)
+                            pps_sync = 0;
                         break;
                     default:
                         break;
@@ -267,20 +312,22 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
  */
 int main(void)
 {
-    SYSTEM_Initialize();
-    recompute_chirp = false;
-    
     LED_SetHigh();
+    SYSTEM_Initialize();
+    compute_signal();
+    recompute_signal = false;
+    LED_SetLow();
+    
     enable_reception();
     while (1)
     {
         ClrWdt();
         // Add your application code
-        if(recompute_chirp){
+        if(recompute_signal){
             LED_SetLow();
-            compute_chirp();
+            compute_signal();
             LED_SetLow();
-            recompute_chirp = false;
+            recompute_signal = false;
         }
         
         if(shoot_chirp_i2c){

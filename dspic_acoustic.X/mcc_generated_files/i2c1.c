@@ -14,12 +14,12 @@
   @Description
     This header file provides APIs for driver for i2c1.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.4
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
         Device            :  dsPIC33CK256MP202
 
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v2.10
-        MPLAB             :  MPLAB X v6.05
+        Compiler          :  XC16 v1.70
+        MPLAB             :  MPLAB X v5.50
 */
 
 /*
@@ -127,8 +127,8 @@ void I2C1_Initialize(void)
     I2C1CONL = 0x8000;
     // BCL disabled; P disabled; S disabled; I2COV disabled; IWCOL disabled; 
     I2C1STAT = 0x00;
-    // ADD 26; 
-    I2C1_SlaveAddressSet(0x1A);
+    // ADD 30; 
+    I2C1_SlaveAddressSet(0x1E);
     // AMSK 0; 
     I2C1_SlaveAddressMaskSet(0x00);
 
@@ -446,110 +446,6 @@ inline void __attribute__ ((always_inline)) I2C1_ReceiveProcess(void)
 
 static uint8_t i2c1_slaveWriteData = 0xAA;
 
-//bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status)
-//{
-//
-//    // this emulates the slave device memory where data written to slave
-//    // is placed and data read from slave is taken
-//    /*
-//     Emulate EEPORM default memory size is 64bytes
-// 
-//     Emulate EEPORM Read/Write Instruction:
-//     --------------------------------------     
-//     Byte Write Instruction:
-//     |Start|slave Addr + w|Ack|AddrHighByte|Ack|AddrLowByte|Ack|data|Nack|Stop|
-//     
-//     Page Write Instruction:
-//     |Start|slave Addr + w|Ack|AddrHighByte|Ack|AddrLowByte|Ack|dataByte n|Ack|...|data Byte n+x|Nack|Stop|
-//     
-//     Byte Read Instruction:
-//     |Start|slave Addr + r|Ack|AddrHighByte|Ack|AddrLowByte|Ack|data|Nack|Stop|
-//
-//     Page Read Instruction:
-//     |Start|slave Addr + r|Ack|AddrHighByte|Ack|AddrLowByte|Ack|dataByte n|Ack|...|dataByte n+x|Nack|Stop|
-//    */
-//    
-//    static uint8_t EMULATE_EEPROM_Memory[EMULATE_EEPROM_SIZE] =
-//            {
-//                0x1A, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-//                0xFF, 0x2A, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-//                0xFF, 0xFF, 0x3F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-//                0xFF, 0xFF, 0xFF, 0x4F, 0xFF, 0xFF, 0xFF, 0xFF,
-//                0xFF, 0xFF, 0xFF, 0xFF, 0x5F, 0xFF, 0xFF, 0xFF,
-//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x6F, 0xFF, 0xFF,
-//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0xFF,
-//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x8F,
-//            };
-//
-//    static uint16_t address, addrByteCount;
-//    static bool     addressState = true;
-//
-//    switch (status)
-//    {
-//        case I2C1_SLAVE_TRANSMIT_REQUEST_DETECTED:
-//            // set up the slave driver buffer transmit pointer
-//            I2C1_ReadPointerSet(&EMULATE_EEPROM_Memory[address++]);
-//            if(address >= EMULATE_EEPROM_SIZE) {
-//                address = 0;
-//            }
-//            break;
-//
-//        case I2C1_SLAVE_RECEIVE_REQUEST_DETECTED:
-//
-//            addrByteCount = 0;
-//            addressState = true;
-//
-//            // set up the slave driver buffer receive pointer
-//            I2C1_WritePointerSet(&i2c1_slaveWriteData);
-//            break;
-//
-//        case I2C1_SLAVE_RECEIVED_DATA_DETECTED:
-//
-//            if (addressState == true)
-//            {
-//                // get the address of the memory being written
-//                if (addrByteCount == 0)
-//                {
-//                    address = (i2c1_slaveWriteData << 8) & 0xFF00;
-//                    addrByteCount++;
-//                }
-//                else if (addrByteCount == 1)
-//                {
-//                    address = address | i2c1_slaveWriteData;
-//                    addrByteCount = 0;
-//                    addressState = false;
-//                }
-//                
-//                if(address >= EMULATE_EEPROM_SIZE) {
-//                    address = EMULATE_EEPROM_SIZE;
-//                }
-//            }
-//            else // if (addressState == false)
-//            {
-//                // set the memory with the received data
-//                EMULATE_EEPROM_Memory[address++] = i2c1_slaveWriteData;
-//                if(address >= EMULATE_EEPROM_SIZE) {
-//                    address = 0;
-//                }
-//            }
-//
-//            break;
-//
-//        case I2C1_SLAVE_10BIT_RECEIVE_REQUEST_DETECTED:
-//
-//            // do something here when 10-bit address is detected
-//
-//            // 10-bit address is detected
-//
-//            break;
-//
-//        default:
-//            break;
-//
-//    }
-//
-//    return true;
-//}
 
 
 

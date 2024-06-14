@@ -1,26 +1,10 @@
 /**
-  System Interrupts Generated Driver File 
+\file
+\addtogroup doc_driver_spi_code
+\brief This file contains the functions that implement the SPI master driver functionalities.
 
-  @Company:
-    Microchip Technology Inc.
-
-  @File Name:
-    interrupt_manager.h
-
-  @Summary:
-    This is the generated driver implementation file for setting up the
-    interrupts using PIC24 / dsPIC33 / PIC32MM MCUs
-
-  @Description:
-    This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
-    Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
-        Device            :  dsPIC33CK256MP202
-    The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.70
-        MPLAB             :  MPLAB X v5.50
-*/
-/*
+\copyright (c) 2020 Microchip Technology Inc. and its subsidiaries.
+\page License
     (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
 
@@ -43,25 +27,41 @@
 */
 
 /**
-    Section: Includes
-*/
-#include <xc.h>
+  Section: Included Files
+ */
+
+#include "spi_master.h"
+
+bool EEPROM2_open(void);
+
+const spi_master_functions_t spiMaster[] = {   
+    { spi1_close, EEPROM2_open, spi1_exchangeByte, spi1_exchangeBlock, spi1_writeBlock, spi1_readBlock, spi1_writeByte, spi1_readByte, spi1_setSpiISR, spi1_isr }
+};
+
+bool EEPROM2_open(void){
+    return spi1_open(EEPROM2_CONFIG);
+}
 
 /**
-    void INTERRUPT_Initialize (void)
-*/
-void INTERRUPT_Initialize (void)
-{
-    //    INT1I: External Interrupt 1
-    //    Priority: 1
-        IPC3bits.INT1IP = 1;
-    //    MICI: I2C1 Master Event
-    //    Priority: 1
-        IPC4bits.MI2C1IP = 1;
-    //    SICI: I2C1 Slave Event
-    //    Priority: 1
-        IPC4bits.SI2C1IP = 1;
-    //    DMA0I: DMA Channel 0
-    //    Priority: 1
-        IPC1bits.DMA0IP = 1;
+ *  \ingroup doc_driver_spi_code
+ *  \brief Open the SPI interface.
+ *
+ *  This function is to keep the backward compatibility with older API users
+ *  \param[in] configuration The configuration to use in the transfer
+ *
+ *  \return Initialization status.
+ *  \retval false The SPI open was unsuccessful
+ *  \retval true  The SPI open was successful
+ */
+bool spi_master_open(spi_master_configurations_t config){
+    switch(config){
+        case EEPROM2:
+            return EEPROM2_open();
+        default:
+            return 0;
+    }
 }
+
+/**
+ End of File
+ */

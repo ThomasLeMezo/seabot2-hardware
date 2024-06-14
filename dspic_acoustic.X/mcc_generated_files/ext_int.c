@@ -1,18 +1,19 @@
+
 /**
-  System Interrupts Generated Driver File 
+  EXT_INT Generated Driver File 
 
   @Company:
     Microchip Technology Inc.
 
   @File Name:
-    interrupt_manager.h
+    ext_int.c
 
-  @Summary:
-    This is the generated driver implementation file for setting up the
-    interrupts using PIC24 / dsPIC33 / PIC32MM MCUs
+  @Summary
+    This is the generated driver implementation file for the EXT_INT 
+    driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description:
-    This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs interrupts.
+    This source file provides implementations for driver APIs for EXT_INT. 
     Generation Information : 
         Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
         Device            :  dsPIC33CK256MP202
@@ -20,6 +21,7 @@
         Compiler          :  XC16 v1.70
         MPLAB             :  MPLAB X v5.50
 */
+
 /*
     (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
     software and any derivatives exclusively with Microchip products.
@@ -43,25 +45,54 @@
 */
 
 /**
-    Section: Includes
-*/
-#include <xc.h>
+   Section: Includes
+ */
+
+#include "ext_int.h"
+
+//***User Area Begin->code: Add External Interrupt handler specific headers 
+
+//***User Area End->code: Add External Interrupt handler specific headers
 
 /**
-    void INTERRUPT_Initialize (void)
+   Section: External Interrupt Handlers
 */
-void INTERRUPT_Initialize (void)
+ 
+ void __attribute__ ((weak)) EX_INT1_CallBack(void)
 {
-    //    INT1I: External Interrupt 1
-    //    Priority: 1
-        IPC3bits.INT1IP = 1;
-    //    MICI: I2C1 Master Event
-    //    Priority: 1
-        IPC4bits.MI2C1IP = 1;
-    //    SICI: I2C1 Slave Event
-    //    Priority: 1
-        IPC4bits.SI2C1IP = 1;
-    //    DMA0I: DMA Channel 0
-    //    Priority: 1
-        IPC1bits.DMA0IP = 1;
+    // Add your custom callback code here
+}
+
+/**
+  Interrupt Handler for EX_INT1 - INT1
+*/
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _INT1Interrupt(void)
+{
+    //***User Area Begin->code: External Interrupt 1***
+	
+	EX_INT1_CallBack();
+    
+	//***User Area End->code: External Interrupt 1***
+    EX_INT1_InterruptFlagClear();
+}
+/**
+    Section: External Interrupt Initializers
+ */
+/**
+    void EXT_INT_Initialize(void)
+
+    Initializer for the following external interrupts
+    INT1
+*/
+void EXT_INT_Initialize(void)
+{
+    /*******
+     * INT1
+     * Clear the interrupt flag
+     * Set the external interrupt edge detect
+     * Enable the interrupt, if enabled in the UI. 
+     ********/
+    EX_INT1_InterruptFlagClear();   
+    EX_INT1_PositiveEdgeSet();
+    EX_INT1_InterruptEnable();
 }

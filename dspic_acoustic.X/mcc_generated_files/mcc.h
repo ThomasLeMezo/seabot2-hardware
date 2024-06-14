@@ -53,14 +53,18 @@
 #include "system_types.h"
 #include "reset.h"
 
-#include "watchdog.h"
-#include "reset.h"
-#include "cmp2.h"
+#include "pwm.h"
+#include "drivers/spi_master.h"
+#include "ext_int.h"
+#include "spi1_driver.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "i2c1.h"
 #include "dma.h"
-#include "pwm.h"
+#include "watchdog.h"
+#include "reset.h"
+#include "delay.h"
+#include "cmp2.h"
+#include "i2c1.h"
 
 #warning "This file will be removed in future MCC releases. Use system.h instead."
 
