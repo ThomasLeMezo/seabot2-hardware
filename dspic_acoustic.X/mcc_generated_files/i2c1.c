@@ -127,8 +127,8 @@ void I2C1_Initialize(void)
     I2C1CONL = 0x8000;
     // BCL disabled; P disabled; S disabled; I2COV disabled; IWCOL disabled; 
     I2C1STAT = 0x00;
-    // ADD 30; 
-    I2C1_SlaveAddressSet(0x1E);
+    // ADD 26; 
+    I2C1_SlaveAddressSet(0x1A);
     // AMSK 0; 
     I2C1_SlaveAddressMaskSet(0x00);
 
@@ -435,18 +435,3 @@ inline void __attribute__ ((always_inline)) I2C1_ReceiveProcess(void)
     *p_i2c1_write_pointer = I2C1_RECEIVE_REG;
 
 }
-
-/* Note: This is an example of the I2C1_StatusCallback()
-         implementation. This is an emulated EEPROM Memory
-         configured to act as a I2C Slave Device.
-         For specific slave device implementation, remove
-         or modify this function to the specific slave device
-         behavior.
-*/
-
-static uint8_t i2c1_slaveWriteData = 0xAA;
-
-
-
-
-

@@ -2,12 +2,12 @@
 
 manifest_file_version: 1.0.0
 project: dspic_acoustic
-creation_date: 2024-06-14T17:10:43.807+02:00[Europe/Paris]
+creation_date: 2024-06-23T22:14:22.143+02:00[Europe/Paris]
 operating_system: Windows 10
 mcc_mode: IDE
 mcc_mode_version: v6.15
 device_name: dsPIC33CK256MP202
-compiler: XC16 2.00
+compiler: XC16 2.10
 mcc_version: 5.4.1
 mcc_core_version: 5.6.1
 content_manager_version: 4.3.2

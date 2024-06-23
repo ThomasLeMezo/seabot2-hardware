@@ -56,7 +56,7 @@ void CMP2_Initialize(void)
 	//Slope Settings
 	SLP2CONH = 0x00; //HME disabled; PSE Negative; SLOPEN disabled; TWME disabled; 
 	SLP2CONL = 0x00; //HCFSEL None; SLPSTRT None; SLPSTOPB None; SLPSTOPA None; 
-	SLP2DAT = 0x00; //SLPDAT 0; 
+	SLP2DAT = 0x12; //SLPDAT 18; 
 	DAC2DATL = 0x00; //DACDATL 0; 
 	DAC2DATH = 0x7FF; //DACDATH 2047; 
     

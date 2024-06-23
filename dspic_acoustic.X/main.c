@@ -57,42 +57,45 @@
 #include <xc.h>
 #include <libpic30.h>
 
+#define START_ADDRESS 0x117F
 #define SAMPLE_NUMBER 8000
-uint16_t data_chirp[SAMPLE_NUMBER] __attribute__((address(0x1080)));
+// 0x117F + 2*8000 = 4FFF (max in X Data RAM (X) (8K)) => see page 49 of datasheet
+uint16_t data_chirp[SAMPLE_NUMBER] __attribute__((address(START_ADDRESS)));
 
-const char device_name[16] = "DSPIC_ACOUSTIC";
-const char code_version = 0x04;
+const char device_name[16] = "DSPIC_ACOUSTICv6";
+const char code_version = 0x06;
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
 uint16_t freq_middle = 12500;
 uint16_t freq_range = 2500; //2500.0;
 const float sampling_duration = 4e-6;
-volatile uint8_t pps_sync = 0;
-uint8_t pps_sync_max = 15;
-uint8_t pps_sync_chirp = 0;
+
+uint16_t chirp_duration_between_shoot = 20; // in seconds
+uint16_t chirp_offset_from_posix_zero = 0; // in seconds
+uint32_t posix_time = 0; // in seconds
+
 bool recompute_signal = true;
 bool enable_chirp = false;
 
 bool shoot_chirp_i2c = false;
 
-float dac_mean = 1300; //2047;
-float dac_amplitude = 1100;
+float dac_mean = 1200; //2047;
+float dac_amplitude = 1000; // 1100
 
-uint16_t dac_mean_16= 1300;
-uint16_t dac_amplitude_16 = 1100;
+uint16_t dac_mean_16= 1200;
+uint16_t dac_amplitude_16 = 1000; // 1100
 
 uint8_t signal_selection = 0;
 
+volatile uint8_t robot_code = 0;
+volatile uint8_t robot_code_bit_index = 0;
+
 void enable_emission(){
-    RELAIS_1_SetLow();
-    RELAIS_2_SetLow();  // 0.35ms
     SIGNAL_ENABLE_SetHigh(); // 3us
 }
 
 void enable_reception(){
-    RELAIS_1_SetHigh();
-    RELAIS_2_SetHigh();
     SIGNAL_ENABLE_SetLow();
 }
 
@@ -112,7 +115,7 @@ void compute_cw(){
     }
 }
 
-compute_signal(){
+void compute_signal(){
     switch (signal_selection){
         case 0x00:
             compute_chirp();
@@ -127,32 +130,41 @@ compute_signal(){
 
 void shoot_chirp(){
     LED_SetHigh();
+    
+    // Test if it is a 0 or 1
+//    11 = DMASRCn is used in Peripheral Indirect Addressing and remains unchanged
+//    10 = DMASRCn is decremented based on the SIZE bit after a transfer completion
+//    01 = DMASRCn is incremented based on the SIZE bit after a transfer completion
+//    00 = DMASRCn remains unchanged after a transfer completion
+    
+    if((robot_code>>robot_code_bit_index)&0b1){
+        DMACH0bits.SAMODE = 0b01; // Increment
+        DMASRC0 = START_ADDRESS;
+    }
+    else{
+        DMACH0bits.SAMODE = 0b10; // Decrement
+        DMASRC0 = START_ADDRESS+SAMPLE_NUMBER*2;
+    }
+    
     enable_emission();
     DMA_ChannelEnable(0);  
-//    __delay_ms(200);
-//    enable_reception();
-//    LED_SetLow();
 }
 
-void set_dma_forward(){
-    
-}
-
-void set_dma_backward(){
-    
-}
-
-void DMA_Channel0_CallBack(){
-    enable_reception();
-    LED_SetLow();
+void DMA_Channel0_CallBack(){ 
+    robot_code_bit_index++;
+    if(robot_code_bit_index !=0)
+        shoot_chirp();
+    else{
+        enable_reception();
+        LED_SetLow();
+    }
 }
 
 void EX_INT1_CallBack(){
     EX_INT1_InterruptDisable();
-    pps_sync++;
-    if(pps_sync>pps_sync_max)
-        pps_sync = 0;
-    if(pps_sync == pps_sync_chirp){
+    posix_time++;
+    
+    if((posix_time - chirp_offset_from_posix_zero) % chirp_duration_between_shoot == 0){
         if(!recompute_signal && enable_chirp){
             shoot_chirp();
         }
@@ -173,21 +185,15 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
             
             switch(i2c_address){
                 case 0x00:
-                    I2C1_ReadPointerSet(&pps_sync);
+                    I2C1_ReadPointerSet(&robot_code);
                     break;
-                case 0x01:
-                    I2C1_ReadPointerSet(&pps_sync_max);
-                    break;
-                case 0x02:
-                    I2C1_ReadPointerSet(&pps_sync_chirp);
-                    break;
-                case 0x03 ... 0x04:
+                case 0x01 ... 0x02:
                     I2C1_ReadPointerSet(&freq_middle + (i2c_address - 0x03));
                     break;
-                case 0x05 ... 0x06:
+                case 0x03 ... 0x04:
                     I2C1_ReadPointerSet(&freq_range + (i2c_address - 0x05));
                     break;
-                case 0x07:
+                case 0x05:
                     I2C1_ReadPointerSet(&recompute_signal);
                     break;
                 case 0x08:
@@ -201,6 +207,16 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     break;
                 case 0x0D:
                     I2C1_ReadPointerSet(&signal_selection);
+                    break;
+                    
+                case 0xB0 ... 0xB4:
+                    I2C1_ReadPointerSet(&posix_time + (i2c_address - 0xB0));
+                    break;
+                case 0xB5 ... 0xB6:
+                    I2C1_ReadPointerSet(&chirp_duration_between_shoot + (i2c_address - 0xB5));
+                    break;
+                case 0xB7 ... 0xB8:
+                    I2C1_ReadPointerSet(&chirp_offset_from_posix_zero + (i2c_address - 0xB5));
                     break;
                 
                 case 0xC0:
@@ -230,24 +246,24 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
             }
             else{
                 switch(i2c_address){
-                    case 0x01:
-                        pps_sync_max = i2c_data;
+                    case 0x00:
+                        robot_code = i2c_data;
                         break;
-                    case 0x02:
-                        pps_sync_chirp = i2c_data;
+                        
+                    case 0x03 ... 0x04:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)&freq_middle;
+                        bytePointer[i2c_address-0x03] = i2c_data;
+                    }
                         break;
-                    case 0x03:
-                        freq_middle = (freq_middle & 0xFF00) + i2c_data;
+                        
+                    case 0x05 ... 0x06:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)&freq_range;
+                        bytePointer[i2c_address-0x05] = i2c_data;
+                    }
                         break;
-                    case 0x04:
-                        freq_middle = (freq_middle & 0xFF) + (i2c_data<<8);
-                        break;
-                    case 0x05:
-                        freq_range = (freq_range & 0xFF00) + i2c_data;
-                        break;
-                    case 0x06:
-                        freq_range = (freq_range & 0xFF) + (i2c_data<<8);
-                        break;
+                        
                     case 0x07:
                         if(i2c_data == 1)
                             recompute_signal = true;
@@ -258,20 +274,20 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         else
                             enable_chirp = false;
                         break;
-                    case 0x09:
-                        dac_mean_16 = (dac_mean_16 & 0xFF00) + i2c_data;
+                        
+                    case 0x09 ... 0x0A:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)&dac_mean_16;
+                        bytePointer[i2c_address-0x09] = i2c_data;
+                    }
                         break;
-                    case 0x0A:
-                        dac_mean_16 = (dac_mean_16 & 0xFF) + (i2c_data<<8);
-                        dac_mean = dac_mean_16;
+                    case 0x0B ... 0x0C:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)&dac_amplitude_16;
+                        bytePointer[i2c_address-0x0B] = i2c_data;
+                    }
                         break;
-                    case 0x0B:
-                        dac_amplitude_16 = (dac_amplitude_16 & 0xFF00) + i2c_data;
-                        break;
-                    case 0x0C:
-                        dac_amplitude_16 = (dac_amplitude_16 & 0xFF) + (i2c_data<<8);
-                        dac_amplitude = dac_amplitude_16;
-                        break;
+                        
                     case 0x0D:
                         signal_selection = i2c_data;
                         break;
@@ -289,10 +305,26 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                             shoot_chirp_i2c = true;
                         }
                         break;
-                    case 0xA2:
-                        if(i2c_data==1)
-                            pps_sync = 0;
+
+                    case 0xB0 ... 0xB4:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)&posix_time;
+                        bytePointer[i2c_address-0xB0] = i2c_data;
+                    }
                         break;
+                    case 0xB5 ... 0xB6:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)&chirp_duration_between_shoot;
+                        bytePointer[i2c_address-0xB5] = i2c_data;
+                    }
+                        break;
+                    case 0xB7 ... 0xB8:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)&chirp_offset_from_posix_zero;
+                        bytePointer[i2c_address-0xB7] = i2c_data;
+                    }
+                        break;                        
+                        
                     default:
                         break;
                 }
@@ -317,6 +349,7 @@ int main(void)
     compute_signal();
     recompute_signal = false;
     LED_SetLow();
+    //enable_chirp = true;
     
     enable_reception();
     while (1)
