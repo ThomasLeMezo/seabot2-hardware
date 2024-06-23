@@ -79,6 +79,7 @@ bool recompute_signal = true;
 bool enable_chirp = false;
 
 bool shoot_chirp_i2c = false;
+bool is_shooting = false;
 
 float dac_mean = 1200; //2047;
 float dac_amplitude = 1000; // 1100
@@ -130,6 +131,7 @@ void compute_signal(){
 
 void shoot_chirp(){
     LED_SetHigh();
+    is_shooting = true;
     
     // Test if it is a 0 or 1
 //    11 = DMASRCn is used in Peripheral Indirect Addressing and remains unchanged
@@ -157,6 +159,7 @@ void DMA_Channel0_CallBack(){
     else{
         enable_reception();
         LED_SetLow();
+        is_shooting = false;
     }
 }
 
@@ -165,7 +168,7 @@ void EX_INT1_CallBack(){
     posix_time++;
     
     if((posix_time - chirp_offset_from_posix_zero) % chirp_duration_between_shoot == 0){
-        if(!recompute_signal && enable_chirp){
+        if(!recompute_signal && enable_chirp && !is_shooting){
             shoot_chirp();
         }
     }
@@ -340,7 +343,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
 }
 
 /*
-                         Main application
+    Main application
  */
 int main(void)
 {
@@ -363,7 +366,7 @@ int main(void)
             recompute_signal = false;
         }
         
-        if(shoot_chirp_i2c){
+        if(shoot_chirp_i2c && !is_shooting){
             shoot_chirp();
             shoot_chirp_i2c = false;
         }
