@@ -52,15 +52,16 @@
 #include "stdbool.h"
 #include "mcc_generated_files/ext_int.h"
 #include <math.h>
+#include "mcc_generated_files/EEPROM2_example.h"
 
 #define FCY 4000000UL
 #include <xc.h>
 #include <libpic30.h>
 
 #define START_ADDRESS 0x117F
-#define SAMPLE_NUMBER 8000
+#define SAMPLE_NUMBER 100
 // 0x117F + 2*8000 = 4FFF (max in X Data RAM (X) (8K)) => see page 49 of datasheet
-uint16_t data_chirp[SAMPLE_NUMBER] __attribute__((address(START_ADDRESS)));
+uint16_t data_chirp[SAMPLE_NUMBER];
 
 const char device_name[16] = "DSPIC_ACOUSTICv6";
 const char code_version = 0x06;
@@ -71,8 +72,8 @@ uint16_t freq_middle = 12500;
 uint16_t freq_range = 2500; //2500.0;
 const float sampling_duration = 4e-6;
 
-uint16_t chirp_duration_between_shoot = 20; // in seconds
-uint16_t chirp_offset_from_posix_zero = 0; // in seconds
+uint16_t shoot_duration_between = 20; // in seconds
+uint16_t shoot_offset_from_posix_zero = 0; // in seconds
 uint32_t posix_time = 0; // in seconds
 
 bool recompute_signal = true;
@@ -91,6 +92,8 @@ uint8_t signal_selection = 0;
 
 volatile uint8_t robot_code = 0;
 volatile uint8_t robot_code_bit_index = 0;
+
+volatile uint8_t data_spi[8];
 
 void enable_emission(){
     SIGNAL_ENABLE_SetHigh(); // 3us
@@ -167,7 +170,7 @@ void EX_INT1_CallBack(){
     EX_INT1_InterruptDisable();
     posix_time++;
     
-    if((posix_time - chirp_offset_from_posix_zero) % chirp_duration_between_shoot == 0){
+    if((posix_time - shoot_offset_from_posix_zero) % shoot_duration_between == 0){
         if(!recompute_signal && enable_chirp && !is_shooting){
             shoot_chirp();
         }
@@ -216,15 +219,20 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&posix_time + (i2c_address - 0xB0));
                     break;
                 case 0xB5 ... 0xB6:
-                    I2C1_ReadPointerSet(&chirp_duration_between_shoot + (i2c_address - 0xB5));
+                    I2C1_ReadPointerSet(&shoot_duration_between + (i2c_address - 0xB5));
                     break;
                 case 0xB7 ... 0xB8:
-                    I2C1_ReadPointerSet(&chirp_offset_from_posix_zero + (i2c_address - 0xB5));
+                    I2C1_ReadPointerSet(&shoot_offset_from_posix_zero + (i2c_address - 0xB5));
                     break;
                 
                 case 0xC0:
                     I2C1_ReadPointerSet(&code_version);
                     break;
+                    
+                case 0xD0:
+                    I2C1_ReadPointerSet(&data_spi[i2c_address - 0xD0]);
+                    break;
+                
                     
                 case 0xF0 ... 0xFF:
                     I2C1_ReadPointerSet(&(((char*)device_name)[i2c_address-0xF0]));
@@ -317,13 +325,13 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         break;
                     case 0xB5 ... 0xB6:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&chirp_duration_between_shoot;
+                        uint8_t *bytePointer = (uint8_t *)&shoot_duration_between;
                         bytePointer[i2c_address-0xB5] = i2c_data;
                     }
                         break;
                     case 0xB7 ... 0xB8:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&chirp_offset_from_posix_zero;
+                        uint8_t *bytePointer = (uint8_t *)&shoot_offset_from_posix_zero;
                         bytePointer[i2c_address-0xB7] = i2c_data;
                     }
                         break;                        
@@ -349,27 +357,32 @@ int main(void)
 {
     LED_SetHigh();
     SYSTEM_Initialize();
-    compute_signal();
+    //compute_signal();
     recompute_signal = false;
     LED_SetLow();
     //enable_chirp = true;
     
+    //uint8_t data_send = 0x42;
+    //EEPROM_WriteByte(0x00, data_send, 1);
+    
+    EEPROM2_example();
+    
     enable_reception();
     while (1)
     {
-        ClrWdt();
-        // Add your application code
-        if(recompute_signal){
-            LED_SetLow();
-            compute_signal();
-            LED_SetLow();
-            recompute_signal = false;
-        }
-        
-        if(shoot_chirp_i2c && !is_shooting){
-            shoot_chirp();
-            shoot_chirp_i2c = false;
-        }
+//        ClrWdt();
+//        // Add your application code
+//        if(recompute_signal){
+//            LED_SetLow();
+//            compute_signal();
+//            LED_SetLow();
+//            recompute_signal = false;
+//        }
+//        
+//        if(shoot_chirp_i2c && !is_shooting){
+//            shoot_chirp();
+//            shoot_chirp_i2c = false;
+//        }
     }
     return 1; 
 }
