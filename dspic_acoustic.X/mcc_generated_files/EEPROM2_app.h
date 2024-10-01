@@ -23,12 +23,33 @@
 #ifndef EEPROM2_APP_H
 #define	EEPROM2_APP_H
 
+#define EEPROM2_READ         0x03                // read data from memory
+#define EEPROM2_FREAD        0x0B
+#define EEPROM2_WREN         0x06                // set the write enable latch
+#define EEPROM2_WRITE        0x02                // write data to memory array
+#define EEPROM2_RDSR         0x05                // read STATUS register
+#define EEPROM2_ADDRBYTES    3
+
 #include <stdint.h>
+
+static void EEPROM2_AddressAssign(uint8_t *addressBuffer, uint32_t byteAddr)
+{
+    uint8_t i = 0;
+    uint8_t j = EEPROM2_ADDRBYTES - 1; // = 2
+    uint32_t address = byteAddr;
+    
+    while(address > 0)
+    {
+        addressBuffer[j-i] = address & 0xFF; // 0
+        i++;
+        address >>= 8;
+    }
+}
 
 void EEPROM2_WriteByte (uint8_t byteData, uint32_t byteAddr);
 uint8_t EEPROM2_ReadByte (uint32_t address);
-void EEPROM2_WriteBlock(uint8_t *writeBuffer, uint8_t buflen, uint32_t startAddr);
-void EEPROM2_ReadBlock(uint8_t *readBuffer, uint8_t buflen, uint32_t startAddr);
+void EEPROM2_WriteBlock(uint8_t *writeBuffer, uint16_t buflen, uint32_t startAddr);
+void EEPROM2_ReadBlock(uint8_t *readBuffer, uint16_t buflen, uint32_t startAddr);
 uint8_t EEPROM2_WritePoll(void);
 
 #endif	/* EEPROM2_APP_H */

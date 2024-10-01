@@ -66,20 +66,18 @@ void DMA_Initialize(void)
     // HADDR 20479; 
     DMAH= 0x4FFF;
 
-    // CHEN disabled; DAMODE Unchanged; TRMODE One-Shot; CHREQ disabled; RELOAD enabled; SIZE 16 bit; NULLW disabled; SAMODE Incremented; 
-    DMACH0 = 0x240 & 0xFFFE; //Enable DMA Channel later;
+    // CHEN disabled; DAMODE Incremented; TRMODE Repeated One-Shot; CHREQ disabled; RELOAD enabled; SIZE 8 bit; NULLW enabled; SAMODE Peripheral indirect addressing; 
+    DMACH0 = 0x6D6 & 0xFFFE; //Enable DMA Channel later;
     // HALFIF disabled; LOWIF disabled; HALFEN disabled; DONEIF enabled; OVRUNIF disabled; CHSEL PWM Generator 1; HIGHIF disabled; 
     DMAINT0= 0x1C20;
-    // SADDR 4224; 
-    DMASRC0= 0x1080;
-    // DADDR 3230; 
-    DMADST0= 0xC9E;
-    // CNT 8000; 
-    DMACNT0= 0x1F40;
+    // SADDR 696; 
+    DMASRC0= 0x2B8;
+    // DADDR 3214; 
+    DMADST0= 0xC8E;
+    // CNT 2; 
+    DMACNT0= 0x02;
     // Clearing Channel 0 Interrupt Flag;
     IFS0bits.DMA0IF = false;
-    // Enabling Channel 0 Interrupt
-    IEC0bits.DMA0IE = true;
 
     // CHEN disabled; SAMODE Unchanged; SIZE 16 bit; DAMODE Unchanged; CHREQ disabled; RELOAD disabled; TRMODE One-Shot; NULLW disabled; 
     DMACH1 = 0x00 & 0xFFFE; //Enable DMA Channel later;
@@ -130,12 +128,15 @@ void __attribute__ ((weak)) DMA_Channel0_CallBack(void)
     // Add your custom callback code here
 }
 
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _DMA0Interrupt( void )
+void DMA__Channel0_Tasks( void )
 {
-	// DMA Channel0 callback function 
-	DMA_Channel0_CallBack();
-	
-    IFS0bits.DMA0IF = 0;
+	if(IFS0bits.DMA0IF)
+	{
+		// DMA Channel0 callback function 
+		DMA_Channel0_CallBack();
+		
+		IFS0bits.DMA0IF = 0;
+	}
 }
 void __attribute__ ((weak)) DMA_Channel1_CallBack(void)
 {

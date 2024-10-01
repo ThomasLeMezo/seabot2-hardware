@@ -1,17 +1,17 @@
 /**
-  CMP2 Generated Driver API Header File
+  CMP1 Generated Driver API Header File
 
   @Company
     Microchip Technology Inc.
 
   @File Name
-    cmp2.h
+    cmp1.h
 
   @Summary
-    This is the generated header file for the CMP2 driver using PIC24 / dsPIC33 / PIC32MM MCUs
+    This is the generated header file for the CMP1 driver using PIC24 / dsPIC33 / PIC32MM MCUs
 
   @Description
-    This header file provides APIs for driver for CMP2.
+    This header file provides APIs for driver for CMP1.
     Generation Information :
         Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
         Device            :  dsPIC33CK256MP202
@@ -21,8 +21,8 @@
         MPLAB 	          :  MPLAB X v5.50
 */
 
-#ifndef _CMP2_H
-#define _CMP2_H
+#ifndef _CMP1_H
+#define _CMP1_H
 
 /**
   Section: Included Files
@@ -43,8 +43,10 @@
 */
 typedef enum
 {
-	CMP2_INPUT_CMP2D = 0x3, //CMP2D
-}CMP2_INPUT;
+	CMP1_INPUT_CMP1D = 0x3, //CMP1D
+	CMP1_INPUT_CMP1C = 0x2, //CMP1C
+	CMP1_INPUT_CMP1A = 0x0, //CMP1A
+}CMP1_INPUT;
 
 /**
   @Summary
@@ -57,15 +59,15 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_FCLKDIV_1_8 = 0x7, 
-	CMP2_FCLKDIV_1_7 = 0x6, 
-	CMP2_FCLKDIV_1_6 = 0x5, 
-	CMP2_FCLKDIV_1_5 = 0x4, 
-	CMP2_FCLKDIV_1_4 = 0x3, 
-	CMP2_FCLKDIV_1_3 = 0x2, 
-	CMP2_FCLKDIV_1_2 = 0x1, 
-	CMP2_FCLKDIV_1_1 = 0x0, 
-}CMP2_FILTER_CLOCK_DIVIDER;
+	CMP1_FCLKDIV_1_8 = 0x7, 
+	CMP1_FCLKDIV_1_7 = 0x6, 
+	CMP1_FCLKDIV_1_6 = 0x5, 
+	CMP1_FCLKDIV_1_5 = 0x4, 
+	CMP1_FCLKDIV_1_4 = 0x3, 
+	CMP1_FCLKDIV_1_3 = 0x2, 
+	CMP1_FCLKDIV_1_2 = 0x1, 
+	CMP1_FCLKDIV_1_1 = 0x0, 
+}CMP1_FILTER_CLOCK_DIVIDER;
 
 /**
   @Summary
@@ -78,11 +80,11 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_CLK_FPLLO___SYSTEM_CLOCK_WITH_PLL_ENABLED = 0x3, 
-	CMP2_CLK_AFPLLO___AUXILIARY_CLOCK_WITH_PLL_ENABLED_ = 0x2, 
-	CMP2_CLK_FVCODIV2___SYSTEM_VCO_CLOCK = 0x1, 
-	CMP2_CLK_AFVCODIV2___AUXILIARY_VCO_CLOCK = 0x0, 
-}CMP2_DAC_CLOCK_SOURCE;
+	CMP1_CLK_FPLLO___SYSTEM_CLOCK_WITH_PLL_ENABLED = 0x3, 
+	CMP1_CLK_AFPLLO___AUXILIARY_CLOCK_WITH_PLL_ENABLED_ = 0x2, 
+	CMP1_CLK_FVCODIV2___SYSTEM_VCO_CLOCK = 0x1, 
+	CMP1_CLK_AFVCODIV2___AUXILIARY_VCO_CLOCK = 0x0, 
+}CMP1_DAC_CLOCK_SOURCE;
 
 /**
   @Summary
@@ -94,11 +96,11 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_CLKDIV_1_4 = 0x3, 
-	CMP2_CLKDIV_1_3 = 0x2, 
-	CMP2_CLKDIV_1_2 = 0x1, 
-	CMP2_CLKDIV_1_1 = 0x0, 
-}CMP2_DAC_CLOCK_DIVIDER;
+	CMP1_CLKDIV_1_4 = 0x3, 
+	CMP1_CLKDIV_1_3 = 0x2, 
+	CMP1_CLKDIV_1_2 = 0x1, 
+	CMP1_CLKDIV_1_1 = 0x0, 
+}CMP1_DAC_CLOCK_DIVIDER;
 
 /**
   @Summary
@@ -111,11 +113,11 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_RISING_OR_FALLING_EDGE_DETECT = 0x3, 
-	CMP2_FALLING_EDGE_DETECT = 0x2, 
-	CMP2_RISING_EDGE_DETECT = 0x1, 
-	CMP2_INTERRUPTS_ARE_DISABLED = 0x0, 
-}CMP2_IRQ_MODE;
+	CMP1_RISING_OR_FALLING_EDGE_DETECT = 0x3, 
+	CMP1_FALLING_EDGE_DETECT = 0x2, 
+	CMP1_RISING_EDGE_DETECT = 0x1, 
+	CMP1_INTERRUPTS_ARE_DISABLED = 0x0, 
+}CMP1_IRQ_MODE;
 
 /**
   @Summary
@@ -128,11 +130,11 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_HYSTERESIS_45MV = 0x3, 
-	CMP2_HYSTERESIS_30MV = 0x2, 
-	CMP2_HYSTERESIS_15MV = 0x1, 
-	CMP2_HYSTERESIS_NONE = 0x0, 
-}CMP2_HYSTERESIS_SELECTION;
+	CMP1_HYSTERESIS_45MV = 0x3, 
+	CMP1_HYSTERESIS_30MV = 0x2, 
+	CMP1_HYSTERESIS_15MV = 0x1, 
+	CMP1_HYSTERESIS_NONE = 0x0, 
+}CMP1_HYSTERESIS_SELECTION;
 
 /**
   @Summary
@@ -145,16 +147,16 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_START_PWM8_TRIGGER1 = 0x8, 
-	CMP2_START_PWM7_TRIGGER1 = 0x7, 
-	CMP2_START_PWM6_TRIGGER1 = 0x6, 
-	CMP2_START_PWM5_TRIGGER1 = 0x5, 
-	CMP2_START_PWM4_TRIGGER1 = 0x4, 
-	CMP2_START_PWM3_TRIGGER1 = 0x3, 
-	CMP2_START_PWM2_TRIGGER1 = 0x2, 
-	CMP2_START_PWM1_TRIGGER1 = 0x1, 
-	CMP2_START_NONE = 0x0, 
-}CMP2_START_TRIGGER;
+	CMP1_START_PWM8_TRIGGER1 = 0x8, 
+	CMP1_START_PWM7_TRIGGER1 = 0x7, 
+	CMP1_START_PWM6_TRIGGER1 = 0x6, 
+	CMP1_START_PWM5_TRIGGER1 = 0x5, 
+	CMP1_START_PWM4_TRIGGER1 = 0x4, 
+	CMP1_START_PWM3_TRIGGER1 = 0x3, 
+	CMP1_START_PWM2_TRIGGER1 = 0x2, 
+	CMP1_START_PWM1_TRIGGER1 = 0x1, 
+	CMP1_START_NONE = 0x0, 
+}CMP1_START_TRIGGER;
 
 /**
   @Summary
@@ -167,16 +169,16 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_STOPA_PWM8_TRIGGER2 = 0x8, 
-	CMP2_STOPA_PWM7_TRIGGER2 = 0x7, 
-	CMP2_STOPA_PWM6_TRIGGER2 = 0x6, 
-	CMP2_STOPA_PWM5_TRIGGER2 = 0x5, 
-	CMP2_STOPA_PWM4_TRIGGER2 = 0x4, 
-	CMP2_STOPA_PWM3_TRIGGER2 = 0x3, 
-	CMP2_STOPA_PWM2_TRIGGER2 = 0x2, 
-	CMP2_STOPA_PWM1_TRIGGER2 = 0x1, 
-	CMP2_STOPA_NONE = 0x0, 
-}CMP2_STOPA_TRIGGER;
+	CMP1_STOPA_PWM8_TRIGGER2 = 0x8, 
+	CMP1_STOPA_PWM7_TRIGGER2 = 0x7, 
+	CMP1_STOPA_PWM6_TRIGGER2 = 0x6, 
+	CMP1_STOPA_PWM5_TRIGGER2 = 0x5, 
+	CMP1_STOPA_PWM4_TRIGGER2 = 0x4, 
+	CMP1_STOPA_PWM3_TRIGGER2 = 0x3, 
+	CMP1_STOPA_PWM2_TRIGGER2 = 0x2, 
+	CMP1_STOPA_PWM1_TRIGGER2 = 0x1, 
+	CMP1_STOPA_NONE = 0x0, 
+}CMP1_STOPA_TRIGGER;
 
 /**
   @Summary
@@ -189,11 +191,11 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_STOPB_CMP3_OUTPUT = 0x3, 
-	CMP2_STOPB_CMP2_OUTPUT = 0x2, 
-	CMP2_STOPB_CMP1_OUTPUT = 0x1, 
-	CMP2_STOPB_NONE = 0x0, 
-}CMP2_STOPB_TRIGGER;
+	CMP1_STOPB_CMP3_OUTPUT = 0x3, 
+	CMP1_STOPB_CMP2_OUTPUT = 0x2, 
+	CMP1_STOPB_CMP1_OUTPUT = 0x1, 
+	CMP1_STOPB_NONE = 0x0, 
+}CMP1_STOPB_TRIGGER;
 
 /**
   @Summary
@@ -205,16 +207,16 @@ typedef enum
 */
 typedef enum
 {
-	CMP2_HYSTERETIC_FUNCTION_PWM8H = 0x8, 
-	CMP2_HYSTERETIC_FUNCTION_PWM7H = 0x7, 
-	CMP2_HYSTERETIC_FUNCTION_PWM6H = 0x6, 
-	CMP2_HYSTERETIC_FUNCTION_PWM5H = 0x5, 
-	CMP2_HYSTERETIC_FUNCTION_PWM4H = 0x4, 
-	CMP2_HYSTERETIC_FUNCTION_PWM3H = 0x3, 
-	CMP2_HYSTERETIC_FUNCTION_PWM2H = 0x2, 
-	CMP2_HYSTERETIC_FUNCTION_PWM1H = 0x1, 
-	CMP2_HYSTERETIC_FUNCTION_NONE = 0x0, 
-}CMP2_HYSTERETIC_FUNCTION;
+	CMP1_HYSTERETIC_FUNCTION_PWM8H = 0x8, 
+	CMP1_HYSTERETIC_FUNCTION_PWM7H = 0x7, 
+	CMP1_HYSTERETIC_FUNCTION_PWM6H = 0x6, 
+	CMP1_HYSTERETIC_FUNCTION_PWM5H = 0x5, 
+	CMP1_HYSTERETIC_FUNCTION_PWM4H = 0x4, 
+	CMP1_HYSTERETIC_FUNCTION_PWM3H = 0x3, 
+	CMP1_HYSTERETIC_FUNCTION_PWM2H = 0x2, 
+	CMP1_HYSTERETIC_FUNCTION_PWM1H = 0x1, 
+	CMP1_HYSTERETIC_FUNCTION_NONE = 0x0, 
+}CMP1_HYSTERETIC_FUNCTION;
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -223,11 +225,11 @@ typedef enum
 #endif
 
 /**
-      Section: CMP2 APIs
+      Section: CMP1 APIs
 */
 /**
   @Summary
-    Initialization function for the CMP2, DAC and Slope compensation.
+    Initialization function for the CMP1, DAC and Slope compensation.
 
   @Description
     This routine is the first API to be called among the Comparator with DAC module APIs.  
@@ -241,7 +243,7 @@ typedef enum
  
 */
 
-void CMP2_Initialize(void);
+void CMP1_Initialize(void);
         
 /**
   @Summary
@@ -258,7 +260,7 @@ void CMP2_Initialize(void);
     bool.
  
 */
-bool CMP2_ComparatorOuputStatusGet(void);
+bool CMP1_ComparatorOuputStatusGet(void);
 
 /**
   @Summary
@@ -274,7 +276,7 @@ bool CMP2_ComparatorOuputStatusGet(void);
     none.
  
 */
-void CMP2_Enable(void);
+void CMP1_Enable(void);
     
 /**
   @Summary
@@ -290,7 +292,7 @@ void CMP2_Enable(void);
     none.
  
 */
-void CMP2_Disable(void);
+void CMP1_Disable(void);
 	
 /**
   @Summary
@@ -307,14 +309,14 @@ void CMP2_Disable(void);
     none.
  
 */
-void CMP2_SetInputSource(CMP2_INPUT inpSrc);
+void CMP1_SetInputSource(CMP1_INPUT inpSrc);
 
 /**
   @Summary
-    Callback for CMP2.
+    Callback for CMP1.
 
   @Description
-    This routine is callback for CMP2
+    This routine is callback for CMP1
 
   @Param
     None.
@@ -323,9 +325,9 @@ void CMP2_SetInputSource(CMP2_INPUT inpSrc);
     None
  
   @Example 
-	Refer to CMP2_Initialize(); for an example
+	Refer to CMP1_Initialize(); for an example
 */
-void CMP2_CallBack(void);
+void CMP1_CallBack(void);
 
 /**
   @Summary
@@ -344,7 +346,7 @@ void CMP2_CallBack(void);
     none.
  
 */
-void CMP2_Tasks(void);
+void CMP1_Tasks(void);
 
 /**
   @Summary
@@ -360,7 +362,7 @@ void CMP2_Tasks(void);
     none.
  
 */
-void CMP2_SetDACDataHighValue(uint16_t dacVal);
+void CMP1_SetDACDataHighValue(uint16_t dacVal);
 
 /**
   @Summary
@@ -376,7 +378,7 @@ void CMP2_SetDACDataHighValue(uint16_t dacVal);
     none.
  
 */
-void CMP2_SetDACDataLowValue(uint16_t dacVal);
+void CMP1_SetDACDataLowValue(uint16_t dacVal);
 
 /**
   @Summary
@@ -392,7 +394,7 @@ void CMP2_SetDACDataLowValue(uint16_t dacVal);
     none.
  
 */
-void CMP2_EnableDACOutput(void);
+void CMP1_EnableDACOutput(void);
 
 /**
   @Summary
@@ -408,7 +410,7 @@ void CMP2_EnableDACOutput(void);
     none.
  
 */
-void CMP2_DisableDACOutput(void);
+void CMP1_DisableDACOutput(void);
 
 /**
   @Summary
@@ -424,7 +426,7 @@ void CMP2_DisableDACOutput(void);
     none.
  
 */
-void CMP2_SetStartTrigger(CMP2_START_TRIGGER trigger);
+void CMP1_SetStartTrigger(CMP1_START_TRIGGER trigger);
 
 /**
   @Summary
@@ -440,7 +442,7 @@ void CMP2_SetStartTrigger(CMP2_START_TRIGGER trigger);
     none.
  
 */
-void CMP2_SetStopATrigger(CMP2_STOPA_TRIGGER trigger);
+void CMP1_SetStopATrigger(CMP1_STOPA_TRIGGER trigger);
 
 /**
   @Summary
@@ -456,7 +458,7 @@ void CMP2_SetStopATrigger(CMP2_STOPA_TRIGGER trigger);
     none.
  
 */
-void CMP2_SetStopBTrigger(CMP2_STOPB_TRIGGER trigger);
+void CMP1_SetStopBTrigger(CMP1_STOPB_TRIGGER trigger);
 
 /**
   @Summary
@@ -472,9 +474,9 @@ void CMP2_SetStopBTrigger(CMP2_STOPB_TRIGGER trigger);
     none.
  
 */
-void CMP2_SetHystereticTrigger(CMP2_HYSTERETIC_FUNCTION trigger);
+void CMP1_SetHystereticTrigger(CMP1_HYSTERETIC_FUNCTION trigger);
 
-#endif //_CMP2_H
+#endif //_CMP1_H
 
 /**
   End of File

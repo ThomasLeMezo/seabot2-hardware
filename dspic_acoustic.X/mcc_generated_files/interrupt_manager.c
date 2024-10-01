@@ -61,7 +61,4 @@ void INTERRUPT_Initialize (void)
     //    SICI: I2C1 Slave Event
     //    Priority: 1
         IPC4bits.SI2C1IP = 1;
-    //    DMA0I: DMA Channel 0
-    //    Priority: 1
-        IPC1bits.DMA0IP = 1;
 }

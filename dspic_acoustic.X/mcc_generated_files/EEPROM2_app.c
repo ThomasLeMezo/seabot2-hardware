@@ -24,14 +24,8 @@
 #include "drivers/spi_master.h"
 #include "EEPROM2_app.h"
 
-#define EEPROM2_READ         0x03                // read data from memory
-#define EEPROM2_WREN         0x06                // set the write enable latch
-#define EEPROM2_WRITE        0x02                // write data to memory array
-#define EEPROM2_RDSR         0x05                // read STATUS register
-#define EEPROM2_ADDRBYTES    3
 
-
-static void EEPROM2_AddressAssign(uint8_t *addressBuffer, uint32_t byteAddr);
+//static void EEPROM2_AddressAssign(uint8_t *addressBuffer, uint32_t byteAddr);
 static void EEPROM2_WriteEnable(void);
 static void EEPROM2_CheckStatusRegister(void);
 
@@ -40,7 +34,7 @@ static uint8_t EEPROM2_ReadStatusRegister(void);
 
 void EEPROM2_WriteByte (uint8_t byteData, uint32_t byteAddr)
 {
-    uint8_t addressBuffer[EEPROM2_ADDRBYTES];
+    uint8_t addressBuffer[EEPROM2_ADDRBYTES] = {0, 0, 0};
 
     EEPROM2_AddressAssign(addressBuffer, byteAddr);
     
@@ -66,7 +60,7 @@ void EEPROM2_WriteByte (uint8_t byteData, uint32_t byteAddr)
 uint8_t EEPROM2_ReadByte (uint32_t address)
 {
     uint8_t readByte;
-    uint8_t addressBuffer[EEPROM2_ADDRBYTES];
+    uint8_t addressBuffer[EEPROM2_ADDRBYTES] = {0, 0, 0};
     
     //Wait for write cycle to complete
     EEPROM2_WritePoll();
@@ -90,9 +84,9 @@ uint8_t EEPROM2_ReadByte (uint32_t address)
     return(readByte);
 }
 
-void EEPROM2_WriteBlock(uint8_t *writeBuffer, uint8_t buflen, uint32_t startAddr)
+void EEPROM2_WriteBlock(uint8_t *writeBuffer, uint16_t buflen, uint32_t startAddr)
 {
-    uint8_t addressBuffer[EEPROM2_ADDRBYTES];
+    uint8_t addressBuffer[EEPROM2_ADDRBYTES] = {0, 0, 0};
     
     EEPROM2_AddressAssign(addressBuffer, startAddr);
     
@@ -116,9 +110,9 @@ void EEPROM2_WriteBlock(uint8_t *writeBuffer, uint8_t buflen, uint32_t startAddr
        
 }
 
-void EEPROM2_ReadBlock(uint8_t *readBuffer, uint8_t buflen, uint32_t startAddr)
+void EEPROM2_ReadBlock(uint8_t *readBuffer, uint16_t buflen, uint32_t startAddr)
 {
-    uint8_t addressBuffer[EEPROM2_ADDRBYTES];
+    uint8_t addressBuffer[EEPROM2_ADDRBYTES] = {0, 0, 0};
     
     //Wait for write cycle to complete
     EEPROM2_WritePoll();
@@ -137,20 +131,6 @@ void EEPROM2_ReadBlock(uint8_t *readBuffer, uint8_t buflen, uint32_t startAddr)
     
     LATBbits.LATB10 = 1; /* set EEPROM2_nCS output high */
     spiMaster[EEPROM2].spiClose();
-}
-
-static void EEPROM2_AddressAssign(uint8_t *addressBuffer, uint32_t byteAddr)
-{
-    uint8_t i = 0;
-    uint8_t j = EEPROM2_ADDRBYTES - 1;
-    uint32_t address = byteAddr;
-    
-    while(address > 0)
-    {
-        addressBuffer[j-i] = address & 0xFF;
-        i++;
-        address >>= 8;
-    }
 }
 
 static void EEPROM2_WriteEnable(void)
