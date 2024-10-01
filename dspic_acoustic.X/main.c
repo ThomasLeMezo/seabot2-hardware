@@ -1,48 +1,4 @@
 /**
-  Generated main.c file from MPLAB Code Configurator
-
-  @Company
-    Microchip Technology Inc.
-
-  @File Name
-    main.c
-
-  @Summary
-    This is the generated main.c using PIC24 / dsPIC33 / PIC32MM MCUs.
-
-  @Description
-    This source file provides main entry point for system initialization and application code development.
-    Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
-        Device            :  dsPIC33CK256MP202
-    The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.70
-        MPLAB 	          :  MPLAB X v5.50
-*/
-
-/*
-    (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
-    software and any derivatives exclusively with Microchip products.
-
-    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-    WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-    PARTICULAR PURPOSE, OR ITS INTERACTION WITH MICROCHIP PRODUCTS, COMBINATION
-    WITH ANY OTHER PRODUCTS, OR USE IN ANY APPLICATION.
-
-    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-    BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-    FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-    ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-    THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-
-    MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
-    TERMS.
-*/
-
-/**
   Section: Included Files
 */
 #include "mcc_generated_files/system.h"
@@ -61,15 +17,16 @@
 #include <xc.h>
 #include <libpic30.h>
 
-const float freq_middle_ = 40000;
-const float freq_range_ = 10000; //2500.0;
+uint16_t freq_middle_ = 40000;
+uint16_t freq_range_ = 10000; //2500.0;
 const float sample_duration_ = 1e-6;
 
 float dac_mean_ = 1200; //2047;
 float dac_amplitude_ = 1000; // 1100
 
-const char device_name[16] = "DSPIC_ACOUSTICv6";
-const char code_version = 0x06;
+const char device_name_[16] = "DSPIC_ACOUSTICv7";
+const char code_version_ = 0x07;
+
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
@@ -123,13 +80,15 @@ void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, 
     const float signal_duration = (float)signal_duration_ms*1e-3;
     const unsigned long long sample_number = floor(signal_duration/sample_duration_);
     const float invert = sens ? 1.0 : -1.0;
+    const float freq_middle = (float)freq_middle_;
+    const float freq_range = (float)freq_range_;
     
     float t = 0.;
     uint32_t add = add_start;
     uint16_t data_chirp[128];
     for(unsigned long long i = 0; i < sample_number; i+=128){
         for(int j = 0; j<128; j++){
-            data_chirp[j] = round(dac_amplitude_*sin(2.0*M_PI*t*(freq_middle_+invert*freq_range_*(t/signal_duration-0.5))) + dac_mean_);
+            data_chirp[j] = round(dac_amplitude_*sin(2.0*M_PI*t*(freq_middle+invert*freq_range*(t/signal_duration-0.5))) + dac_mean_);
             t+=sample_duration_;
         }
         EEPROM2_WriteBlock(data_chirp,256,add);
@@ -140,8 +99,10 @@ void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, 
 void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, const bool level){
     const float signal_duration = (float)signal_duration_ms*1e-3;
     const unsigned long long sample_number = floor(signal_duration/sample_duration_);
+    const float freq_middle = (float)freq_middle_;
+    const float freq_range = (float)freq_range_;
     
-    const float frequency = level ? freq_middle_ + freq_range_/2.0 : freq_middle_ - freq_range_/2.0;
+    const float frequency = level ? freq_middle + freq_range/2.0 : freq_middle - freq_range/2.0;
     
     float t = 0.;
     uint32_t add = add_start;
@@ -236,11 +197,11 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     break;
                 
                 case 0xC0:
-                    I2C1_ReadPointerSet(&code_version);
+                    I2C1_ReadPointerSet(&code_version_);
                     break;                
                     
                 case 0xF0 ... 0xFF:
-                    I2C1_ReadPointerSet(&(((char*)device_name)[i2c_address-0xF0]));
+                    I2C1_ReadPointerSet(&(((char*)device_name_)[i2c_address-0xF0]));
                     break;
                 default:
                     I2C1_ReadPointerSet(&i2c_default_data);

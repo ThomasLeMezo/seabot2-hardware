@@ -129,6 +129,7 @@
 #include "i2c1.h"
 #include "pwm.h"
 #include "spi1_driver.h"
+#include "memory/flash.h"
 #include "ext_int.h"
 #include "drivers/spi_master.h"
 #include "delay.h"
