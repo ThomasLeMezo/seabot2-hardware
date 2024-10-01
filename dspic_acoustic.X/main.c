@@ -201,10 +201,10 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&robot_code);
                     break;
                 case 0x01 ... 0x02:
-                    I2C1_ReadPointerSet(&freq_middle_ + (i2c_address - 0x03));
+                    I2C1_ReadPointerSet(&freq_middle_ + (i2c_address - 0x01));
                     break;
                 case 0x03 ... 0x04:
-                    I2C1_ReadPointerSet(&freq_range_ + (i2c_address - 0x05));
+                    I2C1_ReadPointerSet(&freq_range_ + (i2c_address - 0x03));
                     break;
                 case 0x05:
                     I2C1_ReadPointerSet(&recompute_signal);
@@ -213,13 +213,16 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&enable_chirp);
                     break;
                 case 0x09 ... 0x0A:
-                    I2C1_ReadPointerSet(&dac_mean_16 + (i2c_address - 0x05));
+                    I2C1_ReadPointerSet(&dac_mean_16 + (i2c_address - 0x09));
                     break;
                 case 0x0B ... 0x0C:
-                    I2C1_ReadPointerSet(&dac_amplitude_16 + (i2c_address - 0x05));
+                    I2C1_ReadPointerSet(&dac_amplitude_16 + (i2c_address - 0x0B));
                     break;
                 case 0x0D:
                     I2C1_ReadPointerSet(&signal_selection);
+                    break;
+                case 0x0E ... 0x0F:
+                    I2C1_ReadPointerSet(&signal_main_duration_ms_ + (i2c_address - 0x0E));
                     break;
                     
                 case 0xB0 ... 0xB4:
@@ -229,7 +232,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&shoot_duration_between + (i2c_address - 0xB5));
                     break;
                 case 0xB7 ... 0xB8:
-                    I2C1_ReadPointerSet(&shoot_offset_from_posix_zero + (i2c_address - 0xB5));
+                    I2C1_ReadPointerSet(&shoot_offset_from_posix_zero + (i2c_address - 0xB7));
                     break;
                 
                 case 0xC0:
@@ -360,7 +363,6 @@ int main(void)
     compute_signal();
     recompute_signal = false;
     LED_SetLow();
-    //enable_chirp = true;
     
     while (1)
     {
