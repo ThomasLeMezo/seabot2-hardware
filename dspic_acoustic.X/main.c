@@ -21,8 +21,9 @@ uint16_t freq_middle_ = 40000;
 uint16_t freq_range_ = 10000; //2500.0;
 const float sample_duration_ = 1e-6;
 
-float dac_mean_ = 1200; //2047;
-float dac_amplitude_ = 1000; // 1100
+// [1200, 1000] / [2047, 1100]
+float dac_mean_ = 1200; //2047; //1200; //2047;
+float dac_amplitude_ = 1100; //4000; //1000; // 1100
 
 const char device_name_[16] = "DSPIC_ACOUSTICv7";
 const char code_version_ = 0x07;
@@ -340,6 +341,7 @@ int main(void)
             shoot_signal(0, signal_main_duration_ms_);
             for(uint8_t i=0; i<8; i++){
                 shoot_signal((0b1 & (robot_code>>i)) + 1, signal_main_duration_ms_/2);
+                DELAY_microseconds(500);
             }
             shoot_signal_run_ = false;
         }
