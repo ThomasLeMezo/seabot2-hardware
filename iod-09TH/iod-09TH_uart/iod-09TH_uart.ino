@@ -1,17 +1,6 @@
-
-/*
- * Compiler & board : https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
- * File>Preference>Additional Boards Manager add link above
- * In Tools>Board select "4D Systems gen4 IoD Range"
- * 
- * Add library to folder Documents\Arduino\libraries
- * GFX4DIoD9-master from https://github.com/4dsystems/GFX4DIoD9
- * 
- */
-
 #include <GFX4dIoD9.h>
 #define DEBUG false
-#define CODE_VERSION 0x03
+#define CODE_VERSION 0x04
 
 GFX4dIoD9 gfx = GFX4dIoD9();
 
@@ -29,11 +18,10 @@ byte data_time[2] = {0,0};
 byte data_time_remain[2] = {0,0};
 byte data_status = 0;
 
-
-short pressure_threshold = 750;
-short tension_threshold = 120;
-short temperature_threshold = 400;
-short hygro_threshold = 70;
+const short pressure_threshold = 750;
+const short tension_threshold = 120;
+const short temperature_threshold = 400;
+const short hygro_threshold = 70;
 
 bool screen_errase = false;
 
@@ -262,16 +250,16 @@ void parseUART(){
         break;
 
       case 13:
-      {
-        data_status = Serial.read();
-      }
-      break;
+        {
+          data_status = Serial.read();
+        }
+        break;
 
       case 14:
-      {
-        Serial.write(CODE_VERSION);
-      }
-      break;
+        {
+          Serial.write(CODE_VERSION);
+        }
+        break;
       
 
       default:
