@@ -341,7 +341,7 @@ int main(void)
             shoot_signal(0, signal_main_duration_ms_);
             for(uint8_t i=0; i<8; i++){
                 shoot_signal((0b1 & (robot_code>>i)) + 1, signal_main_duration_ms_/2);
-                DELAY_microseconds(500);
+                DELAY_microseconds(800);
             }
             shoot_signal_run_ = false;
         }
