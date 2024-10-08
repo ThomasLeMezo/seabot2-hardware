@@ -25,14 +25,14 @@ const float sample_duration_ = 1e-6;
 float dac_mean_ = 1200; //2047; //1200; //2047;
 float dac_amplitude_ = 1100; //4000; //1000; // 1100
 
-const char device_name_[16] = "DSPIC_ACOUSTICv7";
-const char code_version_ = 0x07;
+const char device_name_[16] = "DSPIC_ACOUSTICv8";
+const char code_version_ = 0x08;
 
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
 
-uint16_t shoot_duration_between = 20; // in seconds
-uint16_t shoot_offset_from_posix_zero = 0; // in seconds
+uint16_t shoot_duration_between = 30; // in seconds
+uint32_t shoot_offset_from_posix_zero = 0; // in seconds
 uint32_t posix_time = 0; // in seconds
 
 bool recompute_signal = true;
@@ -163,10 +163,10 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&robot_code);
                     break;
                 case 0x01 ... 0x02:
-                    I2C1_ReadPointerSet(&freq_middle_ + (i2c_address - 0x01));
+                    I2C1_ReadPointerSet((uint16_t)(&freq_middle_) + (i2c_address - 0x01));
                     break;
                 case 0x03 ... 0x04:
-                    I2C1_ReadPointerSet(&freq_range_ + (i2c_address - 0x03));
+                    I2C1_ReadPointerSet((uint16_t)(&freq_range_) + (i2c_address - 0x03));
                     break;
                 case 0x05:
                     I2C1_ReadPointerSet(&recompute_signal);
@@ -175,26 +175,26 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&enable_chirp);
                     break;
                 case 0x09 ... 0x0A:
-                    I2C1_ReadPointerSet(&dac_mean_16 + (i2c_address - 0x09));
+                    I2C1_ReadPointerSet((uint16_t)(&dac_mean_16) + (i2c_address - 0x09));
                     break;
                 case 0x0B ... 0x0C:
-                    I2C1_ReadPointerSet(&dac_amplitude_16 + (i2c_address - 0x0B));
+                    I2C1_ReadPointerSet((uint16_t)(&dac_amplitude_16) + (i2c_address - 0x0B));
                     break;
                 case 0x0D:
                     I2C1_ReadPointerSet(&signal_selection);
                     break;
                 case 0x0E ... 0x0F:
-                    I2C1_ReadPointerSet(&signal_main_duration_ms_ + (i2c_address - 0x0E));
+                    I2C1_ReadPointerSet((uint16_t)(&signal_main_duration_ms_) + (i2c_address - 0x0E));
                     break;
                     
-                case 0xB0 ... 0xB4:
-                    I2C1_ReadPointerSet(&posix_time + (i2c_address - 0xB0));
+                case 0xB0 ... 0xB3:
+                    I2C1_ReadPointerSet((uint16_t)(&posix_time) + (i2c_address - 0xB0));
                     break;
-                case 0xB5 ... 0xB6:
-                    I2C1_ReadPointerSet(&shoot_duration_between + (i2c_address - 0xB5));
+                case 0xB4 ... 0xB5:
+                    I2C1_ReadPointerSet((uint16_t)(&shoot_duration_between) + (i2c_address - 0xB5));
                     break;
-                case 0xB7 ... 0xB8:
-                    I2C1_ReadPointerSet(&shoot_offset_from_posix_zero + (i2c_address - 0xB7));
+                case 0xB6 ... 0xB7:
+                    I2C1_ReadPointerSet((uint16_t)(&shoot_offset_from_posix_zero) + (i2c_address - 0xB7));
                     break;
                 
                 case 0xC0:
@@ -228,21 +228,21 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         robot_code = i2c_data;
                         break;
                         
+                    case 0x01 ... 0x02:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)(&freq_middle_) + (i2c_address - 0x01);
+                        bytePointer = i2c_data;
+                    }
+                        break;
+                        
                     case 0x03 ... 0x04:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&freq_middle_;
-                        bytePointer[i2c_address-0x03] = i2c_data;
+                        uint8_t *bytePointer = (uint8_t *)(&freq_range_) + (i2c_address - 0x03);
+                        bytePointer = i2c_data;
                     }
                         break;
                         
-                    case 0x05 ... 0x06:
-                    {
-                        uint8_t *bytePointer = (uint8_t *)&freq_range_;
-                        bytePointer[i2c_address-0x05] = i2c_data;
-                    }
-                        break;
-                        
-                    case 0x07:
+                    case 0x05:
                     {
                         if(i2c_data == 1)
                             recompute_signal = true;
@@ -259,19 +259,26 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         
                     case 0x09 ... 0x0A:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&dac_mean_16;
-                        bytePointer[i2c_address-0x09] = i2c_data;
+                        uint8_t *bytePointer = (uint8_t *)(&dac_mean_16) + (i2c_address - 0x09);
+                        bytePointer = i2c_data;
                     }
                         break;
                     case 0x0B ... 0x0C:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&dac_amplitude_16;
-                        bytePointer[i2c_address-0x0B] = i2c_data;
+                        uint8_t *bytePointer = (uint8_t *)(&dac_amplitude_16) + (i2c_address - 0x0B);
+                        bytePointer = i2c_data;
                     }
                         break;
                         
                     case 0x0D:
                         signal_selection = i2c_data;
+                        break;
+
+                    case 0x0E ... 0x0F:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)(&signal_main_duration_ms_) + (i2c_address - 0x0E);
+                        bytePointer = i2c_data;
+                    }
                         break;
                     
                     case 0xA1:
@@ -282,24 +289,24 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     }
                         break;
 
-                    case 0xB0 ... 0xB4:
+                    case 0xB0 ... 0xB3:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&posix_time;
-                        bytePointer[i2c_address-0xB0] = i2c_data;
+                        uint8_t *bytePointer = (uint8_t *)(&posix_time) + (i2c_address - 0xB0);
+                        *bytePointer = i2c_data;
                     }
                         break;
-                    case 0xB5 ... 0xB6:
+                    case 0xB4 ... 0xB5:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&shoot_duration_between;
-                        bytePointer[i2c_address-0xB5] = i2c_data;
+                        uint8_t *bytePointer = (uint8_t *)(&shoot_duration_between) + (i2c_address - 0xB4);
+                        bytePointer = i2c_data;
                     }
                         break;
-                    case 0xB7 ... 0xB8:
+                    case 0xB6 ... 0xB7:
                     {
-                        uint8_t *bytePointer = (uint8_t *)&shoot_offset_from_posix_zero;
-                        bytePointer[i2c_address-0xB7] = i2c_data;
+                        uint8_t *bytePointer = (uint8_t *)(&shoot_offset_from_posix_zero) + (i2c_address - 0xB7);
+                        bytePointer = i2c_data;
                     }
-                        break;                        
+                        break;
                         
                     default:
                         break;

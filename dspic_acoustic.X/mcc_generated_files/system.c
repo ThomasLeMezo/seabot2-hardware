@@ -124,23 +124,23 @@
 #include "clock.h"
 #include "system.h"
 #include "system_types.h"
-#include "interrupt_manager.h"
-#include "traps.h"
-#include "i2c1.h"
-#include "pwm.h"
-#include "spi1_driver.h"
-#include "memory/flash.h"
 #include "ext_int.h"
 #include "drivers/spi_master.h"
-#include "delay.h"
-#include "cmp1.h"
 #include "dma.h"
+#include "cmp1.h"
+#include "i2c1.h"
+#include "pwm.h"
+#include "interrupt_manager.h"
+#include "traps.h"
+#include "memory/flash.h"
+#include "spi1_driver.h"
+#include "delay.h"
 
 void SYSTEM_Initialize(void)
 {
     PIN_MANAGER_Initialize();
-    INTERRUPT_Initialize();
     CLOCK_Initialize();
+    INTERRUPT_Initialize();
     I2C1_Initialize();
     CMP1_Initialize();
     PWM_Initialize();

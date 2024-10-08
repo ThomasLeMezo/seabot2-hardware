@@ -435,3 +435,122 @@ inline void __attribute__ ((always_inline)) I2C1_ReceiveProcess(void)
     *p_i2c1_write_pointer = I2C1_RECEIVE_REG;
 
 }
+
+/* Note: This is an example of the I2C1_StatusCallback()
+         implementation. This is an emulated EEPROM Memory
+         configured to act as a I2C Slave Device.
+         For specific slave device implementation, remove
+         or modify this function to the specific slave device
+         behavior.
+*/
+
+static uint8_t i2c1_slaveWriteData = 0xAA;
+
+//bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status)
+//{
+//
+//    // this emulates the slave device memory where data written to slave
+//    // is placed and data read from slave is taken
+//    /*
+//     Emulate EEPORM default memory size is 64bytes
+// 
+//     Emulate EEPORM Read/Write Instruction:
+//     --------------------------------------     
+//     Byte Write Instruction:
+//     |Start|slave Addr + w|Ack|AddrHighByte|Ack|AddrLowByte|Ack|data|Nack|Stop|
+//     
+//     Page Write Instruction:
+//     |Start|slave Addr + w|Ack|AddrHighByte|Ack|AddrLowByte|Ack|dataByte n|Ack|...|data Byte n+x|Nack|Stop|
+//     
+//     Byte Read Instruction:
+//     |Start|slave Addr + r|Ack|AddrHighByte|Ack|AddrLowByte|Ack|data|Nack|Stop|
+//
+//     Page Read Instruction:
+//     |Start|slave Addr + r|Ack|AddrHighByte|Ack|AddrLowByte|Ack|dataByte n|Ack|...|dataByte n+x|Nack|Stop|
+//    */
+//    
+//    static uint8_t EMULATE_EEPROM_Memory[EMULATE_EEPROM_SIZE] =
+//            {
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//            };
+//
+//    static uint16_t address, addrByteCount;
+//    static bool     addressState = true;
+//
+//    switch (status)
+//    {
+//        case I2C1_SLAVE_TRANSMIT_REQUEST_DETECTED:
+//            // set up the slave driver buffer transmit pointer
+//            I2C1_ReadPointerSet(&EMULATE_EEPROM_Memory[address++]);
+//            if(address >= EMULATE_EEPROM_SIZE) {
+//                address = 0;
+//            }
+//            break;
+//
+//        case I2C1_SLAVE_RECEIVE_REQUEST_DETECTED:
+//
+//            addrByteCount = 0;
+//            addressState = true;
+//
+//            // set up the slave driver buffer receive pointer
+//            I2C1_WritePointerSet(&i2c1_slaveWriteData);
+//            break;
+//
+//        case I2C1_SLAVE_RECEIVED_DATA_DETECTED:
+//
+//            if (addressState == true)
+//            {
+//                // get the address of the memory being written
+//                if (addrByteCount == 0)
+//                {
+//                    address = (i2c1_slaveWriteData << 8) & 0xFF00;
+//                    addrByteCount++;
+//                }
+//                else if (addrByteCount == 1)
+//                {
+//                    address = address | i2c1_slaveWriteData;
+//                    addrByteCount = 0;
+//                    addressState = false;
+//                }
+//                
+//                if(address >= EMULATE_EEPROM_SIZE) {
+//                    address = EMULATE_EEPROM_SIZE;
+//                }
+//            }
+//            else // if (addressState == false)
+//            {
+//                // set the memory with the received data
+//                EMULATE_EEPROM_Memory[address++] = i2c1_slaveWriteData;
+//                if(address >= EMULATE_EEPROM_SIZE) {
+//                    address = 0;
+//                }
+//            }
+//
+//            break;
+//
+//        case I2C1_SLAVE_10BIT_RECEIVE_REQUEST_DETECTED:
+//
+//            // do something here when 10-bit address is detected
+//
+//            // 10-bit address is detected
+//
+//            break;
+//
+//        default:
+//            break;
+//
+//    }
+//
+//    return true;
+//}
+//
+
+
+

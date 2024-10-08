@@ -130,12 +130,12 @@ void PWM_Initialize (void)
     PG1LEBH = 0x00;
     // PHASE 0; 
     PG1PHASE = 0x00;
-    // DC 100; 
-    PG1DC = 0x64;
+    // DC 13; 
+    PG1DC = 0x0D;
     // DCA 0; 
     PG1DCA = 0x00;
-    // PER 199; 
-    PG1PER = 0xC7;
+    // PER 24; 
+    PG1PER = 0x18;
     // TRIGA 0; 
     PG1TRIGA = 0x00;
     // TRIGB 0; 
