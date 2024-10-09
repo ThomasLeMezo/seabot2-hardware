@@ -54,8 +54,8 @@
 
 void PWM_Initialize (void)
 {
-    // MCLKSEL FPLLO - System Clock with PLL enabled; HRERR disabled; LOCK disabled; DIVSEL 1:2; 
-    PCLKCON = 0x02;
+    // MCLKSEL FOSC - System Clock; HRERR disabled; LOCK disabled; DIVSEL 1:2; 
+    PCLKCON = 0x00;
     // FSCL 0; 
     FSCL = 0x00;
     // FSMINPER 0; 
@@ -102,8 +102,8 @@ void PWM_Initialize (void)
     PG1STAT = 0x00;
     // FLTDAT 0; DBDAT 0; SWAP disabled; OVRENH disabled; OVRENL disabled; OSYNC User output overrides are synchronized to the local PWM time base; CLMOD disabled; FFDAT 0; CLDAT 0; OVRDAT 0; 
     PG1IOCONL = 0x00;
-    // PENL disabled; DTCMPSEL PCI Sync Logic; PMOD Independent; POLL Active-high; PENH disabled; CAPSRC Software; POLH Active-high; 
-    PG1IOCONH = 0x10;
+    // PENL enabled; DTCMPSEL PCI Sync Logic; PMOD Independent; POLL Active-high; PENH disabled; CAPSRC Software; POLH Active-high; 
+    PG1IOCONH = 0x14;
     // UPDTRG Manual; ADTR1PS 1:1; PGTRGSEL EOC event; ADTR1EN3 disabled; ADTR1EN1 disabled; ADTR1EN2 disabled; 
     PG1EVTL = 0x00;
     // ADTR2EN1 disabled; IEVTSEL EOC; SIEN disabled; FFIEN disabled; ADTR1OFS None; CLIEN disabled; FLTIEN disabled; ADTR2EN2 disabled; ADTR2EN3 disabled; 
@@ -130,12 +130,12 @@ void PWM_Initialize (void)
     PG1LEBH = 0x00;
     // PHASE 0; 
     PG1PHASE = 0x00;
-    // DC 13; 
-    PG1DC = 0x0D;
+    // DC 50; 
+    PG1DC = 0x32;
     // DCA 0; 
     PG1DCA = 0x00;
-    // PER 24; 
-    PG1PER = 0x18;
+    // PER 99; 
+    PG1PER = 0x63;
     // TRIGA 0; 
     PG1TRIGA = 0x00;
     // TRIGB 0; 
@@ -148,8 +148,8 @@ void PWM_Initialize (void)
     PG1DTH = 0x00;
     
 
-    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock; ON enabled; 
-    PG1CONL = 0x8008;
+    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock; ON disabled; 
+    PG1CONL = 0x08;
 }
 
 void __attribute__ ((weak)) PWM_Generator1_CallBack(void)

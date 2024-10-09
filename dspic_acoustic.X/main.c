@@ -17,16 +17,16 @@
 #include <xc.h>
 #include <libpic30.h>
 
-uint16_t freq_middle_ = 40000;
-uint16_t freq_range_ = 10000; //2500.0;
+uint16_t freq_middle_ = 20000;
+uint16_t freq_range_ = 5000; //2500.0;
 const float sample_duration_ = 1e-6;
 
 // [1200, 1000] / [2047, 1100]
 float dac_mean_ = 1200; //2047; //1200; //2047;
 float dac_amplitude_ = 1100; //4000; //1000; // 1100
 
-const char device_name_[16] = "DSPIC_ACOUSTICv8";
-const char code_version_ = 0x08;
+const char device_name_[16] = "DSPIC_ACOUSTICv9";
+const char code_version_ = 0x09;
 
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
@@ -42,7 +42,7 @@ uint16_t signal_main_duration_ms_ = 250;
 bool shoot_signal_run_ = false;
 
 uint16_t dac_mean_16= 1200;
-uint16_t dac_amplitude_16 = 1000; // 1100
+uint16_t dac_amplitude_16 = 900; // 1100
 
 uint8_t signal_selection = 0;
 
@@ -51,7 +51,7 @@ volatile uint8_t robot_code = 0;
 // 0 => 0xFFFFF => 0x17FFFE => 0x1FFFFD
 // [0xFFFFF, 0x7FFFF, 0x7FFFF]
 // [1,048,575 | 524,287 | 524,287], max = 0x1FFFFD < 0x1FFFFF
-const uint32_t signal_add_[3] = {0, 0xFFFFF, 0x17FFFE};
+const uint32_t signal_add_[3] = {0, 0x100000, 0x180000};
 // At 1us per sample => 1.048575s max for larger symbol
 
 void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
@@ -60,7 +60,7 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
     EEPROM2_WritePoll(); //Wait for write cycle to complete
     spiMaster[EEPROM2].spiOpen(); 
     EEPROM2_nCS_SetLow(); // set EEPROM2_nCS output low
-    spiMaster[EEPROM2].exchangeByte(EEPROM2_FREAD); //Send Read Command
+    spiMaster[EEPROM2].exchangeByte(EEPROM2_READ); //Send Read Command
     spiMaster[EEPROM2].exchangeBlock(addressBuffer,EEPROM2_ADDRBYTES); //Send Address bytes
     
     LED_SetLow();
@@ -78,7 +78,7 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
 }
 
 void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, const bool sens){
-    const float signal_duration = (float)signal_duration_ms*1e-3;
+    const float signal_duration = ((float)signal_duration_ms)*1e-3;
     const unsigned long long sample_number = floor(signal_duration/sample_duration_);
     const float invert = sens ? 1.0 : -1.0;
     const float freq_middle = (float)freq_middle_;
@@ -126,9 +126,9 @@ void compute_signal(){
             compute_chirp(signal_add_[2], signal_main_duration_ms_/2, false);
             break;
         case 0x01:
-            compute_chirp(signal_add_[0], signal_main_duration_ms_, true);
-            compute_chirp(signal_add_[1], signal_main_duration_ms_/2, true);
-            compute_chirp(signal_add_[2], signal_main_duration_ms_/2, false);
+            compute_cw(signal_add_[0], signal_main_duration_ms_, true);
+            compute_cw(signal_add_[1], signal_main_duration_ms_/2, true);
+            compute_cw(signal_add_[2], signal_main_duration_ms_/2, false);
             break;
         default:
             break;
@@ -231,14 +231,14 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     case 0x01 ... 0x02:
                     {
                         uint8_t *bytePointer = (uint8_t *)(&freq_middle_) + (i2c_address - 0x01);
-                        bytePointer = i2c_data;
+                        *bytePointer = i2c_data;
                     }
                         break;
                         
                     case 0x03 ... 0x04:
                     {
                         uint8_t *bytePointer = (uint8_t *)(&freq_range_) + (i2c_address - 0x03);
-                        bytePointer = i2c_data;
+                        *bytePointer = i2c_data;
                     }
                         break;
                         
@@ -260,13 +260,13 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     case 0x09 ... 0x0A:
                     {
                         uint8_t *bytePointer = (uint8_t *)(&dac_mean_16) + (i2c_address - 0x09);
-                        bytePointer = i2c_data;
+                        *bytePointer = i2c_data;
                     }
                         break;
                     case 0x0B ... 0x0C:
                     {
                         uint8_t *bytePointer = (uint8_t *)(&dac_amplitude_16) + (i2c_address - 0x0B);
-                        bytePointer = i2c_data;
+                        *bytePointer = i2c_data;
                     }
                         break;
                         
@@ -277,7 +277,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     case 0x0E ... 0x0F:
                     {
                         uint8_t *bytePointer = (uint8_t *)(&signal_main_duration_ms_) + (i2c_address - 0x0E);
-                        bytePointer = i2c_data;
+                        *bytePointer = i2c_data;
                     }
                         break;
                     
@@ -298,13 +298,13 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     case 0xB4 ... 0xB5:
                     {
                         uint8_t *bytePointer = (uint8_t *)(&shoot_duration_between) + (i2c_address - 0xB4);
-                        bytePointer = i2c_data;
+                        *bytePointer = i2c_data;
                     }
                         break;
                     case 0xB6 ... 0xB7:
                     {
-                        uint8_t *bytePointer = (uint8_t *)(&shoot_offset_from_posix_zero) + (i2c_address - 0xB7);
-                        bytePointer = i2c_data;
+                        uint8_t *bytePointer = (uint8_t *)(&shoot_offset_from_posix_zero) + (i2c_address - 0xB6);
+                        *bytePointer = i2c_data;
                     }
                         break;
                         
@@ -346,6 +346,7 @@ int main(void)
         
         if(shoot_signal_run_){
             shoot_signal(0, signal_main_duration_ms_);
+            DELAY_microseconds(800);
             for(uint8_t i=0; i<8; i++){
                 shoot_signal((0b1 & (robot_code>>i)) + 1, signal_main_duration_ms_/2);
                 DELAY_microseconds(800);
