@@ -62,8 +62,8 @@ void CLOCK_Initialize(void)
     APLLFBD1 = 0x96;
     // APOST1DIV 1:4; APOST2DIV 1:1; AVCODIV FVCO/2; 
     APLLDIV1 = 0x241;
-    // ROEN disabled; ROSWEN disabled; ROSLP disabled; ROSEL FOSC; ROOUT disabled; ROSIDL disabled; 
-    REFOCONL = 0x00;
+    // ROEN enabled; ROSWEN disabled; ROSLP disabled; ROSEL FOSC; ROOUT disabled; ROSIDL disabled; 
+    REFOCONL = 0x8000;
     // RODIV 0; 
     REFOCONH = 0x00;
     // ROTRIM 0; 

@@ -17,7 +17,7 @@
 #include <xc.h>
 #include <libpic30.h>
 
-uint16_t freq_middle_ = 20000;
+uint16_t freq_middle_ = 25000;
 uint16_t freq_range_ = 5000; //2500.0;
 const float sample_duration_ = 1e-6;
 
@@ -25,8 +25,8 @@ const float sample_duration_ = 1e-6;
 float dac_mean_ = 1200; //2047; //1200; //2047;
 float dac_amplitude_ = 1100; //4000; //1000; // 1100
 
-const char device_name_[16] = "DSPIC_ACOUSTICv9";
-const char code_version_ = 0x09;
+const char device_name_[16] = "DSPIC_ACOUSTICvA";
+const char code_version_ = 0x0A;
 
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
@@ -60,8 +60,10 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
     EEPROM2_WritePoll(); //Wait for write cycle to complete
     spiMaster[EEPROM2].spiOpen(); 
     EEPROM2_nCS_SetLow(); // set EEPROM2_nCS output low
-    spiMaster[EEPROM2].exchangeByte(EEPROM2_READ); //Send Read Command
+    spiMaster[EEPROM2].exchangeByte(EEPROM2_FREAD); //Send Read Command
     spiMaster[EEPROM2].exchangeBlock(addressBuffer,EEPROM2_ADDRBYTES); //Send Address bytes
+    
+    // Read the dummy byte is not necessary !
     
     LED_SetLow();
     SIGNAL_ENABLE_SetHigh();
@@ -77,6 +79,19 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
     LED_SetHigh();
 }
 
+void erase_eeprom(){
+    EEPROM2_WriteEnable();
+    EEPROM2_CheckStatusRegister();
+    
+    spiMaster[EEPROM2].spiOpen(); 
+    EEPROM2_nCS_SetLow(); // set EEPROM2_nCS output low
+    // CHER
+    spiMaster[EEPROM2].exchangeByte(EEPROM2_CHER); //Send Read Command
+    EEPROM2_nCS_SetHigh(); /* set EEPROM2_nCS output high */
+    spiMaster[EEPROM2].spiClose();
+    DELAY_milliseconds(30);
+}
+
 void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, const bool sens){
     const float signal_duration = ((float)signal_duration_ms)*1e-3;
     const unsigned long long sample_number = floor(signal_duration/sample_duration_);
@@ -88,8 +103,9 @@ void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, 
     uint32_t add = add_start;
     uint16_t data_chirp[128];
     for(unsigned long long i = 0; i < sample_number; i+=128){
-        for(int j = 0; j<128; j++){
+        for(uint16_t j = 0; j<128; j++){
             data_chirp[j] = round(dac_amplitude_*sin(2.0*M_PI*t*(freq_middle+invert*freq_range*(t/signal_duration-0.5))) + dac_mean_);
+            //data_chirp[j] = 0x1234;
             t+=sample_duration_;
         }
         EEPROM2_WriteBlock(data_chirp,256,add);
@@ -119,6 +135,8 @@ void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, con
 }
 
 void compute_signal(){
+    recompute_signal = true;
+    erase_eeprom();
     switch (signal_selection){
         case 0x00:
             compute_chirp(signal_add_[0], signal_main_duration_ms_, true);
@@ -333,12 +351,14 @@ int main(void)
     recompute_signal = false;
     LED_SetLow();
     
+    shoot_signal_run_ = true;
+    
     while (1)
     {
         ClrWdt();
 
         if(recompute_signal){
-            LED_SetLow();
+            LED_SetHigh();
             compute_signal();
             LED_SetLow();
             recompute_signal = false;

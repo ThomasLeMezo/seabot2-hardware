@@ -24,11 +24,6 @@
 #include "drivers/spi_master.h"
 #include "EEPROM2_app.h"
 
-
-//static void EEPROM2_AddressAssign(uint8_t *addressBuffer, uint32_t byteAddr);
-static void EEPROM2_WriteEnable(void);
-static void EEPROM2_CheckStatusRegister(void);
-
 static uint8_t EEPROM2_ReadStatusRegister(void);
 
 
@@ -133,7 +128,7 @@ void EEPROM2_ReadBlock(uint8_t *readBuffer, uint16_t buflen, uint32_t startAddr)
     spiMaster[EEPROM2].spiClose();
 }
 
-static void EEPROM2_WriteEnable(void)
+void EEPROM2_WriteEnable(void)
 {    
     spiMaster[EEPROM2].spiOpen();
     LATBbits.LATB10 = 0; /* set EEPROM2_nCS output low */
@@ -145,7 +140,7 @@ static void EEPROM2_WriteEnable(void)
     spiMaster[EEPROM2].spiClose();
 }
 
-static void EEPROM2_CheckStatusRegister(void)
+void EEPROM2_CheckStatusRegister(void)
 {
     uint8_t check;
     //Check if WEL bit is set

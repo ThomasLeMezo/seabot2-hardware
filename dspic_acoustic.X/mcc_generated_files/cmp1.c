@@ -58,7 +58,7 @@ void CMP1_Initialize(void)
 	SLP1CONL = 0x00; //HCFSEL None; SLPSTRT None; SLPSTOPB None; SLPSTOPA None; 
 	SLP1DAT = 0x00; //SLPDAT 0; 
 	DAC1DATL = 0x00; //DACDATL 0; 
-	DAC1DATH = 0x00; //DACDATH 0; 
+	DAC1DATH = 0x20; //DACDATH 32; 
     
 	
     CMP1_Enable();

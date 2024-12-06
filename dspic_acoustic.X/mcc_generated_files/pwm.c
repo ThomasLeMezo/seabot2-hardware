@@ -102,8 +102,8 @@ void PWM_Initialize (void)
     PG1STAT = 0x00;
     // FLTDAT 0; DBDAT 0; SWAP disabled; OVRENH disabled; OVRENL disabled; OSYNC User output overrides are synchronized to the local PWM time base; CLMOD disabled; FFDAT 0; CLDAT 0; OVRDAT 0; 
     PG1IOCONL = 0x00;
-    // PENL enabled; DTCMPSEL PCI Sync Logic; PMOD Independent; POLL Active-high; PENH disabled; CAPSRC Software; POLH Active-high; 
-    PG1IOCONH = 0x14;
+    // PENL disabled; DTCMPSEL PCI Sync Logic; PMOD Complementary; POLL Active-high; PENH disabled; CAPSRC Software; POLH Active-high; 
+    PG1IOCONH = 0x00;
     // UPDTRG Manual; ADTR1PS 1:1; PGTRGSEL EOC event; ADTR1EN3 disabled; ADTR1EN1 disabled; ADTR1EN2 disabled; 
     PG1EVTL = 0x00;
     // ADTR2EN1 disabled; IEVTSEL EOC; SIEN disabled; FFIEN disabled; ADTR1OFS None; CLIEN disabled; FLTIEN disabled; ADTR2EN2 disabled; ADTR2EN3 disabled; 
@@ -148,8 +148,8 @@ void PWM_Initialize (void)
     PG1DTH = 0x00;
     
 
-    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock; ON disabled; 
-    PG1CONL = 0x08;
+    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock; ON enabled; 
+    PG1CONL = 0x8008;
 }
 
 void __attribute__ ((weak)) PWM_Generator1_CallBack(void)

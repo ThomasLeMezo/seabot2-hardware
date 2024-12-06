@@ -29,6 +29,7 @@
 #define EEPROM2_WRITE        0x02                // write data to memory array
 #define EEPROM2_RDSR         0x05                // read STATUS register
 #define EEPROM2_ADDRBYTES    3
+#define EEPROM2_CHER 0xC7
 
 #include <stdint.h>
 
@@ -45,6 +46,8 @@ static void EEPROM2_AddressAssign(uint8_t *addressBuffer, uint32_t byteAddr)
         address >>= 8;
     }
 }
+void EEPROM2_WriteEnable(void);
+void EEPROM2_CheckStatusRegister(void);
 
 void EEPROM2_WriteByte (uint8_t byteData, uint32_t byteAddr);
 uint8_t EEPROM2_ReadByte (uint32_t address);
