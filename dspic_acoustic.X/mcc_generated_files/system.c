@@ -13,11 +13,11 @@
   @Description:
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.5
         Device            :  dsPIC33CK256MP202
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.70
-        MPLAB             :  MPLAB X v5.50
+        Compiler          :  XC16 v2.10
+        MPLAB             :  MPLAB X v6.05
 */
 
 /*
@@ -124,17 +124,17 @@
 #include "clock.h"
 #include "system.h"
 #include "system_types.h"
-#include "cmp1.h"
-#include "delay.h"
 #include "memory/flash.h"
+#include "drivers/spi_master.h"
+#include "cmp1.h"
 #include "ext_int.h"
-#include "pwm.h"
 #include "spi1_driver.h"
+#include "pwm.h"
 #include "dma.h"
 #include "interrupt_manager.h"
 #include "traps.h"
+#include "delay.h"
 #include "i2c1.h"
-#include "drivers/spi_master.h"
 
 void SYSTEM_Initialize(void)
 {

@@ -1,5 +1,9 @@
 /**
   Section: Included Files
+ * 
+ * 
+ * Note : Vitesse du SPI à régler dans EEPROM et non SPI foundation
+ * 
 */
 #include "mcc_generated_files/system.h"
 #include "mcc_generated_files/pin_manager.h"
@@ -63,7 +67,9 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
     spiMaster[EEPROM2].exchangeByte(EEPROM2_FREAD); //Send Read Command
     spiMaster[EEPROM2].exchangeBlock(addressBuffer,EEPROM2_ADDRBYTES); //Send Address bytes
     
-    // Read the dummy byte is not necessary !
+    // Do not send dummy byte
+    spiMaster[EEPROM2].exchangeByte(0x00); // Send dummy byte ?
+    spiMaster[EEPROM2].exchangeByte(0x00); // Send dummy byte ?
     
     LED_SetLow();
     SIGNAL_ENABLE_SetHigh();
@@ -71,12 +77,14 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
     DELAY_milliseconds(sample_duration_ms); // Wait for the signal to end
     
     // Wait for signal to be send
-    
+    DMA_ChannelDisable(0);
     EEPROM2_nCS_SetHigh(); /* set EEPROM2_nCS output high */
     spiMaster[EEPROM2].spiClose();
-    DMA_ChannelDisable(0);
     SIGNAL_ENABLE_SetLow();
     LED_SetHigh();
+    
+    // Set signal to mean
+    DAC1DATH = (uint16_t)dac_mean_;
 }
 
 void erase_eeprom(){
@@ -94,28 +102,28 @@ void erase_eeprom(){
 
 void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, const bool sens){
     const float signal_duration = ((float)signal_duration_ms)*1e-3;
-    const unsigned long long sample_number = floor(signal_duration/sample_duration_);
+    const unsigned long long sample_number = ceil((signal_duration/sample_duration_)/256.0 + 2)*256;
     const float invert = sens ? 1.0 : -1.0;
     const float freq_middle = (float)freq_middle_;
     const float freq_range = (float)freq_range_;
-    
+        
     float t = 0.;
     uint32_t add = add_start;
-    uint16_t data_chirp[128];
-    for(unsigned long long i = 0; i < sample_number; i+=128){
-        for(uint16_t j = 0; j<128; j++){
+    uint16_t data_chirp[256];
+    for(unsigned long long i = 0; i < sample_number; i+=256){
+        for(uint16_t j = 0; j<256; j++){
             data_chirp[j] = round(dac_amplitude_*sin(2.0*M_PI*t*(freq_middle+invert*freq_range*(t/signal_duration-0.5))) + dac_mean_);
-            //data_chirp[j] = 0x1234;
             t+=sample_duration_;
         }
-        EEPROM2_WriteBlock(data_chirp,256,add);
-        add+=256;
+        EEPROM2_WriteBlock(data_chirp,512,add);
+        add+=512;
     }
 }
 
 void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, const bool level){
     const float signal_duration = (float)signal_duration_ms*1e-3;
-    const unsigned long long sample_number = floor(signal_duration/sample_duration_);
+    // Add "1" to avoid 0xFF data if rounding is not correct
+    const unsigned long long sample_number = ceil((signal_duration/sample_duration_)/256.0 + 2)*256;
     const float freq_middle = (float)freq_middle_;
     const float freq_range = (float)freq_range_;
     
@@ -123,14 +131,15 @@ void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, con
     
     float t = 0.;
     uint32_t add = add_start;
-    uint16_t data_chirp[128];
-    for(unsigned long long i = 0; i < sample_number; i+=128){
-        for(int j = 0; j<128; j++){
-            data_chirp[j] = round(dac_amplitude_*sin(2.0*M_PI*t*frequency) + dac_mean_);
+    uint16_t data_chirp[256];
+    for(unsigned long long i = 0; i < sample_number; i+=256){
+        for(int j = 0; j<256; j++){
+            uint16_t val = round(dac_amplitude_*sin(2.0*M_PI*t*frequency) + dac_mean_);
+            data_chirp[j] = val ; //(val << 8) | (val >> 8);
             t+=sample_duration_;
         }
-        EEPROM2_WriteBlock(data_chirp,256,add);
-        add+=256;
+        EEPROM2_WriteBlock(data_chirp,512,add);
+        add+=512;
     }
 }
 
@@ -347,6 +356,7 @@ int main(void)
 {
     LED_SetHigh();
     SYSTEM_Initialize();
+    DAC1DATH = (uint16_t)dac_mean_;
     compute_signal();
     recompute_signal = false;
     LED_SetLow();

@@ -13,11 +13,11 @@
   @Description
     This source file provides APIs for PWM.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.5
         Device            :  dsPIC33CK256MP202
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.70
-        MPLAB 	          :  MPLAB X v5.50
+        Compiler          :  XC16 v2.10
+        MPLAB 	          :  MPLAB X v6.05
 */
 
 /*
@@ -54,6 +54,8 @@
 
 void PWM_Initialize (void)
 {
+    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock divided by clock divider circuit; ON enabled; 
+    PG1CONL = 0x10;
     // MCLKSEL FOSC - System Clock; HRERR disabled; LOCK disabled; DIVSEL 1:2; 
     PCLKCON = 0x00;
     // FSCL 0; 
@@ -126,16 +128,16 @@ void PWM_Initialize (void)
     PG1SPCIH = 0x00;
     // LEB 0; 
     PG1LEBL = 0x00;
-    // PWMPCI 1; PLR disabled; PLF disabled; PHR disabled; PHF disabled; 
+    // PWMPCI PWM1; PLR disabled; PLF disabled; PHR disabled; PHF disabled; 
     PG1LEBH = 0x00;
     // PHASE 0; 
     PG1PHASE = 0x00;
-    // DC 50; 
-    PG1DC = 0x32;
+    // DC 25; 
+    PG1DC = 0x19;
     // DCA 0; 
     PG1DCA = 0x00;
-    // PER 99; 
-    PG1PER = 0x63;
+    // PER 49; 
+    PG1PER = 0x31;
     // TRIGA 0; 
     PG1TRIGA = 0x00;
     // TRIGB 0; 
@@ -147,9 +149,7 @@ void PWM_Initialize (void)
     // DTH 0; 
     PG1DTH = 0x00;
     
-
-    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock; ON enabled; 
-    PG1CONL = 0x8008;
+    PG1CONLbits.ON = 1;
 }
 
 void __attribute__ ((weak)) PWM_Generator1_CallBack(void)

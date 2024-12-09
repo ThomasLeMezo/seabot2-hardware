@@ -14,12 +14,12 @@
   @Description
     This header file provides APIs for driver for i2c1.
     Generation Information :
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.5
         Device            :  dsPIC33CK256MP202
 
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.70
-        MPLAB             :  MPLAB X v5.50
+        Compiler          :  XC16 v2.10
+        MPLAB             :  MPLAB X v6.05
 */
 
 /*
@@ -106,7 +106,7 @@ inline void __attribute__ ((always_inline)) I2C1_ReceiveProcess(void);
  Section: Local Variables
 */
 
-static I2C_SLAVE_STATES   i2c1_slave_state;
+static volatile I2C_SLAVE_STATES   i2c1_slave_state;
 static uint8_t            *p_i2c1_write_pointer;
 static uint8_t            *p_i2c1_read_pointer;
 
@@ -131,6 +131,8 @@ void I2C1_Initialize(void)
     I2C1_SlaveAddressSet(0x1A);
     // AMSK 0; 
     I2C1_SlaveAddressMaskSet(0x00);
+    // SBCDE disabled; BOEN disabled; SCIE disabled; PCIE disabled; DHEN disabled; SDAHT disabled; AHEN disabled; 
+    I2C1CONH = 0x00;
 
     // make sure this is set first
     i2c1_slave_state = S_SLAVE_IDLE;

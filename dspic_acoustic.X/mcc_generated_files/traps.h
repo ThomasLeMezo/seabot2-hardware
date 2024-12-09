@@ -14,11 +14,11 @@
   @Description:
     This source file provides implementations for PIC24 / dsPIC33 / PIC32MM MCUs traps.
     Generation Information : 
-        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.1
+        Product Revision  :  PIC24 / dsPIC33 / PIC32MM MCUs - 1.171.5
         Device            :  dsPIC33CK256MP202
     The generated drivers are tested against the following:
-        Compiler          :  XC16 v1.70
-        MPLAB             :  MPLAB X v5.50
+        Compiler          :  XC16 v2.10
+        MPLAB             :  MPLAB X v6.05
 */
 /*
     (c) 2020 Microchip Technology Inc. and its subsidiaries. You may use this
@@ -59,7 +59,6 @@ typedef enum
     TRAPS_MATH_ERR = 3, /** Math Error Trap vector */
     TRAPS_HARD_ERR = 7, /** Generic Hard Trap vector */
     TRAPS_NVM_ERR = 12, /** Generic Soft Trap vector */
-    TRAPS_DMT_ERR = 8, /** Generic Soft Trap vector */
     TRAPS_DAE_ERR = 9, /** Generic Soft Trap vector */
     TRAPS_DOOVR_ERR = 10, /** Generic Soft Trap vector */
     TRAPS_APLL_ERR = 11, /** Generic Soft Trap vector */

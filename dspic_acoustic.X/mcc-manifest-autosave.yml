@@ -2,7 +2,7 @@
 
 manifest_file_version: 1.0.0
 project: dspic_acoustic
-creation_date: 2024-12-06T20:10:34.943+01:00[Europe/Paris]
+creation_date: 2024-12-09T19:00:09.450+01:00[Europe/Paris]
 operating_system: Windows 10
 mcc_mode: IDE
 mcc_mode_version: v6.20
@@ -15,10 +15,10 @@ is_mcc_offline: false
 is_using_prerelease_versions: false
 mcc_content_registries: https://registry.npmjs.org/
 device_library: {library_class: com.microchip.mcc.mcu16.Mcu16PeripheralLibrary, name: PIC24
-    / dsPIC33 / PIC32MM MCUs, version: 1.171.1}
+    / dsPIC33 / PIC32MM MCUs, version: 1.171.5}
 packs: {name: dsPIC33CK-MP_DFP, version: 1.14.409}
 modules:
-- {name: com.microchip.mcc.mcu16.Mcu16PeripheralLibrary, type: CLASSIC, version: 1.171.1}
+- {name: com.microchip.mcc.mcu16.Mcu16PeripheralLibrary, type: CLASSIC, version: 1.171.5}
 - {name: com.microchip.mcc.foundationservices.library.FoundationServicesLibrary, type: CLASSIC,
   version: 0.2.3}
 - {name: com.microchip.mcc.mikroEClickLibrary.MikroEClickLibrary, type: CLASSIC, version: 1.1.3}
