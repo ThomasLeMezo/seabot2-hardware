@@ -62,7 +62,7 @@
 #pragma config IESO = OFF    //Two-speed Oscillator Start-up Enable bit->Start up with user-selected oscillator source
 
 // FOSC
-#pragma config POSCMD = NONE    //Primary Oscillator Mode Select bits->Primary Oscillator disabled
+#pragma config POSCMD = XT    //Primary Oscillator Mode Select bits->XT Crystal Oscillator Mode
 #pragma config OSCIOFNC = ON    //OSC2 Pin Function bit->OSC2 is general purpose digital I/O pin
 #pragma config FCKSM = CSECMD    //Clock Switching Mode bits->Clock switching is enabled,Fail-safe Clock Monitor is disabled
 #pragma config PLLKEN = ON    //PLL Lock Status Control->PLL lock signal will be used to disable PLL clock output if lock is lost
@@ -125,16 +125,17 @@
 #include "system.h"
 #include "system_types.h"
 #include "memory/flash.h"
-#include "drivers/spi_master.h"
-#include "cmp1.h"
+#include "delay.h"
 #include "ext_int.h"
-#include "spi1_driver.h"
-#include "pwm.h"
-#include "dma.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "delay.h"
+#include "drivers/spi_master.h"
+#include "dma.h"
+#include "tmr1.h"
+#include "cmp1.h"
 #include "i2c1.h"
+#include "spi1_driver.h"
+#include "pwm.h"
 
 void SYSTEM_Initialize(void)
 {
@@ -146,6 +147,7 @@ void SYSTEM_Initialize(void)
     PWM_Initialize();
     EXT_INT_Initialize();
     DMA_Initialize();
+    TMR1_Initialize();
     INTERRUPT_GlobalEnable();
     SYSTEM_CORCONModeOperatingSet(CORCON_MODE_PORVALUES);
 }

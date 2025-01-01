@@ -67,7 +67,7 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
     spiMaster[EEPROM2].exchangeByte(EEPROM2_FREAD); //Send Read Command
     spiMaster[EEPROM2].exchangeBlock(addressBuffer,EEPROM2_ADDRBYTES); //Send Address bytes
     
-    // Do not send dummy byte
+    // Do not send dummy byte ?
     spiMaster[EEPROM2].exchangeByte(0x00); // Send dummy byte ?
     spiMaster[EEPROM2].exchangeByte(0x00); // Send dummy byte ?
     
@@ -357,6 +357,7 @@ int main(void)
     LED_SetHigh();
     SYSTEM_Initialize();
     DAC1DATH = (uint16_t)dac_mean_;
+    
     compute_signal();
     recompute_signal = false;
     LED_SetLow();

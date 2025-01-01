@@ -54,8 +54,8 @@
 
 void PWM_Initialize (void)
 {
-    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock divided by clock divider circuit; ON enabled; 
-    PG1CONL = 0x10;
+    // HREN disabled; MODSEL Independent Edge; TRGCNT 1; CLKSEL Master clock; ON enabled; 
+    PG1CONL = 0x8;
     // MCLKSEL FOSC - System Clock; HRERR disabled; LOCK disabled; DIVSEL 1:2; 
     PCLKCON = 0x00;
     // FSCL 0; 
@@ -132,12 +132,12 @@ void PWM_Initialize (void)
     PG1LEBH = 0x00;
     // PHASE 0; 
     PG1PHASE = 0x00;
-    // DC 25; 
-    PG1DC = 0x19;
+    // DC 50; 
+    PG1DC = 0x32;
     // DCA 0; 
     PG1DCA = 0x00;
-    // PER 49; 
-    PG1PER = 0x31;
+    // PER 99; 
+    PG1PER = 0x63;
     // TRIGA 0; 
     PG1TRIGA = 0x00;
     // TRIGB 0; 
