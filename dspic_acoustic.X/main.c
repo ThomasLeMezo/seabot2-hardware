@@ -21,16 +21,12 @@
 #include <xc.h>
 #include <libpic30.h>
 
-uint16_t freq_middle_ = 25000;
+uint16_t freq_middle_ = 40000;
 uint16_t freq_range_ = 5000; //2500.0;
 const float sample_duration_ = 1e-6;
 
-// [1200, 1000] / [2047, 1100]
-float dac_mean_ = 1200; //2047; //1200; //2047;
-float dac_amplitude_ = 1100; //4000; //1000; // 1100
-
-const char device_name_[16] = "DSPIC_ACOUSTICvA";
-const char code_version_ = 0x0A;
+const char device_name_[16] = "DSPIC_ACOUSTICvB";
+const char code_version_ = 0x0B;
 
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
@@ -45,8 +41,8 @@ uint16_t signal_main_duration_ms_ = 250;
 
 bool shoot_signal_run_ = false;
 
-uint16_t dac_mean_16= 1200;
-uint16_t dac_amplitude_16 = 900; // 1100
+uint16_t dac_mean_16_ = 1200;
+uint16_t dac_amplitude_16_ = 1100; // 1100
 
 uint8_t signal_selection = 0;
 
@@ -84,7 +80,7 @@ void shoot_signal(const uint8_t signal_id, const uint16_t sample_duration_ms){
     LED_SetHigh();
     
     // Set signal to mean
-    DAC1DATH = (uint16_t)dac_mean_;
+    DAC1DATH = dac_mean_16_;
 }
 
 void erase_eeprom(){
@@ -102,17 +98,24 @@ void erase_eeprom(){
 
 void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, const bool sens){
     const float signal_duration = ((float)signal_duration_ms)*1e-3;
+    const float signal_fade = signal_duration/10.0;
     const unsigned long long sample_number = ceil((signal_duration/sample_duration_)/256.0 + 2)*256;
     const float invert = sens ? 1.0 : -1.0;
     const float freq_middle = (float)freq_middle_;
     const float freq_range = (float)freq_range_;
+    const float dac_amplitude = (float)dac_amplitude_16_;
+    const float dac_mean = (float)dac_mean_16_;
         
     float t = 0.;
     uint32_t add = add_start;
     uint16_t data_chirp[256];
     for(unsigned long long i = 0; i < sample_number; i+=256){
         for(uint16_t j = 0; j<256; j++){
-            data_chirp[j] = round(dac_amplitude_*sin(2.0*M_PI*t*(freq_middle+invert*freq_range*(t/signal_duration-0.5))) + dac_mean_);
+            // Window
+            const double amplitude = dac_amplitude * fmin(1.0, t/signal_fade)
+                                             * fmin(1.0, (signal_duration_ms - t)/signal_fade);
+            double frequency = freq_middle+invert*freq_range*(t/signal_duration-0.5);
+            data_chirp[j] = round(amplitude*sin(2.0*M_PI*t*frequency) + dac_mean);
             t+=sample_duration_;
         }
         EEPROM2_WriteBlock(data_chirp,512,add);
@@ -122,10 +125,13 @@ void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, 
 
 void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, const bool level){
     const float signal_duration = (float)signal_duration_ms*1e-3;
+    const float signal_fade = signal_duration/10.0;
     // Add "1" to avoid 0xFF data if rounding is not correct
     const unsigned long long sample_number = ceil((signal_duration/sample_duration_)/256.0 + 2)*256;
     const float freq_middle = (float)freq_middle_;
     const float freq_range = (float)freq_range_;
+    const float dac_amplitude = (float)dac_amplitude_16_;
+    const float dac_mean = (float)dac_mean_16_;
     
     const float frequency = level ? freq_middle + freq_range/2.0 : freq_middle - freq_range/2.0;
     
@@ -134,7 +140,10 @@ void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, con
     uint16_t data_chirp[256];
     for(unsigned long long i = 0; i < sample_number; i+=256){
         for(int j = 0; j<256; j++){
-            uint16_t val = round(dac_amplitude_*sin(2.0*M_PI*t*frequency) + dac_mean_);
+            // Window
+            const double amplitude = dac_amplitude * fmin(1.0, t/signal_fade)
+                                             * fmin(1.0, (signal_duration_ms - t)/signal_fade);
+            uint16_t val = round(amplitude*sin(2.0*M_PI*t*frequency) + dac_mean);
             data_chirp[j] = val ; //(val << 8) | (val >> 8);
             t+=sample_duration_;
         }
@@ -144,6 +153,7 @@ void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, con
 }
 
 void compute_signal(){
+    LED_SetHigh();
     recompute_signal = true;
     erase_eeprom();
     switch (signal_selection){
@@ -160,6 +170,8 @@ void compute_signal(){
         default:
             break;
     }
+    recompute_signal = false;
+    LED_SetLow();
 }
 
 void EX_INT1_CallBack(){
@@ -202,10 +214,10 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     I2C1_ReadPointerSet(&enable_chirp);
                     break;
                 case 0x09 ... 0x0A:
-                    I2C1_ReadPointerSet((uint16_t)(&dac_mean_16) + (i2c_address - 0x09));
+                    I2C1_ReadPointerSet((uint16_t)(&dac_mean_16_) + (i2c_address - 0x09));
                     break;
                 case 0x0B ... 0x0C:
-                    I2C1_ReadPointerSet((uint16_t)(&dac_amplitude_16) + (i2c_address - 0x0B));
+                    I2C1_ReadPointerSet((uint16_t)(&dac_amplitude_16_) + (i2c_address - 0x0B));
                     break;
                 case 0x0D:
                     I2C1_ReadPointerSet(&signal_selection);
@@ -286,13 +298,13 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         
                     case 0x09 ... 0x0A:
                     {
-                        uint8_t *bytePointer = (uint8_t *)(&dac_mean_16) + (i2c_address - 0x09);
+                        uint8_t *bytePointer = (uint8_t *)(&dac_mean_16_) + (i2c_address - 0x09);
                         *bytePointer = i2c_data;
                     }
                         break;
                     case 0x0B ... 0x0C:
                     {
-                        uint8_t *bytePointer = (uint8_t *)(&dac_amplitude_16) + (i2c_address - 0x0B);
+                        uint8_t *bytePointer = (uint8_t *)(&dac_amplitude_16_) + (i2c_address - 0x0B);
                         *bytePointer = i2c_data;
                     }
                         break;
@@ -356,23 +368,15 @@ int main(void)
 {
     LED_SetHigh();
     SYSTEM_Initialize();
-    DAC1DATH = (uint16_t)dac_mean_;
-    
+    DAC1DATH = dac_mean_16_;
     compute_signal();
-    recompute_signal = false;
-    LED_SetLow();
-    
-    shoot_signal_run_ = true;
     
     while (1)
     {
         ClrWdt();
 
         if(recompute_signal){
-            LED_SetHigh();
             compute_signal();
-            LED_SetLow();
-            recompute_signal = false;
         }
         
         if(shoot_signal_run_){
