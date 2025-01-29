@@ -17,6 +17,7 @@ freq_range = 5000
 
 amplitude = 0.5 * np.minimum(np.ones_like(t), t/signal_fade) * np.minimum(np.ones_like(t), (signal_duration-t)/signal_fade)
 frequency = freq_middle + freq_range*(t/signal_duration-0.5)
+frequency_phase = freq_middle + freq_range*(t/(2.0*signal_duration)-0.5)
 
 data = amplitude * np.sin(2*np.pi*t*frequency)
 

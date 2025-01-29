@@ -11,6 +11,7 @@
 #include "mcc_generated_files/dma.h"
 #include "stdbool.h"
 #include <math.h>
+#include <stdint.h>
 #include "mcc_generated_files/EEPROM2_app.h"
 #include "mcc_generated_files/pin_manager.h"
 #include "mcc_generated_files/drivers/spi_master.h"
@@ -21,7 +22,7 @@
 #include <xc.h>
 #include <libpic30.h>
 
-uint16_t freq_middle_ = 40000;
+uint16_t freq_middle_ = 20000;
 uint16_t freq_range_ = 5000; //2500.0;
 const float sample_duration_ = 1e-6;
 
@@ -37,7 +38,10 @@ uint32_t posix_time = 0; // in seconds
 
 bool recompute_signal = true;
 bool enable_chirp = false;
-uint16_t signal_main_duration_ms_ = 250;
+uint16_t signal_main_duration_ms_ = 25;
+uint8_t signal_fade_ = 1;
+
+uint8_t signal_selection = 0;
 
 bool shoot_signal_run_ = false;
 
@@ -48,16 +52,21 @@ double dac_interp_p1 = 5.70147051e-04;
 double dac_interp_p0 = 9.35330181e+02;
 double dac_offset = 1179.15;
 
-uint8_t signal_selection = 0;
-uint8_t signal_fade_ = 10;
+uint16_t signal_number = 0;
 
-volatile uint8_t robot_code = 0;
+volatile uint8_t robot_code_ = 0;
+volatile uint64_t robot_data_ = 0;
+volatile uint8_t robot_data_size_ = 0;
 
 // 0 => 0xFFFFF => 0x17FFFE => 0x1FFFFD
 // [0xFFFFF, 0x7FFFF, 0x7FFFF]
 // [1,048,575 | 524,287 | 524,287], max = 0x1FFFFD < 0x1FFFFF
 const uint32_t signal_add_[3] = {0, 0x100000, 0x180000};
 // At 1us per sample => 1.048575s max for larger symbol
+
+static inline uint8_t max_uint8(uint8_t a, uint8_t b) {
+    return (a > b) ? a : b;
+}
 
 float get_dac_amplitude_freq(const double frequency){
     return fmin(2048.0, 
@@ -105,7 +114,8 @@ void erase_eeprom(){
 void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, const bool sens){
     const float signal_duration = ((float)signal_duration_ms)*1e-3;
     const float signal_fade = ((float)signal_fade_)*1e-3;
-    const unsigned long long sample_number = ceil((signal_duration/sample_duration_)/256.0 + 2)*256;
+    // Add sample after the signal_duration
+    const unsigned long sample_number = ceil((signal_duration/sample_duration_)/256.0 + 2)*256;
     const float invert = sens ? 1.0 : -1.0;
     const float freq_middle = (float)freq_middle_;
     const float freq_range = (float)freq_range_;
@@ -115,17 +125,22 @@ void compute_chirp(const uint32_t add_start, const uint16_t signal_duration_ms, 
     float t = 0.;
     uint32_t add = add_start;
     uint16_t data_chirp[256];
-    for(unsigned long long i = 0; i < sample_number; i+=256){
+    for(unsigned long i = 0; i < sample_number; i+=256){
         for(uint16_t j = 0; j<256; j++){
             // Window
-			const float frequency = freq_middle+invert*freq_range*(t/signal_duration-0.5);
+            const float time_ratio = (t/signal_duration);
+			const float frequency = freq_middle+invert*freq_range*(time_ratio-0.5);
             
             const float dac_amplitude = get_dac_amplitude_freq(frequency);
             
             const float amplitude = dac_amplitude * fmin(1.0, t/signal_fade)
-                                             * fmin(1.0, (signal_duration - t)/signal_fade);
+                                             * fmin(1.0, fmax(0.0, 
+                                            (signal_duration - t)/signal_fade));
 
-            data_chirp[j] = round(amplitude*sin(2.0*M_PI*t*frequency) + dac_mean);
+            // Phase has to be taken into account which explain the time_ratio/2.0
+            data_chirp[j] = round(amplitude*sin(2.0*M_PI*t*
+                    (freq_middle+invert*freq_range*(time_ratio/2.0-0.5))
+                    ) + dac_mean);
             t+=sample_duration_;
         }
         EEPROM2_WriteBlock(data_chirp,512,add);
@@ -153,7 +168,8 @@ void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, con
         for(int j = 0; j<256; j++){
             // Window
             const float amplitude = dac_amplitude * fmin(1.0, t/signal_fade)
-                                             * fmin(1.0, (signal_duration - t)/signal_fade);
+                                             * fmin(1.0, fmax(0.0, 
+                    (signal_duration - t)/signal_fade));
             uint16_t val = round(amplitude*sin(2.0*M_PI*t*frequency) + dac_mean);
             data_chirp[j] = val ; //(val << 8) | (val >> 8);
             t+=sample_duration_;
@@ -164,7 +180,6 @@ void compute_cw(const uint32_t add_start, const uint16_t signal_duration_ms, con
 }
 
 void compute_signal(){
-    LED_SetHigh();
     recompute_signal = true;
     erase_eeprom();
     switch (signal_selection){
@@ -182,7 +197,6 @@ void compute_signal(){
             break;
     }
     recompute_signal = false;
-    LED_SetLow();
 }
 
 void EX_INT1_CallBack(){
@@ -192,6 +206,7 @@ void EX_INT1_CallBack(){
     if((posix_time - shoot_offset_from_posix_zero) % shoot_duration_between == 0){
         if(!recompute_signal && enable_chirp){
             shoot_signal_run_ = true;
+            signal_number++;
         }
     }
     EX_INT1_InterruptEnable();
@@ -210,7 +225,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
             
             switch(i2c_address){
                 case 0x00:
-                    I2C1_ReadPointerSet(&robot_code);
+                    I2C1_ReadPointerSet(&robot_code_);
                     break;
                 case 0x01 ... 0x02:
                     I2C1_ReadPointerSet((uint16_t)(&freq_middle_) + (i2c_address - 0x01));
@@ -226,6 +241,9 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     break;
                 case 0x08:
                     I2C1_ReadPointerSet(&enable_chirp);
+                    break;
+                case 0x0A ... 0x0B:
+                    I2C1_ReadPointerSet((uint16_t)(&signal_number) + (i2c_address - 0x0A));
                     break;
                 case 0x0D:
                     I2C1_ReadPointerSet(&signal_selection);
@@ -257,7 +275,14 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                 
                 case 0xC0:
                     I2C1_ReadPointerSet(&code_version_);
-                    break;                
+                    break;
+                    
+                case 0xD0:
+                    I2C1_ReadPointerSet(&robot_data_size_);
+                    break;
+                case 0xD1 ... 0xD9:
+                    I2C1_ReadPointerSet((uint16_t)(&robot_data_) + (i2c_address - 0xD1));
+                    break;
                     
                 case 0xF0 ... 0xFF:
                     I2C1_ReadPointerSet(&(((char*)device_name_)[i2c_address-0xF0]));
@@ -283,7 +308,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
             else{
                 switch(i2c_address){
                     case 0x00:
-                        robot_code = i2c_data;
+                        robot_code_ = i2c_data;
                         break;
                         
                     case 0x01 ... 0x02:
@@ -325,6 +350,13 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         if(i2c_data == 1){
                             shoot_signal_run_ = true;
                         }
+                    }
+                        break;
+                        
+                    case 0x0A ... 0x0B:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)(&signal_number) + (i2c_address - 0x0A);
+                        *bytePointer = i2c_data;
                     }
                         break;
                         
@@ -382,6 +414,16 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         *bytePointer = i2c_data;
                     }
                         break;
+                    
+                    case 0xD0:
+                        robot_data_size_ = max_uint8(8, i2c_data);
+                        break;
+                    case 0xD1 ... 0xD9:
+                    {
+                        uint8_t *bytePointer = (uint8_t *)(&robot_data_) + (i2c_address - 0xD1);
+                        *bytePointer = i2c_data;
+                    }
+                        break;
                         
                     default:
                         break;
@@ -419,10 +461,13 @@ int main(void)
 //            LED_SetHigh();
             SIGNAL_ENABLE_SetHigh();
             shoot_signal(0, signal_main_duration_ms_);
-            DELAY_microseconds(800);
             for(uint8_t i=0; i<8; i++){
-                shoot_signal((0b1 & (robot_code>>i)) + 1, signal_main_duration_ms_/2);
-                DELAY_microseconds(800);
+                shoot_signal((0b1 & (robot_code_>>i)) + 1, signal_main_duration_ms_/2);
+            }
+            if(robot_data_size_>0){
+                for(uint8_t i=0; i<robot_data_size_; i++){
+                    shoot_signal((0b1 & (robot_data_>>i)) + 1, signal_main_duration_ms_/2);
+                }
             }
             shoot_signal_run_ = false;
             SIGNAL_ENABLE_SetLow();
