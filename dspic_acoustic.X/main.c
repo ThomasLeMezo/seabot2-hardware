@@ -22,12 +22,12 @@
 #include <xc.h>
 #include <libpic30.h>
 
-uint16_t freq_middle_ = 20000;
+uint16_t freq_middle_ = 40000;
 uint16_t freq_range_ = 5000; //2500.0;
 const float sample_duration_ = 1e-6;
 
-const char device_name_[16] = "DSPIC_ACOUSTICvB";
-const char code_version_ = 0x0B;
+const char device_name_[16] = "DSPIC_ACOUSTICvC";
+const char code_version_ = 0x0C;
 
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
@@ -38,8 +38,8 @@ uint32_t posix_time = 0; // in seconds
 
 bool recompute_signal = true;
 bool enable_chirp = false;
-uint16_t signal_main_duration_ms_ = 25;
-uint8_t signal_fade_ = 1;
+uint16_t signal_main_duration_ms_ = 50;
+uint8_t signal_fade_ = 2;
 
 uint8_t signal_selection = 0;
 
@@ -416,7 +416,7 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                         break;
                     
                     case 0xD0:
-                        robot_data_size_ = max_uint8(8, i2c_data);
+                        robot_data_size_ = max_uint8(64, i2c_data);
                         break;
                     case 0xD1 ... 0xD9:
                     {
