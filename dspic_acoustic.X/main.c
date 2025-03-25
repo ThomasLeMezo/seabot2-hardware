@@ -26,8 +26,8 @@ uint16_t freq_middle_ = 40000;
 uint16_t freq_range_ = 5000; //2500.0;
 const float sample_duration_ = 1e-6;
 
-const char device_name_[16] = "DSPIC_ACOUSTICvC";
-const char code_version_ = 0x0C;
+const char device_name_[16] = "DSPIC_ACOUSTICvD";
+const char code_version_ = 0x0D;
 
 volatile unsigned char i2c_nb_bytes = 0;
 volatile unsigned char i2c_register = 0x00;
@@ -44,6 +44,10 @@ uint8_t signal_fade_ = 2;
 uint8_t signal_selection = 0;
 
 bool shoot_signal_run_ = false;
+
+uint32_t time_count_ = 0;
+bool first_pps_received = false;
+uint16_t pps_error = 0;
 
 //y = -9.08900731E-08x2 + 5.70147051E-04x + 9.35330181E+02
 // offset 0.95 V
@@ -201,7 +205,25 @@ void compute_signal(){
 
 void EX_INT1_CallBack(){
     EX_INT1_InterruptDisable();
-    posix_time++;
+    
+    if(!first_pps_received){
+        first_pps_received = true;
+        posix_time++;
+        time_count_ = 0;
+    }
+    else{
+        if(time_count_>300){
+            posix_time+= (time_count_ + 100)/200; // ([300, 500[ give +2 etc.)
+            time_count_ = 0;
+        }
+        else if(time_count_>100){
+            posix_time++;
+            time_count_ = 0;
+        }
+        else{
+            pps_error++;
+        }
+    }
     
     if((posix_time - shoot_offset_from_posix_zero) % shoot_duration_between == 0){
         if(!recompute_signal && enable_chirp){
@@ -210,6 +232,10 @@ void EX_INT1_CallBack(){
         }
     }
     EX_INT1_InterruptEnable();
+}
+
+void PWM_Generator2Interrupt_CallBack(){
+    time_count_++;
 }
 
 bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
@@ -271,6 +297,9 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
                     break;
                 case 0xB6 ... 0xB7:
                     I2C1_ReadPointerSet((uint16_t)(&shoot_offset_from_posix_zero) + (i2c_address - 0xB7));
+                    break;
+                case 0xB8 ... 0xB9:
+                    I2C1_ReadPointerSet((uint16_t)(&pps_error) + (i2c_address - 0xB8));
                     break;
                 
                 case 0xC0:
@@ -439,6 +468,8 @@ bool I2C1_StatusCallback(I2C1_SLAVE_DRIVER_STATUS status){
     return true;
 }
 
+
+
 /*
     Main application
  */
@@ -448,6 +479,9 @@ int main(void)
     SYSTEM_Initialize();
     DAC1DATH = (uint16_t)round(dac_offset);
     compute_signal();
+    
+    // 200 Hz => 5ms
+    PWM_SetGenerator2InterruptHandler(PWM_Generator2Interrupt_CallBack);
     
     while (1)
     {

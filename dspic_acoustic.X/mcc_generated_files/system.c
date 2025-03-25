@@ -124,17 +124,17 @@
 #include "clock.h"
 #include "system.h"
 #include "system_types.h"
-#include "memory/flash.h"
+#include "dma.h"
+#include "tmr1.h"
 #include "delay.h"
+#include "cmp1.h"
+#include "memory/flash.h"
+#include "spi1_driver.h"
+#include "drivers/spi_master.h"
 #include "ext_int.h"
 #include "interrupt_manager.h"
 #include "traps.h"
-#include "drivers/spi_master.h"
-#include "dma.h"
-#include "tmr1.h"
-#include "cmp1.h"
 #include "i2c1.h"
-#include "spi1_driver.h"
 #include "pwm.h"
 
 void SYSTEM_Initialize(void)
@@ -145,9 +145,9 @@ void SYSTEM_Initialize(void)
     I2C1_Initialize();
     CMP1_Initialize();
     PWM_Initialize();
-    EXT_INT_Initialize();
     DMA_Initialize();
     TMR1_Initialize();
+    EXT_INT_Initialize();
     INTERRUPT_GlobalEnable();
     SYSTEM_CORCONModeOperatingSet(CORCON_MODE_PORVALUES);
 }
