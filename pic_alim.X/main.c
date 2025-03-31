@@ -365,7 +365,7 @@ void main(void) {
     INTERRUPT_PeripheralInterruptEnable();
 
     while (1) {
-        // State machine running at 500ms
+        // State machine running at 500ms // TMR3
         if (step_state_machine == 1) {
             step_state_machine = 0;
             
@@ -399,6 +399,7 @@ void main(void) {
                     GLOBAL_POWER_SetLow();
                     if(battery_voltage_adc[0] > battery_voltage_adc_min ||
                                 battery_voltage_adc[1] > battery_voltage_adc_min)
+                    {
                         if(has_been_first_init)
                             state = POWER_ON;
                         else{
@@ -406,6 +407,7 @@ void main(void) {
                             has_been_first_init = 1;
                             GLOBAL_POWER_SetHigh();
                         }
+                    }
                     else
                         state = IDLE;
                     break;
