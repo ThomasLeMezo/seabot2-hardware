@@ -15,6 +15,12 @@
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
       </logicalFolder>
     </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="true">
+      <itemPath>Makefile</itemPath>
+      <itemPath>pic_uart_i2c.mc3</itemPath>
+    </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
@@ -33,12 +39,6 @@
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
-    </logicalFolder>
-    <logicalFolder name="ExternalFiles"
-                   displayName="Important Files"
-                   projectFiles="false">
-      <itemPath>Makefile</itemPath>
-      <itemPath>pic_uart_i2c.mc3</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -686,6 +686,8 @@
         <property key="periphComp5.gte" value="gt"/>
         <property key="periphComp6.gte" value="gt"/>
         <property key="poweroptions.powerenable" value="true"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/Thomas/Documents/seabot2-hardware/pic_uart_i2c.X/debug/PIC18F14K22_J8/pic_uart_i2c_ptg"/>
         <property key="programmerToGoImageName" value="pic_uart_i2c_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
@@ -1885,6 +1887,8 @@
         <property key="periphComp5.gte" value="gt"/>
         <property key="periphComp6.gte" value="gt"/>
         <property key="poweroptions.powerenable" value="true"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/Users/Thomas/Documents/seabot2-hardware/pic_uart_i2c.X/debug/PIC18F13K22_J8/pic_uart_i2c_ptg"/>
         <property key="programmerToGoImageName" value="pic_uart_i2c_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>

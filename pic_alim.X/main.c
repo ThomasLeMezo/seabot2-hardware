@@ -67,7 +67,7 @@ volatile unsigned short cpt_led = 100;
 // Sleep mode
 volatile unsigned char time_to_start[3] = {0, 0, 5}; // hour, min, sec
 volatile unsigned char default_time_to_start[3] = {0, 0, 5}; // hour, min, sec
-volatile unsigned short time_to_stop = 350; // in sec (max 255 sec)
+volatile unsigned short time_to_stop = 350; // in sec
 volatile unsigned short default_time_to_stop = 350;
 
 // Watchdog

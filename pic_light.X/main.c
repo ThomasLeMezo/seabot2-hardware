@@ -46,7 +46,8 @@ void i2c_handler_read()
         i2c_register = read_byte;
     else
     {
-        switch(i2c_register+i2c_nb_bytes-1)
+        unsigned char reg_add = i2c_register+i2c_nb_bytes-1;
+        switch(reg_add)
         {
             case 0x00:
                 led_enable = read_byte;
@@ -66,7 +67,7 @@ void i2c_handler_read()
             case 0x09:
             case 0x0A:
             case 0x0B:
-                led_pattern[(i2c_register+i2c_nb_bytes)-(unsigned char)1-(unsigned char)0x02] = read_byte;
+                led_pattern[reg_add-(unsigned char)0x02] = read_byte;
                 break;
         default:
           break;
@@ -140,8 +141,7 @@ void timer_handler(){
         if(led_pattern_index==NB_PATTERN)
             led_pattern_index = 0;
         
-        
-        led_count_down = led_pattern[led_pattern_index]-1;
+        led_count_down = led_pattern[led_pattern_index]-1; // Remove 1 bc it is the current state
         
         if((led_pattern_index%2==0) && led_enable)
             EPWM1_LoadDutyValue(led_pwm);
